@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Maestro — CBTIS 40</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap');
+  :root{
+    --board:#233d2f; --board-dark:#1a2f24; --chalk:#f4f1e6; --chalk-dim:#c9d3c9;
+    --accent-red:#e2574c; --accent-yellow:#e0b84a; --accent-green:#7fb069; --line: rgba(244,241,230,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--board);color:var(--chalk);font-family:'Work Sans',sans-serif;min-height:100vh;}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 20px 80px;}
+  h1{font-family:'Patrick Hand',cursive;font-size:38px;margin:0 0 4px;}
+  .sub{color:var(--chalk-dim);font-size:14px;margin-bottom:28px;}
+
+  .gate{max-width:360px;margin:80px auto;text-align:center;}
+  .gate input{width:100%;background:var(--board-dark);border:1px solid var(--line);color:var(--chalk);
+    padding:12px 14px;border-radius:8px;font-size:15px;margin:14px 0;}
+  .gate button{background:var(--accent-yellow);color:var(--board-dark);border:none;padding:11px 26px;
+    border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;}
+  .gate .err{color:var(--accent-red);font-size:13px;min-height:18px;}
+
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+  select, button.ghost{
+    background:var(--board-dark);border:1px solid var(--line);color:var(--chalk);
+    padding:9px 14px;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif;cursor:pointer;
+  }
+
+  .section-title{font-family:'Patrick Hand',cursive;font-size:24px;color:var(--accent-yellow);margin:34px 0 14px;}
+
+  table{width:100%;border-collapse:collapse;background:var(--board-dark);border-radius:10px;overflow:hidden;}
+  th, td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:14px;}
+  th{color:var(--accent-yellow);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;}
+  tr:last-child td{border-bottom:none;}
+  .pct-good{color:var(--accent-green);font-weight:600;}
+  .pct-bad{color:var(--accent-red);font-weight:600;}
+
+  .error-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .error-q{flex:1;font-size:14px;}
+  .error-bar-wrap{width:160px;background:var(--board-dark);border-radius:5px;height:8px;overflow:hidden;flex-shrink:0;}
+  .error-bar-fill{height:100%;background:var(--accent-red);}
+  .error-count{font-size:13px;color:var(--chalk-dim);width:70px;text-align:right;flex-shrink:0;}
+
+  .empty{color:var(--chalk-dim);font-style:italic;padding:20px;text-align:center;}
+  .loading{color:var(--chalk-dim);padding:20px;text-align:center;}
+
+  .progress-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;background:var(--board-dark);
+    border-radius:8px;padding:10px 14px;}
+  .progress-date{width:130px;flex-shrink:0;font-size:12px;color:var(--chalk-dim);}
+  .progress-unit{flex:1;font-size:14px;}
+  .progress-bar-wrap{width:140px;background:var(--board);border-radius:5px;height:8px;overflow:hidden;flex-shrink:0;}
+  .progress-bar-fill{height:100%;}
+  .progress-pct{width:50px;text-align:right;font-size:13px;font-weight:600;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="gate" id="gate">
+    <h1>Panel de Maestro 🔒</h1>
+    <p class="sub">CBTIS 40 — acceso solo para el docente</p>
+    <input type="password" id="pwInput" placeholder="Contraseña">
+    <div><button onclick="checkPassword()">Entrar</button></div>
+    <div class="err" id="pwErr"></div>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <h1>Panel de Maestro</h1>
+    <div class="sub">CBTIS 40 · Inglés — resultados de Practice &amp; Check</div>
+
+    <div class="filters">
+      <select id="groupFilter" onchange="onGroupChange()">
+        <option value="">Todos los grupos</option>
+      </select>
+      <select id="unitFilter" onchange="renderAll()">
+        <option value="">Todas las unidades</option>
+      </select>
+      <select id="studentFilter" onchange="renderAll()">
+        <option value="">Todos los alumnos</option>
+      </select>
+      <button class="ghost" onclick="loadData()">↻ Actualizar</button>
+    </div>
+
+    <div class="section-title">Errores más recurrentes</div>
+    <div id="errorAnalysis" class="loading">Cargando...</div>
+
+    <div class="section-title" id="progressTitle" style="display:none;">Progreso del alumno</div>
+    <div id="studentProgress" style="display:none;"></div>
+
+    <div class="section-title">Intentos por alumno</div>
+    <div id="attemptsTable" class="loading">Cargando...</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+  /* Debe ser EXACTAMENTE la misma configuración que usa tu archivo
+     de repasos (repasos-ingles-cbtis40.html), porque ambos leen y
+     escriben en la misma base de datos. */
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_JqZlzxvhvcduK695YPqIHM5PukeLI64",
+    authDomain: "cbtis-40-english-class.firebaseapp.com",
+    projectId: "cbtis-40-english-class",
+    storageBucket: "cbtis-40-english-class.firebasestorage.app",
+    messagingSenderId: "99688303455",
+    appId: "1:99688303455:web:7c13b7c60086047eddc4ea"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  /* Cuentas de acceso al panel — SOLO como filtro de entrada casual,
+     no es seguridad real (cualquiera que vea el código puede leerla).
+     Para agregar un profesor nuevo: copia una línea, ponle su propia
+     contraseña, su nombre, y el mismo "teacherId" que usaste en TEACHERS
+     dentro de repasos-ingles-cbtis40.html. scope:"own" = solo ve sus
+     propios alumnos. scope:"all" = ve los de todos (clave maestra). */
+  const TEACHER_ACCOUNTS = {
+    "cbtis40profe":     { name: "Profr. Jorge Sandoval", teacherId: "jorge",  scope: "own" },
+    "cbtis40profe-esposa": { name: "Profra. Merary García", teacherId: "esposa", scope: "own" },
+    "cbtis40admin":     { name: "Administrador (todos los grupos)", teacherId: null, scope: "all" }
+  };
+
+  let currentAccount = null;
+
+  function checkPassword(){
+    const val = document.getElementById('pwInput').value;
+    const account = TEACHER_ACCOUNTS[val];
+    if (account) {
+      currentAccount = account;
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.querySelector('#dashboard .sub').textContent =
+        `CBTIS 40 · Inglés — resultados de Practice & Check — ${account.name}`;
+      loadData();
+    } else {
+      document.getElementById('pwErr').textContent = 'Contraseña incorrecta.';
+    }
+  }
+  document.getElementById('pwInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  let allResults = [];
+
+  async function loadData(){
+    document.getElementById('errorAnalysis').innerHTML = '<div class="loading">Cargando...</div>';
+    document.getElementById('attemptsTable').innerHTML = '<div class="loading">Cargando...</div>';
+    try {
+      let query = db.collection('results').orderBy('timestamp', 'desc');
+      if (currentAccount.scope !== 'all') {
+        query = db.collection('results').where('teacherId', '==', currentAccount.teacherId).orderBy('timestamp', 'desc');
+      }
+      const snap = await query.get();
+      allResults = snap.docs.map(d => d.data());
+      populateGroupFilter();
+      populateUnitFilter();
+      populateStudentFilter();
+      renderAll();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('attemptsTable').innerHTML =
+        '<div class="empty">No se pudieron cargar los datos. Revisa la conexión o las reglas de Firestore.</div>';
+      document.getElementById('errorAnalysis').innerHTML = '';
+    }
+  }
+
+  function populateGroupFilter(){
+    const sel = document.getElementById('groupFilter');
+    const current = sel.value;
+    const groups = [...new Set(allResults.map(r => r.studentGroup).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">Todos los grupos</option>' +
+      groups.map(g => `<option value="${g}">${g}</option>`).join('');
+    sel.value = current;
+  }
+
+  function onGroupChange(){
+    populateStudentFilter();
+    renderAll();
+  }
+
+  function populateStudentFilter(){
+    const sel = document.getElementById('studentFilter');
+    const current = sel.value;
+    const group = document.getElementById('groupFilter').value;
+    const pool = group ? allResults.filter(r => r.studentGroup === group) : allResults;
+    const students = [...new Map(pool.map(r => [r.studentNameKey, r.studentName])).entries()]
+      .sort((a,b) => a[1].localeCompare(b[1]));
+    sel.innerHTML = '<option value="">Todos los alumnos</option>' +
+      students.map(([key, name]) => `<option value="${key}">${name}</option>`).join('');
+    sel.value = current;
+    if (![...sel.options].some(o => o.value === current)) sel.value = '';
+  }
+
+  function populateUnitFilter(){
+    const sel = document.getElementById('unitFilter');
+    const current = sel.value;
+    const units = [...new Set(allResults.map(r => r.unitId))];
+    sel.innerHTML = '<option value="">Todas las unidades</option>' +
+      units.map(u => {
+        const title = (allResults.find(r => r.unitId === u) || {}).unitTitle || u;
+        return `<option value="${u}">${title}</option>`;
+      }).join('');
+    sel.value = current;
+  }
+
+  function filteredResults(){
+    const unit = document.getElementById('unitFilter').value;
+    const group = document.getElementById('groupFilter').value;
+    const studentKey = document.getElementById('studentFilter').value;
+    return allResults.filter(r =>
+      (!unit || r.unitId === unit) &&
+      (!group || r.studentGroup === group) &&
+      (!studentKey || r.studentNameKey === studentKey)
+    );
+  }
+
+  function renderAll(){
+    renderErrorAnalysis();
+    renderStudentProgress();
+    renderAttemptsTable();
+  }
+
+  function renderStudentProgress(){
+    const studentKey = document.getElementById('studentFilter').value;
+    const titleEl = document.getElementById('progressTitle');
+    const el = document.getElementById('studentProgress');
+
+    if (!studentKey) {
+      titleEl.style.display = 'none';
+      el.style.display = 'none';
+      return;
+    }
+    titleEl.style.display = 'block';
+    el.style.display = 'block';
+
+    // Progreso en orden cronológico (más viejo primero), sin importar
+    // el filtro de unidad, para ver la evolución completa del alumno.
+    const results = allResults
+      .filter(r => r.studentNameKey === studentKey)
+      .sort((a, b) => {
+        const ta = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : 0;
+        const tb = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate() : 0;
+        return ta - tb;
+      });
+
+    if (!results.length) { el.innerHTML = '<div class="empty">Sin intentos registrados.</div>'; return; }
+
+    el.innerHTML = results.map(r => {
+      const pct = r.total ? Math.round((r.score / r.total) * 100) : 0;
+      const date = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().toLocaleString('es-MX') : '—';
+      const color = pct >= 70 ? 'var(--accent-green)' : 'var(--accent-red)';
+      return `<div class="progress-row">
+        <div class="progress-date">${date}</div>
+        <div class="progress-unit">${r.unitTitle || r.unitId} · intento #${r.attemptNumber || 1}</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%; background:${color}"></div></div>
+        <div class="progress-pct" style="color:${color}">${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderErrorAnalysis(){
+    const results = filteredResults();
+    const el = document.getElementById('errorAnalysis');
+    if (!results.length) { el.innerHTML = '<div class="empty">Todavía no hay resultados.</div>'; return; }
+
+    // Cuenta cuántas veces se falló cada pregunta (por texto de pregunta)
+    const counts = {};
+    results.forEach(r => {
+      (r.questionResults || []).forEach(q => {
+        if (!q.correct) {
+          counts[q.question] = (counts[q.question] || 0) + 1;
+        }
+      });
+    });
+
+    const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 10);
+    if (!sorted.length) { el.innerHTML = '<div class="empty">Sin errores registrados — buen trabajo del grupo 🎉</div>'; return; }
+
+    const max = sorted[0][1];
+    el.innerHTML = sorted.map(([question, count]) => `
+      <div class="error-bar-row">
+        <div class="error-q">${question}</div>
+        <div class="error-bar-wrap"><div class="error-bar-fill" style="width:${(count/max)*100}%"></div></div>
+        <div class="error-count">${count} veces</div>
+      </div>
+    `).join('');
+  }
+
+  function renderAttemptsTable(){
+    const results = filteredResults();
+    const el = document.getElementById('attemptsTable');
+    if (!results.length) { el.innerHTML = '<div class="empty">Todavía no hay resultados.</div>'; return; }
+
+    const rows = results.map(r => {
+      const pct = r.total ? Math.round((r.score / r.total) * 100) : 0;
+      const date = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().toLocaleString('es-MX') : '—';
+      return `<tr>
+        <td>${r.studentName || '—'}</td>
+        <td>${r.studentGroup || '—'}</td>
+        <td>${r.unitTitle || r.unitId || '—'}</td>
+        <td class="${pct >= 70 ? 'pct-good' : 'pct-bad'}">${r.score}/${r.total} (${pct}%)</td>
+        <td>${r.attemptNumber || 1}</td>
+        <td>${date}</td>
+      </tr>`;
+    }).join('');
+
+    el.innerHTML = `<table>
+      <thead><tr><th>Alumno</th><th>Grupo</th><th>Unidad</th><th>Calificación</th><th>Intento #</th><th>Fecha</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+</script>
+</body>
+</html>
