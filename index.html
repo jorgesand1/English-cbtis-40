@@ -378,16 +378,54 @@ function speak(text){
   window.speechSynthesis.speak(utter);
 }
 
+let completedUnits = {}; // { unitId: { score, total, attempts } }
+
 function renderUnitPicker(){
   const el = document.getElementById('unitPicker');
   el.innerHTML = '';
   UNITS.forEach(u => {
     const btn = document.createElement('button');
     btn.className = 'unit-btn' + (u.id === currentUnit.id ? ' active' : '');
-    btn.textContent = u.title;
+    const progress = completedUnits[u.id];
+    if (progress) {
+      const pct = progress.total ? Math.round((progress.score / progress.total) * 100) : 0;
+      btn.textContent = `✓ ${u.title} (${pct}%)`;
+      btn.title = `Ya contestada — mejor resultado: ${progress.score}/${progress.total}, ${progress.attempts} intento(s)`;
+    } else {
+      btn.textContent = u.title;
+    }
     btn.onclick = () => { currentUnit = u; userAnswers = {}; renderQuiz(); renderUnitPicker(); };
     el.appendChild(btn);
   });
+}
+
+/* Revisa qué unidades ya contestó este alumno (con este profesor),
+   para mostrarle un ✓ y su mejor calificación en el selector. */
+async function loadStudentProgress(){
+  try {
+    const snap = await db.collection('results')
+      .where('teacherId', '==', selectedTeacherId)
+      .where('studentNameKey', '==', studentNameKey)
+      .get();
+
+    const byUnit = {};
+    snap.docs.forEach(d => {
+      const r = d.data();
+      if (!byUnit[r.unitId]) byUnit[r.unitId] = { score: 0, total: 0, attempts: 0 };
+      byUnit[r.unitId].attempts++;
+      // Nos quedamos con la MEJOR calificación (en % ) que haya logrado
+      const prevPct = byUnit[r.unitId].total ? byUnit[r.unitId].score / byUnit[r.unitId].total : -1;
+      const newPct = r.total ? r.score / r.total : -1;
+      if (newPct > prevPct) {
+        byUnit[r.unitId].score = r.score;
+        byUnit[r.unitId].total = r.total;
+      }
+    });
+    completedUnits = byUnit;
+    renderUnitPicker();
+  } catch (err) {
+    console.error('No se pudo cargar el progreso previo:', err);
+  }
 }
 
 function renderQuiz(){
@@ -743,6 +781,7 @@ async function saveResults(score, total, questionResults){
     });
 
     if (statusEl) { statusEl.textContent = '✓ Result saved'; }
+    loadStudentProgress();
   } catch (err) {
     console.error('No se pudo guardar el resultado:', err);
     if (statusEl) { statusEl.textContent = '⚠ Could not save (check your connection)'; }
@@ -814,6 +853,7 @@ function startSession(){
   document.getElementById('appContent').style.display = 'block';
   renderUnitPicker();
   renderQuiz();
+  loadStudentProgress();
 }
 </script>
 </body>
