@@ -501,10 +501,12 @@ function renderQuiz(){
       card.appendChild(emojiEl);
     }
 
-    const text = document.createElement('div');
-    text.className = 'q-text';
-    text.innerHTML = q.text;
-    card.appendChild(text);
+    if (q.text) {
+      const text = document.createElement('div');
+      text.className = 'q-text';
+      text.innerHTML = q.text;
+      card.appendChild(text);
+    }
 
     if (q.audioText) {
       const audioRow = document.createElement('div');
@@ -614,18 +616,42 @@ function renderQuiz(){
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             chunks = [];
-            const preferredTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
-            const supportedType = preferredTypes.find(t => MR.isTypeSupported && MR.isTypeSupported(t));
-            mediaRecorder = supportedType ? new MR(stream, { mimeType: supportedType }) : new MR(stream);
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+
+            // Prueba varios formatos hasta que uno funcione en este navegador
+            // (Safari/iPhone solo soporta algunos, y a veces isTypeSupported
+            // no está disponible, así que además probamos con try/catch).
+            const preferredTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg', ''];
+            mediaRecorder = null;
+            for (const t of preferredTypes) {
+              try {
+                mediaRecorder = t ? new MR(stream, { mimeType: t }) : new MR(stream);
+                break;
+              } catch (e) { /* intenta el siguiente formato */ }
+            }
+            if (!mediaRecorder) {
+              status.textContent = '⚠ Este navegador no puede grabar audio aquí.';
+              stream.getTracks().forEach(t => t.stop());
+              return;
+            }
+
+            mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
             mediaRecorder.onstop = () => {
-              const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-              audioPlayback.src = URL.createObjectURL(blob);
-              audioPlayback.style.display = 'block';
-              status.textContent = '✓ Listo — dale play para escucharte y comparar con el modelo.';
+              stream.getTracks().forEach(t => t.stop());
               recBtn.classList.remove('recording');
               recBtn.innerHTML = '🎙️ Record my attempt';
-              stream.getTracks().forEach(t => t.stop());
+              if (!chunks.length) {
+                status.textContent = '⚠ No se grabó audio — intenta de nuevo y habla un poco más antes de detener.';
+                return;
+              }
+              const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/mp4' });
+              const url = URL.createObjectURL(blob);
+              audioPlayback.src = url;
+              audioPlayback.style.display = 'block';
+              audioPlayback.load();
+              audioPlayback.onerror = () => {
+                status.textContent = '⚠ Se grabó, pero este navegador no puede reproducirlo. Prueba en Chrome.';
+              };
+              status.textContent = '✓ Listo — dale play para escucharte y comparar con el modelo.';
             };
             mediaRecorder.start();
             recBtn.classList.add('recording');
