@@ -566,9 +566,9 @@ function renderQuiz(){
         <button class="shadow-btn" type="button" data-action="slow">🐢 Slow speed</button>
         <button class="shadow-btn" type="button" data-action="loop">🔁 Play 3 times</button>
       `;
-      controls.querySelector('[data-action="normal"]').onclick = () => speak(q.sentence, 0.95, 1);
-      controls.querySelector('[data-action="slow"]').onclick = () => speak(q.sentence, 0.65, 1);
-      controls.querySelector('[data-action="loop"]').onclick = () => speak(q.sentence, 0.95, 3);
+      controls.querySelector('[data-action="normal"]').onclick = () => speak(q.sentence, 1.0, 1);
+      controls.querySelector('[data-action="slow"]').onclick = () => speak(q.sentence, 0.4, 1);
+      controls.querySelector('[data-action="loop"]').onclick = () => speak(q.sentence, 1.0, 3);
       card.appendChild(controls);
 
       const hint = document.createElement('div');
