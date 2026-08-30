@@ -614,10 +614,12 @@ function renderQuiz(){
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             chunks = [];
-            mediaRecorder = new MR(stream);
+            const preferredTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
+            const supportedType = preferredTypes.find(t => MR.isTypeSupported && MR.isTypeSupported(t));
+            mediaRecorder = supportedType ? new MR(stream, { mimeType: supportedType }) : new MR(stream);
             mediaRecorder.ondataavailable = e => chunks.push(e.data);
             mediaRecorder.onstop = () => {
-              const blob = new Blob(chunks, { type: 'audio/webm' });
+              const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
               audioPlayback.src = URL.createObjectURL(blob);
               audioPlayback.style.display = 'block';
               status.textContent = '✓ Listo — dale play para escucharte y comparar con el modelo.';
