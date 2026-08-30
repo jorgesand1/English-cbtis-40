@@ -72,6 +72,11 @@
     <div class="sub">CBTIS 40 · Inglés — resultados de Practice &amp; Check</div>
 
     <div class="filters">
+      <select id="semesterFilter" onchange="onSemesterChange()">
+        <option value="">Todos los semestres</option>
+        <option value="1">1.er semestre</option>
+        <option value="5">5.º semestre</option>
+      </select>
       <select id="groupFilter" onchange="onGroupChange()">
         <option value="">Todos los grupos</option>
       </select>
@@ -146,6 +151,12 @@
 
   let allResults = [];
 
+  // Compatibilidad: los resultados guardados antes de esta actualización
+  // no tenían campo semester y pertenecen al contenido original de 1.º.
+  function resultSemester(r){
+    return Number(r.semester || 1);
+  }
+
   async function loadData(){
     document.getElementById('errorAnalysis').innerHTML = '<div class="loading">Cargando...</div>';
     document.getElementById('attemptsTable').innerHTML = '<div class="loading">Cargando...</div>';
@@ -171,10 +182,21 @@
   function populateGroupFilter(){
     const sel = document.getElementById('groupFilter');
     const current = sel.value;
-    const groups = [...new Set(allResults.map(r => r.studentGroup).filter(Boolean))].sort();
+    const semester = document.getElementById('semesterFilter').value;
+    const pool = semester ? allResults.filter(r => resultSemester(r) === Number(semester)) : allResults;
+    const groups = [...new Set(pool.map(r => r.studentGroup).filter(Boolean))].sort();
     sel.innerHTML = '<option value="">Todos los grupos</option>' +
       groups.map(g => `<option value="${g}">${g}</option>`).join('');
     sel.value = current;
+  }
+
+  function onSemesterChange(){
+    document.getElementById('groupFilter').value = '';
+    document.getElementById('studentFilter').value = '';
+    populateGroupFilter();
+    populateUnitFilter();
+    populateStudentFilter();
+    renderAll();
   }
 
   function onGroupChange(){
@@ -186,7 +208,11 @@
     const sel = document.getElementById('studentFilter');
     const current = sel.value;
     const group = document.getElementById('groupFilter').value;
-    const pool = group ? allResults.filter(r => r.studentGroup === group) : allResults;
+    const semester = document.getElementById('semesterFilter').value;
+    const pool = allResults.filter(r =>
+      (!semester || resultSemester(r) === Number(semester)) &&
+      (!group || r.studentGroup === group)
+    );
     const students = [...new Map(pool.map(r => [r.studentNameKey, r.studentName])).entries()]
       .sort((a,b) => a[1].localeCompare(b[1]));
     sel.innerHTML = '<option value="">Todos los alumnos</option>' +
@@ -198,20 +224,25 @@
   function populateUnitFilter(){
     const sel = document.getElementById('unitFilter');
     const current = sel.value;
-    const units = [...new Set(allResults.map(r => r.unitId))];
+    const semester = document.getElementById('semesterFilter').value;
+    const pool = semester ? allResults.filter(r => resultSemester(r) === Number(semester)) : allResults;
+    const units = [...new Set(pool.map(r => r.unitId))];
     sel.innerHTML = '<option value="">Todas las unidades</option>' +
       units.map(u => {
-        const title = (allResults.find(r => r.unitId === u) || {}).unitTitle || u;
+        const title = (pool.find(r => r.unitId === u) || {}).unitTitle || u;
         return `<option value="${u}">${title}</option>`;
       }).join('');
     sel.value = current;
+    if (![...sel.options].some(o => o.value === current)) sel.value = '';
   }
 
   function filteredResults(){
+    const semester = document.getElementById('semesterFilter').value;
     const unit = document.getElementById('unitFilter').value;
     const group = document.getElementById('groupFilter').value;
     const studentKey = document.getElementById('studentFilter').value;
     return allResults.filter(r =>
+      (!semester || resultSemester(r) === Number(semester)) &&
       (!unit || r.unitId === unit) &&
       (!group || r.studentGroup === group) &&
       (!studentKey || r.studentNameKey === studentKey)
@@ -239,8 +270,9 @@
 
     // Progreso en orden cronológico (más viejo primero), sin importar
     // el filtro de unidad, para ver la evolución completa del alumno.
+    const semester = document.getElementById('semesterFilter').value;
     const results = allResults
-      .filter(r => r.studentNameKey === studentKey)
+      .filter(r => r.studentNameKey === studentKey && (!semester || resultSemester(r) === Number(semester)))
       .sort((a, b) => {
         const ta = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : 0;
         const tb = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate() : 0;
@@ -301,6 +333,7 @@
       return `<tr>
         <td>${r.studentName || '—'}</td>
         <td>${r.studentGroup || '—'}</td>
+        <td>${resultSemester(r)}.º</td>
         <td>${r.unitTitle || r.unitId || '—'}</td>
         <td class="${pct >= 70 ? 'pct-good' : 'pct-bad'}">${r.score}/${r.total} (${pct}%)</td>
         <td>${r.attemptNumber || 1}</td>
@@ -309,7 +342,7 @@
     }).join('');
 
     el.innerHTML = `<table>
-      <thead><tr><th>Alumno</th><th>Grupo</th><th>Unidad</th><th>Calificación</th><th>Intento #</th><th>Fecha</th></tr></thead>
+      <thead><tr><th>Alumno</th><th>Grupo</th><th>Semestre</th><th>Unidad</th><th>Calificación</th><th>Intento #</th><th>Fecha</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }

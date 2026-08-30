@@ -103,6 +103,27 @@
   .match-select.correct{border-color:var(--accent-green);}
   .match-select.incorrect{border-color:var(--accent-red);}
 
+
+  /* True / False y ordenar palabras */
+  .tf-options{display:flex;gap:10px;flex-wrap:wrap;}
+  .tf-options .option{min-width:120px;justify-content:center;}
+  .unscramble-bank{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
+  .word-chip{
+    background:var(--board);border:1px solid var(--line);color:var(--chalk);
+    padding:8px 12px;border-radius:18px;cursor:pointer;font-family:'Work Sans',sans-serif;font-size:14px;
+  }
+  .word-chip:hover{border-color:var(--accent-yellow);}
+  .word-chip.used{opacity:.35;cursor:default;}
+  .answer-builder{
+    min-height:48px;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;
+    display:flex;gap:7px;flex-wrap:wrap;align-items:center;background:rgba(0,0,0,.08);
+  }
+  .answer-builder.correct{border-color:var(--accent-green);}
+  .answer-builder.incorrect{border-color:var(--accent-red);}
+  .answer-word{background:var(--chalk);color:var(--board-dark);padding:6px 10px;border-radius:15px;cursor:pointer;font-size:14px;}
+  .builder-hint{color:var(--chalk-dim);font-size:12px;width:100%;}
+  .semester-tag{color:var(--accent-yellow);font-size:13px;margin:0 0 16px;font-weight:600;}
+
   .speak-target{
     font-size:20px;font-family:'Patrick Hand',cursive;color:var(--accent-yellow);
     margin-bottom:16px;letter-spacing:.01em;
@@ -189,6 +210,12 @@
     <input type="text" id="studentNameInput" class="fill-input" style="width:100%;font-size:16px;" placeholder="Nombre y apellido">
     <div class="q-text" style="margin-top:16px;">Tu grupo:</div>
     <input type="text" id="studentGroupInput" class="fill-input" style="width:100%;font-size:16px;" placeholder="Ej. 1A, 2B, 3C...">
+    <div class="q-text" style="margin-top:16px;">Tu semestre:</div>
+    <select id="semesterSelect" class="match-select" style="width:100%;">
+      <option value="">— selecciona —</option>
+      <option value="1">1.er semestre — Inglés I</option>
+      <option value="5">5.º semestre — Inglés V</option>
+    </select>
     <div class="actions" style="margin-top:16px;">
       <button class="primary" onclick="startSession()">Start / Comenzar</button>
     </div>
@@ -228,15 +255,21 @@
 
    Cada "unidad" tiene un id, un título, y una lista de preguntas.
    Cada pregunta tiene un "type": "mc" (opción múltiple),
-   "fill" (completar), o "match" (relacionar columnas).
+   "fill" (completar), "match" (relacionar columnas),
+   "truefalse" (verdadero/falso) o "unscramble" (ordenar palabras).
 
    Copia el bloque de un tipo de pregunta y cambia los textos
    para crear las tuyas. No necesitas tocar el resto del código.
    ============================================================ */
 const UNITS = [
+  /* ==========================================================
+     1.er SEMESTRE — se conservan los IDs originales para que
+     el progreso y los resultados ya guardados sigan funcionando.
+     ========================================================== */
   {
     id: "unit0",
-    title: "Unit 0 — Diagnostic Evaluation (Experience 1)",
+    semester: 1,
+    title: "Diagnostic Evaluation — 1st Semester (Experience 1)",
     questions: [
       {
         type: "mc",
@@ -257,18 +290,8 @@ const UNITS = [
         audioText: "In my classroom there is a desk, a chair, a bookshelf, and a computer.",
         answer: "bookshelf"
       },
-      {
-        type: "mc",
-        text: "Is Carlos's classroom big or small?",
-        options: ["Big", "Small"],
-        answer: "Small"
-      },
-      {
-        type: "mc",
-        text: "What does Carlos like to do in his bedroom?",
-        options: ["Read books", "Listen to music", "Play video games", "Sleep all day"],
-        answer: "Listen to music"
-      },
+      { type: "mc", text: "Is Carlos's classroom big or small?", options: ["Big", "Small"], answer: "Small" },
+      { type: "mc", text: "What does Carlos like to do in his bedroom?", options: ["Read books", "Listen to music", "Play video games", "Sleep all day"], answer: "Listen to music" },
       { type: "mc", text: "She ___ my sister. (is / am / are)", options: ["is","am","are"], answer: "is" },
       { type: "mc", text: "___ is my notebook. (This / These / Those)", options: ["This","These","Those"], answer: "This" },
       { type: "mc", text: "They ___ happy today. (is / are)", options: ["is","are"], answer: "are" },
@@ -283,8 +306,7 @@ const UNITS = [
         type: "speaking",
         mode: "open",
         text: "Introduce yourself out loud using this structure: 'My name is ___, I am ___ years old, and I am ___.'",
-        keywords: ["name"],
-        minWords: 6,
+        keywords: ["name"], minWords: 6,
         hint: 'start with "My name is..." instead of "I am..."',
         sampleAnswer: "My name is Luis, I am 15 years old, and I am Mexican."
       }
@@ -292,102 +314,146 @@ const UNITS = [
   },
   {
     id: "pron-j",
+    semester: 1,
     title: "🔊 Pronunciation Focus — The J Sound",
     questions: [
-      {
-        type: "note",
-        text: "En español, la J suena como una exhalación fuerte desde la garganta (jamón, jugo). En inglés, la J <b>siempre</b> suena distinto: es un sonido que empieza como 'd' y termina como 'sh' suave — algo como \"dyu\". Escucha cada palabra, dale play las veces que quieras, y luego grábate repitiéndola."
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🧃",
-        audioText: "juice",
-        targetText: "juice"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🧥",
-        audioText: "jacket",
-        targetText: "jacket"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🫙",
-        audioText: "jar",
-        targetText: "jar"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🍊",
-        audioText: "orange",
-        targetText: "orange"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🚙",
-        audioText: "jeep",
-        targetText: "jeep"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🧌",
-        audioText: "giant",
-        targetText: "giant"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🪼",
-        audioText: "jellyfish",
-        targetText: "jellyfish"
-      },
-      {
-        type: "speaking",
-        text: "Listen and repeat:",
-        showWord: true,
-        emoji: "🐆",
-        audioText: "jaguar",
-        targetText: "jaguar"
-      },
-      {
-        type: "note",
-        text: "Dato extra: la letra <b>G</b> antes de e/i/y a veces hace este MISMO sonido — como en <i>giant</i> (que ya practicaste) o <i>orange</i>. No solo la letra J lo produce."
-      }
+      { type: "note", text: "En español, la J suena como una exhalación fuerte desde la garganta (jamón, jugo). En inglés, la J <b>siempre</b> suena distinto: es un sonido que empieza como 'd' y termina como 'sh' suave — algo como \"dyu\". Escucha cada palabra, dale play las veces que quieras, y luego grábate repitiéndola." },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧃", audioText: "juice", targetText: "juice" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧥", audioText: "jacket", targetText: "jacket" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🫙", audioText: "jar", targetText: "jar" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🍊", audioText: "orange", targetText: "orange" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚙", audioText: "jeep", targetText: "jeep" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧌", audioText: "giant", targetText: "giant" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🪼", audioText: "jellyfish", targetText: "jellyfish" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🐆", audioText: "jaguar", targetText: "jaguar" },
+      { type: "note", text: "Dato extra: la letra <b>G</b> antes de e/i/y a veces hace este MISMO sonido — como en <i>giant</i> o <i>orange</i>. No solo la letra J lo produce." }
     ]
   },
   {
     id: "shadowing-1",
+    semester: 1,
     title: "🗣️ Shadowing Practice",
+    questions: [
+      { type: "note", text: "<b>Shadowing:</b> no esperes a que termine la oración para repetirla — habla EN VOZ ALTA al mismo tiempo que escuchas el audio, imitando el ritmo. Usa 'Slow speed' si te cuesta trabajo al inicio, y 'Play 3 times' para practicar varias veces seguidas." },
+      { type: "shadowing", sentence: "I usually wake up early and have breakfast with my family." },
+      { type: "shadowing", sentence: "My favorite subject is English because I want to travel one day." },
+      { type: "shadowing", sentence: "Can you tell me where the nearest bus stop is, please?" }
+    ]
+  },
+
+  /* ==========================================================
+     5.º SEMESTRE — pronunciación y shadowing.
+     La práctica de la J se conserva también para Inglés V.
+     El shadowing usa estructuras y temas presentes en el diagnóstico.
+     ========================================================== */
+  {
+    id: "pron-j-5",
+    semester: 5,
+    title: "🔊 Pronunciation Focus — The J Sound",
+    questions: [
+      { type: "note", text: "En español, la J suena como una exhalación fuerte desde la garganta (jamón, jugo). En inglés, la J <b>siempre</b> suena distinto: es un sonido que empieza como 'd' y termina como 'sh' suave — algo como \"dyu\". Escucha cada palabra, dale play las veces que quieras, y luego grábate repitiéndola." },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧃", audioText: "juice", targetText: "juice" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧥", audioText: "jacket", targetText: "jacket" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🫙", audioText: "jar", targetText: "jar" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🍊", audioText: "orange", targetText: "orange" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚙", audioText: "jeep", targetText: "jeep" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧌", audioText: "giant", targetText: "giant" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🪼", audioText: "jellyfish", targetText: "jellyfish" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🐆", audioText: "jaguar", targetText: "jaguar" },
+      { type: "note", text: "Dato extra: la letra <b>G</b> antes de e/i/y a veces hace este MISMO sonido — como en <i>giant</i> o <i>orange</i>. No solo la letra J lo produce." }
+    ]
+  },
+  {
+    id: "shadowing-5",
+    semester: 5,
+    title: "🗣️ Shadowing Practice — 5th Semester",
+    questions: [
+      { type: "note", text: "<b>Shadowing:</b> habla EN VOZ ALTA al mismo tiempo que escuchas. Estas oraciones practican vocabulario y estructuras relacionadas con el diagnóstico: rutinas, presente continuo, experiencias pasadas y acciones ya completadas." },
+      { type: "shadowing", sentence: "I usually wake up early and take the bus to school every morning." },
+      { type: "shadowing", sentence: "My friends are waiting for the bus because they are going downtown." },
+      { type: "shadowing", sentence: "We visited a science exhibition last weekend and learned many new things." },
+      { type: "shadowing", sentence: "She had already finished her school project when her brother arrived home." },
+      { type: "shadowing", sentence: "Have you already done your homework, or are you still working on it?" }
+    ]
+  },
+
+  /* ==========================================================
+     5.º SEMESTRE — diagnóstico paralelo a Spiral 5.
+     Evalúa las mismas habilidades, pero con textos y reactivos nuevos.
+     ========================================================== */
+  {
+    id: "diag-5",
+    semester: 5,
+    title: "Diagnostic Evaluation — 5th Semester",
     questions: [
       {
         type: "note",
-        text: "<b>Shadowing:</b> no esperes a que termine la oración para repetirla — habla EN VOZ ALTA al mismo tiempo que escuchas el audio, imitando el ritmo. Usa 'Slow speed' si te cuesta trabajo al inicio, y 'Play 3 times' para practicar varias veces seguidas."
+        text: "<b>Part 1 · Listening comprehension.</b> Listen carefully. You may play the audio more than once, then answer the five questions."
       },
       {
-        type: "shadowing",
-        sentence: "I usually wake up early and have breakfast with my family."
+        type: "mc",
+        text: "What time does Daniel usually wake up on weekdays?",
+        audioText: "Hello! My name is Daniel. I live in a busy neighborhood near the beach. On weekdays, I usually wake up at six fifteen in the morning. Before school, I walk my dog and then eat breakfast with my sister. In the afternoon, I help at my uncle's sports shop. I enjoy taking photos, especially of the ocean. On Saturdays, I meet my cousins at the basketball court. We usually play for an hour and then buy fruit drinks. I like living here because there are many things to do and I can see the sea every day.",
+        options: ["5:45 a.m.", "6:15 a.m.", "6:45 a.m.", "7:15 a.m."],
+        answer: "6:15 a.m."
       },
       {
-        type: "shadowing",
-        sentence: "My favorite subject is English because I want to travel one day."
+        type: "mc",
+        text: "What does Daniel usually do before breakfast?",
+        audioText: "Before school, I walk my dog and then eat breakfast with my sister.",
+        options: ["He walks his dog", "He takes photos", "He plays basketball", "He goes to the shop"],
+        answer: "He walks his dog"
       },
       {
-        type: "shadowing",
-        sentence: "Can you tell me where the nearest bus stop is, please?"
-      }
+        type: "fill",
+        text: "Where does Daniel help in the afternoon? Complete: At his uncle's ______ shop.",
+        audioText: "In the afternoon, I help at my uncle's sports shop.",
+        answer: "sports"
+      },
+      {
+        type: "mc",
+        text: "What does Daniel usually do with his cousins on Saturdays?",
+        audioText: "On Saturdays, I meet my cousins at the basketball court. We usually play for an hour and then buy fruit drinks.",
+        options: ["They play basketball", "They go swimming", "They study English", "They watch movies"],
+        answer: "They play basketball"
+      },
+      {
+        type: "mc",
+        text: "Why does Daniel like living there?",
+        audioText: "I like living here because there are many things to do and I can see the sea every day.",
+        options: ["Because it is always quiet", "Because his school is very small", "Because there are many things to do and he can see the sea", "Because his cousins live in his house"],
+        answer: "Because there are many things to do and he can see the sea"
+      },
+
+      {
+        type: "note",
+        text: "<b>Part 2 · Reading comprehension.</b><br><br><b>A changed weekend, great memories</b><br><br>Valeria had planned to attend a music festival in Hermosillo last month, but the event was canceled because of heavy rain. Instead, she stayed in Guaymas and spent the weekend with her family.<br><br>On Friday night, Valeria wanted to send some photos to her friend Nora, but Nora had already gone to bed. On Saturday morning, the two friends visited a science exhibition downtown. They spent several hours trying interactive experiments and learning about space.<br><br>When Valeria returned home, she found her younger brother Diego preparing dinner. “Have you already done your school project?” she asked. Diego showed her the completed slides on his laptop. On Sunday, the weather improved, so the family went to the beach and played volleyball together."
+      },
+      { type: "truefalse", text: "Valeria attended the music festival in Hermosillo last month.", answer: "False" },
+      { type: "truefalse", text: "Nora had already gone to bed when Valeria wanted to send her photos.", answer: "True" },
+      { type: "truefalse", text: "Valeria and Nora visited the science exhibition on Sunday.", answer: "False" },
+      { type: "truefalse", text: "Diego had completed his school project when Valeria asked him about it.", answer: "True" },
+      { type: "truefalse", text: "Valeria's family played volleyball at the beach.", answer: "True" },
+
+      {
+        type: "note",
+        text: "<b>Part 3 · Sentence structure.</b> Tap the words in the correct order to build each sentence. Tap a word in your answer to send it back."
+      },
+      { type: "unscramble", text: "Put the words in order:", words: ["usually", "I", "check", "my", "messages", "after", "breakfast"], answer: "I usually check my messages after breakfast" },
+      { type: "unscramble", text: "Put the words in order:", words: ["are", "waiting", "They", "for", "the", "bus", "now"], answer: "They are waiting for the bus now" },
+      { type: "unscramble", text: "Put the words in order:", words: ["never", "My", "friends", "arrive", "late", "to", "class"], answer: "My friends never arrive late to class" },
+      { type: "unscramble", text: "Put the words in order:", words: ["practices", "Elena", "volleyball", "every", "Tuesday"], answer: "Elena practices volleyball every Tuesday" },
+      { type: "unscramble", text: "Put the words in order:", words: ["am", "studying", "I", "for", "my", "English", "exam", "now"], answer: "I am studying for my English exam now" },
+
+      {
+        type: "note",
+        text: "<b>Part 4 · Present Simple.</b> Complete each sentence with the correct form of the verb in parentheses."
+      },
+      { type: "fill", text: "My brother ______ (study) at night.", answer: "studies" },
+      { type: "fill", text: "We ______ (take) the bus to school every morning.", answer: "take" },
+      { type: "fill", text: "Carlos ______ (watch) videos after he finishes his homework.", answer: "watches" },
+      { type: "fill", text: "My parents ______ (work) in the morning.", answer: "work" },
+      { type: "fill", text: "I ______ (finish) classes at two o'clock.", answer: "finish" }
     ]
   }
 ];
@@ -396,7 +462,7 @@ const UNITS = [
    2) EL MOTOR — esta parte ya funciona, no necesitas editarla
       a menos que quieras agregar un nuevo TIPO de ejercicio.
    ============================================================ */
-let currentUnit = UNITS[0];
+let currentUnit = null;
 let userAnswers = {};
 
 /* Lee en voz alta usando la Web Speech API del navegador (gratis, sin
@@ -418,12 +484,17 @@ function speak(text, rate = 0.95, times = 1){
 
 let completedUnits = {}; // { unitId: { score, total, attempts } }
 
+function visibleUnits(){
+  return UNITS.filter(u => Number(u.semester || 1) === Number(selectedSemester));
+}
+
 function renderUnitPicker(){
   const el = document.getElementById('unitPicker');
   el.innerHTML = '';
-  UNITS.forEach(u => {
+  const units = visibleUnits();
+  units.forEach(u => {
     const btn = document.createElement('button');
-    btn.className = 'unit-btn' + (u.id === currentUnit.id ? ' active' : '');
+    btn.className = 'unit-btn' + (currentUnit && u.id === currentUnit.id ? ' active' : '');
     const progress = completedUnits[u.id];
     if (progress) {
       const pct = progress.total ? Math.round((progress.score / progress.total) * 100) : 0;
@@ -449,6 +520,8 @@ async function loadStudentProgress(){
     const byUnit = {};
     snap.docs.forEach(d => {
       const r = d.data();
+      const resultSemester = Number(r.semester || 1); // resultados antiguos = 1.er semestre
+      if (resultSemester !== Number(selectedSemester)) return;
       if (!byUnit[r.unitId]) byUnit[r.unitId] = { score: 0, total: 0, attempts: 0 };
       byUnit[r.unitId].attempts++;
       // Nos quedamos con la MEJOR calificación (en % ) que haya logrado
@@ -469,7 +542,14 @@ async function loadStudentProgress(){
 function renderQuiz(){
   const area = document.getElementById('quizArea');
   area.innerHTML = '';
+  if (!currentUnit) return;
 
+  const semesterTag = document.createElement('div');
+  semesterTag.className = 'semester-tag';
+  semesterTag.textContent = `${Number(selectedSemester) === 1 ? '1.er' : '5.º'} semestre · ${currentUnit.title}`;
+  area.appendChild(semesterTag);
+
+  let displayQuestionNumber = 0;
   currentUnit.questions.forEach((q, i) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -487,10 +567,11 @@ function renderQuiz(){
       return; // no se califica, no tiene respuesta
     }
 
+    displayQuestionNumber++;
     const meta = document.createElement('div');
     meta.className = 'q-meta';
-    const typeLabels = { mc: 'Multiple choice', fill: 'Fill in the blank', match: 'Matching', speaking: 'Speaking', shadowing: 'Shadowing (practice)' };
-    meta.textContent = `Question ${i+1} — ${typeLabels[q.type] || ''}`;
+    const typeLabels = { mc: 'Multiple choice', fill: 'Fill in the blank', match: 'Matching', truefalse: 'True / False', unscramble: 'Unscramble', speaking: 'Speaking', shadowing: 'Shadowing (practice)' };
+    meta.textContent = `Question ${displayQuestionNumber} — ${typeLabels[q.type] || ''}`;
     card.appendChild(meta);
 
     if (q.emoji) {
@@ -533,9 +614,73 @@ function renderQuiz(){
     } else if (q.type === 'fill') {
       const input = document.createElement('input');
       input.className = 'fill-input';
+      input.dataset.qIndex = i;
       input.placeholder = 'type your answer';
       input.oninput = (e) => { userAnswers[i] = e.target.value.trim(); };
       card.appendChild(input);
+
+    } else if (q.type === 'truefalse') {
+      const opts = document.createElement('div');
+      opts.className = 'options tf-options';
+      ['True', 'False'].forEach(opt => {
+        const label = document.createElement('label');
+        label.className = 'option';
+        label.dataset.qIndex = i;
+        label.innerHTML = `<input type="radio" name="q${i}" value="${opt}"> <span>${opt}</span>`;
+        label.querySelector('input').onchange = (e) => { userAnswers[i] = e.target.value; };
+        opts.appendChild(label);
+      });
+      card.appendChild(opts);
+
+    } else if (q.type === 'unscramble') {
+      userAnswers[i] = [];
+      const bank = document.createElement('div');
+      bank.className = 'unscramble-bank';
+      const builder = document.createElement('div');
+      builder.className = 'answer-builder';
+      builder.dataset.qIndex = i;
+
+      const refreshBuilder = () => {
+        builder.innerHTML = '';
+        if (!userAnswers[i].length) {
+          const hint = document.createElement('div');
+          hint.className = 'builder-hint';
+          hint.textContent = 'Your sentence will appear here...';
+          builder.appendChild(hint);
+        } else {
+          userAnswers[i].forEach((item, answerPos) => {
+            const span = document.createElement('span');
+            span.className = 'answer-word';
+            span.textContent = item.word;
+            span.title = 'Tap to return this word';
+            span.onclick = () => {
+              const [removed] = userAnswers[i].splice(answerPos, 1);
+              const chip = bank.querySelector(`[data-word-index="${removed.idx}"]`);
+              if (chip) chip.classList.remove('used');
+              refreshBuilder();
+            };
+            builder.appendChild(span);
+          });
+        }
+      };
+
+      q.words.forEach((word, wordIdx) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'word-chip';
+        chip.dataset.wordIndex = wordIdx;
+        chip.textContent = word;
+        chip.onclick = () => {
+          if (chip.classList.contains('used')) return;
+          chip.classList.add('used');
+          userAnswers[i].push({ idx: wordIdx, word });
+          refreshBuilder();
+        };
+        bank.appendChild(chip);
+      });
+      refreshBuilder();
+      card.appendChild(bank);
+      card.appendChild(builder);
 
     } else if (q.type === 'match') {
       userAnswers[i] = userAnswers[i] || {};
@@ -547,6 +692,7 @@ function renderQuiz(){
         term.textContent = pair.term;
         const select = document.createElement('select');
         select.className = 'match-select';
+        select.dataset.qIndex = i;
         select.innerHTML = `<option value="">— choose —</option>` +
           pair.options.map(o => `<option value="${o}">${o}</option>`).join('');
         select.onchange = (e) => { userAnswers[i][pIdx] = e.target.value; };
@@ -817,7 +963,7 @@ function checkAnswers(){
       pushResult(q, isCorrect);
 
     } else if (q.type === 'fill') {
-      const input = document.querySelector(`.card:nth-child(${i+1}) .fill-input`);
+      const input = document.querySelector(`.fill-input[data-q-index="${i}"]`);
       const chosen = (userAnswers[i] || '').toLowerCase();
       const isCorrect = chosen === q.answer.toLowerCase();
       input.classList.remove('correct','incorrect');
@@ -827,8 +973,37 @@ function checkAnswers(){
       if (isCorrect) correctCount++;
       pushResult(q, isCorrect);
 
+    } else if (q.type === 'truefalse') {
+      const labels = document.querySelectorAll(`.option[data-q-index="${i}"]`);
+      const chosen = userAnswers[i];
+      const isCorrect = chosen === q.answer;
+      labels.forEach(label => {
+        const val = label.querySelector('input').value;
+        label.classList.remove('correct','incorrect');
+        if (val === q.answer) label.classList.add('correct');
+        else if (val === chosen && !isCorrect) label.classList.add('incorrect');
+      });
+      fb.textContent = isCorrect ? '✓ Correct!' : `✗ Correct answer: ${q.answer}`;
+      fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
+      if (isCorrect) correctCount++;
+      pushResult(q, isCorrect);
+
+    } else if (q.type === 'unscramble') {
+      const normalizeSentence = s => (s || '').toLowerCase().replace(/[^a-z0-9\s']/g, '').replace(/\s+/g, ' ').trim();
+      const chosen = (userAnswers[i] || []).map(x => x.word).join(' ');
+      const isCorrect = normalizeSentence(chosen) === normalizeSentence(q.answer);
+      const builder = document.querySelector(`.answer-builder[data-q-index="${i}"]`);
+      if (builder) {
+        builder.classList.remove('correct','incorrect');
+        builder.classList.add(isCorrect ? 'correct' : 'incorrect');
+      }
+      fb.textContent = isCorrect ? '✓ Correct order!' : `✗ Correct sentence: "${q.answer}."`;
+      fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
+      if (isCorrect) correctCount++;
+      pushResult(q, isCorrect);
+
     } else if (q.type === 'match') {
-      const selects = document.querySelectorAll(`.card:nth-child(${i+1}) .match-select`);
+      const selects = document.querySelectorAll(`.match-select[data-q-index="${i}"]`);
       let allCorrect = true;
       selects.forEach((sel, pIdx) => {
         const correct = q.pairs[pIdx].answer;
@@ -923,6 +1098,7 @@ async function saveResults(score, total, questionResults){
       studentName,
       studentNameKey,
       studentGroup,
+      semester: Number(selectedSemester),
       unitId: currentUnit.id,
       unitTitle: currentUnit.title,
       score,
@@ -944,6 +1120,7 @@ let studentName = '';
 let studentNameKey = '';
 let studentGroup = '';
 let selectedTeacherId = '';
+let selectedSemester = '';
 
 /* Lista de profesores que comparten este mismo sitio. Para agregar
    uno nuevo, copia una línea y cambia el id y el nombre — el id debe
@@ -977,9 +1154,11 @@ function startSession(){
   const teacherSelect = document.getElementById('teacherSelect');
   const nameInput = document.getElementById('studentNameInput');
   const groupInput = document.getElementById('studentGroupInput');
+  const semesterSelect = document.getElementById('semesterSelect');
   const teacherId = teacherSelect.value;
   const name = nameInput.value.trim();
   const group = groupInput.value.trim();
+  const semester = semesterSelect.value;
   let ok = true;
   if (!teacherId) {
     teacherSelect.style.borderColor = 'var(--accent-red)';
@@ -995,12 +1174,20 @@ function startSession(){
     groupInput.placeholder = 'Escribe tu grupo para continuar';
     ok = false;
   }
+  if (!semester) {
+    semesterSelect.style.borderColor = 'var(--accent-red)';
+    ok = false;
+  }
   if (!ok) return;
 
   selectedTeacherId = teacherId;
   studentName = name;
   studentNameKey = normalizeName(name);
   studentGroup = group.toUpperCase();
+  selectedSemester = Number(semester);
+  currentUnit = visibleUnits()[0] || null;
+  completedUnits = {};
+  userAnswers = {};
   document.getElementById('nameGate').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
   renderUnitPicker();
