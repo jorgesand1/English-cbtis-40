@@ -123,6 +123,20 @@
   .score-bar-fill{height:100%;background:var(--accent-green);transition:width .4s;}
   .no-support{color:var(--chalk-dim);font-size:13px;font-style:italic;}
 
+  .shadow-sentence{
+    font-size:22px;font-family:'Patrick Hand',cursive;color:var(--chalk);
+    margin-bottom:18px;line-height:1.5;
+  }
+  .shadow-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .shadow-btn{
+    background:var(--board);border:1px solid var(--accent-yellow);color:var(--accent-yellow);
+    padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'Work Sans',sans-serif;
+    font-size:13px;font-weight:600;
+  }
+  .shadow-btn:hover{background:rgba(224,184,74,0.1);}
+  .shadow-divider{border-top:1px dashed var(--line);margin:16px 0;}
+  .shadow-record-audio{width:100%;margin-top:10px;}
+
   .audio-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .audio-btn{
     background:var(--board);border:1px solid var(--accent-yellow);color:var(--accent-yellow);
@@ -353,6 +367,28 @@ const UNITS = [
         text: "Dato extra: la letra <b>G</b> antes de e/i/y a veces hace este MISMO sonido — como en <i>giant</i> (que ya practicaste) o <i>orange</i>. No solo la letra J lo produce."
       }
     ]
+  },
+  {
+    id: "shadowing-1",
+    title: "🗣️ Shadowing Practice",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Shadowing:</b> no esperes a que termine la oración para repetirla — habla EN VOZ ALTA al mismo tiempo que escuchas el audio, imitando el ritmo. Usa 'Slow speed' si te cuesta trabajo al inicio, y 'Play 3 times' para practicar varias veces seguidas."
+      },
+      {
+        type: "shadowing",
+        sentence: "I usually wake up early and have breakfast with my family."
+      },
+      {
+        type: "shadowing",
+        sentence: "My favorite subject is English because I want to travel one day."
+      },
+      {
+        type: "shadowing",
+        sentence: "Can you tell me where the nearest bus stop is, please?"
+      }
+    ]
   }
 ];
 
@@ -366,16 +402,18 @@ let userAnswers = {};
 /* Lee en voz alta usando la Web Speech API del navegador (gratis, sin
    archivos de audio). Funciona en Chrome/Edge; en algunos navegadores
    requiere que el usuario haya interactuado con la página primero. */
-function speak(text){
+function speak(text, rate = 0.95, times = 1){
   if (!('speechSynthesis' in window)) {
     alert('Este navegador no soporta audio integrado. Prueba en Chrome.');
     return;
   }
   window.speechSynthesis.cancel(); // corta audio anterior si sigue sonando
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'en-US';
-  utter.rate = 0.95;
-  window.speechSynthesis.speak(utter);
+  for (let n = 0; n < times; n++) {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = rate;
+    window.speechSynthesis.speak(utter); // se encolan solas, una tras otra
+  }
 }
 
 let completedUnits = {}; // { unitId: { score, total, attempts } }
@@ -451,7 +489,7 @@ function renderQuiz(){
 
     const meta = document.createElement('div');
     meta.className = 'q-meta';
-    const typeLabels = { mc: 'Multiple choice', fill: 'Fill in the blank', match: 'Matching', speaking: 'Speaking' };
+    const typeLabels = { mc: 'Multiple choice', fill: 'Fill in the blank', match: 'Matching', speaking: 'Speaking', shadowing: 'Shadowing (practice)' };
     meta.textContent = `Question ${i+1} — ${typeLabels[q.type] || ''}`;
     card.appendChild(meta);
 
@@ -514,6 +552,92 @@ function renderQuiz(){
         row.appendChild(select);
         card.appendChild(row);
       });
+
+    } else if (q.type === 'shadowing') {
+      const sentenceEl = document.createElement('div');
+      sentenceEl.className = 'shadow-sentence';
+      sentenceEl.textContent = q.sentence;
+      card.appendChild(sentenceEl);
+
+      const controls = document.createElement('div');
+      controls.className = 'shadow-controls';
+      controls.innerHTML = `
+        <button class="shadow-btn" type="button" data-action="normal">🔊 Normal speed</button>
+        <button class="shadow-btn" type="button" data-action="slow">🐢 Slow speed</button>
+        <button class="shadow-btn" type="button" data-action="loop">🔁 Play 3 times</button>
+      `;
+      controls.querySelector('[data-action="normal"]').onclick = () => speak(q.sentence, 0.95, 1);
+      controls.querySelector('[data-action="slow"]').onclick = () => speak(q.sentence, 0.65, 1);
+      controls.querySelector('[data-action="loop"]').onclick = () => speak(q.sentence, 0.95, 3);
+      card.appendChild(controls);
+
+      const hint = document.createElement('div');
+      hint.className = 'audio-hint';
+      hint.textContent = 'Habla EN VOZ ALTA al mismo tiempo que escuchas — no esperes a que termine.';
+      card.appendChild(hint);
+
+      const divider = document.createElement('div');
+      divider.className = 'shadow-divider';
+      card.appendChild(divider);
+
+      const recordLabel = document.createElement('div');
+      recordLabel.className = 'q-meta';
+      recordLabel.textContent = 'Opcional: graba tu intento y compáralo';
+      card.appendChild(recordLabel);
+
+      const MR = window.MediaRecorder;
+      if (!navigator.mediaDevices || !MR) {
+        const warn = document.createElement('div');
+        warn.className = 'no-support';
+        warn.textContent = 'Tu navegador no soporta grabar audio aquí.';
+        card.appendChild(warn);
+      } else {
+        const recBtn = document.createElement('button');
+        recBtn.className = 'record-btn';
+        recBtn.type = 'button';
+        recBtn.innerHTML = '🎙️ Record my attempt';
+        const status = document.createElement('div');
+        status.className = 'record-status';
+        const audioPlayback = document.createElement('audio');
+        audioPlayback.className = 'shadow-record-audio';
+        audioPlayback.controls = true;
+        audioPlayback.style.display = 'none';
+
+        let mediaRecorder = null;
+        let chunks = [];
+
+        recBtn.onclick = async () => {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            return;
+          }
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            chunks = [];
+            mediaRecorder = new MR(stream);
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+              const blob = new Blob(chunks, { type: 'audio/webm' });
+              audioPlayback.src = URL.createObjectURL(blob);
+              audioPlayback.style.display = 'block';
+              status.textContent = '✓ Listo — dale play para escucharte y comparar con el modelo.';
+              recBtn.classList.remove('recording');
+              recBtn.innerHTML = '🎙️ Record my attempt';
+              stream.getTracks().forEach(t => t.stop());
+            };
+            mediaRecorder.start();
+            recBtn.classList.add('recording');
+            recBtn.innerHTML = '⏹ Stop';
+            status.textContent = '🎙️ Recording... habla ahora';
+          } catch (err) {
+            status.textContent = '⚠ No se pudo acceder al micrófono. Revisa permisos.';
+          }
+        };
+
+        card.appendChild(recBtn);
+        card.appendChild(status);
+        card.appendChild(audioPlayback);
+      }
 
     } else if (q.type === 'speaking') {
       if (q.showWord && q.targetText) {
@@ -646,7 +770,7 @@ function checkAnswers(){
   };
 
   currentUnit.questions.forEach((q, i) => {
-    if (q.type === 'note') return;
+    if (q.type === 'note' || q.type === 'shadowing') return;
     const fb = document.getElementById(`fb-${i}`);
 
     if (q.type === 'mc') {
@@ -736,7 +860,7 @@ function checkAnswers(){
     }
   });
 
-  const scorableTotal = currentUnit.questions.filter(q => q.type !== 'note').length;
+  const scorableTotal = currentUnit.questions.filter(q => q.type !== 'note' && q.type !== 'shadowing').length;
   showScore(correctCount, scorableTotal);
   saveResults(correctCount, scorableTotal, questionResults);
 }
