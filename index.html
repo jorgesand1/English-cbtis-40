@@ -413,6 +413,126 @@ const UNITS = [
       { type: "fill", text: "My parents ______ (work) in the morning.", answer: "work" },
       { type: "fill", text: "I ______ (finish) classes at two o'clock.", answer: "finish" }
     ]
+  },
+  {
+    id: "unit1-ingles5",
+    semester: 5,
+    title: "Unit 1 — Healthy & Unhealthy Habits",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Part 1 · Vocabulary.</b> Match each word with its correct meaning."
+      },
+      {
+        type: "match",
+        text: "Match each word with its meaning:",
+        pairs: [
+          { term: "Junk food", options: ["Highly processed food with little nutritional value, like chips or soda", "Drinking enough water to keep your body healthy", "Putting off important tasks until the last minute"], answer: "Highly processed food with little nutritional value, like chips or soda" },
+          { term: "Addiction", options: ["Eating a mix of foods that gives your body what it needs", "A strong urge to keep doing something harmful, even when you want to stop", "Habits that keep your body clean"], answer: "A strong urge to keep doing something harmful, even when you want to stop" },
+          { term: "Sedentary lifestyle", options: ["Spending most of the day sitting with very little physical movement", "Focusing calmly on the present moment", "Highly processed food with little nutritional value"], answer: "Spending most of the day sitting with very little physical movement" },
+          { term: "Procrastination", options: ["Putting off important tasks until the last minute", "A strong urge to keep doing something harmful", "Drinking enough water to keep your body healthy"], answer: "Putting off important tasks until the last minute" },
+          { term: "Balanced diet", options: ["Eating a mix of foods that gives your body what it needs", "Spending most of the day sitting", "Focusing calmly on the present moment"], answer: "Eating a mix of foods that gives your body what it needs" },
+          { term: "Hydration", options: ["Drinking enough water to keep your body healthy", "Putting off important tasks", "Habits that keep your body clean"], answer: "Drinking enough water to keep your body healthy" },
+          { term: "Mindfulness", options: ["Focusing calmly on the present moment", "Eating a mix of foods that gives your body what it needs", "A strong urge to keep doing something harmful"], answer: "Focusing calmly on the present moment" },
+          { term: "Hygiene", options: ["Habits that keep your body clean, like washing your hands", "Drinking enough water to keep your body healthy", "Spending most of the day sitting"], answer: "Habits that keep your body clean, like washing your hands" }
+        ]
+      },
+      {
+        type: "note",
+        text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🍟", audioText: "junk food", targetText: "junk food" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚫", audioText: "addiction", targetText: "addiction" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🛋️", audioText: "sedentary lifestyle", targetText: "sedentary lifestyle" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⏳", audioText: "procrastination", targetText: "procrastination" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🥗", audioText: "balanced diet", targetText: "balanced diet" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "💧", audioText: "hydration", targetText: "hydration" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧘", audioText: "mindfulness", targetText: "mindfulness" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧼", audioText: "hygiene", targetText: "hygiene" },
+      {
+        type: "note",
+        text: "<b>Part 2 · Listening comprehension.</b> Listen to Maria and Leo talking about their habits, then decide if each statement is True or False."
+      },
+      {
+        type: "truefalse",
+        text: "Leo rides his bike every morning before school.",
+        audioText: "Maria: Hey Leo, do you have any healthy habits? Leo: Yeah, I go for a bike ride every morning before school, it helps me feel awake. What about you? Maria: I try to drink more water instead of soda, but honestly, I still eat a lot of junk food at night. Leo: You should replace it with fruit, it really helps. I also make sure I sleep at least seven hours, or I feel terrible the next day. Maria: I wish I could sleep that much, I usually stay up late scrolling on my phone.",
+        answer: "True"
+      },
+      { type: "truefalse", text: "Maria has completely stopped eating junk food.", audioText: "Maria: Hey Leo, do you have any healthy habits? Leo: Yeah, I go for a bike ride every morning before school, it helps me feel awake. What about you? Maria: I try to drink more water instead of soda, but honestly, I still eat a lot of junk food at night. Leo: You should replace it with fruit, it really helps. I also make sure I sleep at least seven hours, or I feel terrible the next day. Maria: I wish I could sleep that much, I usually stay up late scrolling on my phone.", answer: "False" },
+      { type: "truefalse", text: "Leo recommends replacing junk food with fruit.", audioText: "Maria: Hey Leo, do you have any healthy habits? Leo: Yeah, I go for a bike ride every morning before school, it helps me feel awake. What about you? Maria: I try to drink more water instead of soda, but honestly, I still eat a lot of junk food at night. Leo: You should replace it with fruit, it really helps. I also make sure I sleep at least seven hours, or I feel terrible the next day. Maria: I wish I could sleep that much, I usually stay up late scrolling on my phone.", answer: "True" },
+      { type: "truefalse", text: "Maria sleeps at least seven hours every night.", audioText: "Maria: Hey Leo, do you have any healthy habits? Leo: Yeah, I go for a bike ride every morning before school, it helps me feel awake. What about you? Maria: I try to drink more water instead of soda, but honestly, I still eat a lot of junk food at night. Leo: You should replace it with fruit, it really helps. I also make sure I sleep at least seven hours, or I feel terrible the next day. Maria: I wish I could sleep that much, I usually stay up late scrolling on my phone.", answer: "False" },
+      { type: "truefalse", text: "Leo feels terrible if he doesn't get enough sleep.", audioText: "Maria: Hey Leo, do you have any healthy habits? Leo: Yeah, I go for a bike ride every morning before school, it helps me feel awake. What about you? Maria: I try to drink more water instead of soda, but honestly, I still eat a lot of junk food at night. Leo: You should replace it with fruit, it really helps. I also make sure I sleep at least seven hours, or I feel terrible the next day. Maria: I wish I could sleep that much, I usually stay up late scrolling on my phone.", answer: "True" },
+      {
+        type: "note",
+        text: "<b>Part 3 · Reading comprehension.</b><br><br><b>Small Habits, Big Changes</b><br><br>Our daily habits shape our health, whether we notice it or not. Someone who eats vegetables, drinks water, and moves their body every day is likely to feel more energetic. Someone who skips meals, avoids exercise, and stays up too late will often feel tired and unmotivated.<br><br>The good news is that habits can change. One powerful method is repeating positive affirmations — short, present-tense statements that train your brain to believe something is already true. For example, saying 'I choose water over soda because it makes me feel great' can slowly replace an old craving with a new preference.<br><br>Another example: someone who struggles with a sedentary lifestyle might repeat, 'I move my body every day because it gives me energy.' At first, it might feel forced. But with repetition, the brain starts to connect the action with a positive feeling, making the new habit easier to keep.<br><br>Of course, affirmations alone are not magic. Real change requires consistency — repeating the habit and the affirmation together, day after day, even when motivation is low. Small, steady steps usually work better than trying to change everything at once."
+      },
+      {
+        type: "mc",
+        text: "1. What is the main idea of the passage?",
+        options: ["Vegetables are the healthiest food", "Repeating affirmations, combined with consistency, can help build healthier habits", "Sleep is more important than exercise"],
+        answer: "Repeating affirmations, combined with consistency, can help build healthier habits"
+      },
+      {
+        type: "mc",
+        text: "2. Which is an example of an unhealthy habit mentioned in the text?",
+        options: ["Drinking water instead of soda", "Skipping meals and avoiding exercise", "Moving your body every day"],
+        answer: "Skipping meals and avoiding exercise"
+      },
+      {
+        type: "mc",
+        text: "3. According to the text, how do affirmations work?",
+        options: ["They train the brain to connect an action with a positive feeling", "They physically force the body to exercise", "They replace the need for sleep"],
+        answer: "They train the brain to connect an action with a positive feeling"
+      },
+      {
+        type: "mc",
+        text: "4. Which of the following is an example of a positive affirmation from the text?",
+        options: ["I never have time to exercise.", "I move my body every day because it gives me energy.", "Junk food is my only comfort."],
+        answer: "I move my body every day because it gives me energy."
+      },
+      {
+        type: "mc",
+        text: "5. What does the text say is necessary for real change?",
+        options: ["Changing everything at once", "Consistency over time", "Avoiding affirmations"],
+        answer: "Consistency over time"
+      },
+      {
+        type: "note",
+        text: "<b>Part 4 · Speaking.</b> Say your own affirmation out loud about a healthy habit, using the Present Simple tense — like the example: 'I drink water every day.'"
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Say your own affirmation about a healthy habit (Present Simple):",
+        keywords: [],
+        minWords: 4,
+        hint: "use a full sentence in Present Simple, like 'I exercise every morning'",
+        sampleAnswer: "I choose healthy snacks because they make me feel good."
+      },
+      {
+        type: "note",
+        text: "<b>Grammar reminder:</b> Use <b>Simple Present</b> for habits and routines (always, usually, every day) — e.g. 'I eat healthy food every day.' Use <b>Present Continuous</b> (am/is/are + -ing) for what's happening right now — e.g. 'She is having a positive mindset.'"
+      },
+      {
+        type: "note",
+        text: "<b>Part 5 · Review — Unscramble.</b> Put the words in order to form correct sentences using Present Simple."
+      },
+      { type: "unscramble", text: "Put the words in order:", words: ["usually", "I", "eat", "a", "healthy", "breakfast"], answer: "I usually eat a healthy breakfast" },
+      { type: "unscramble", text: "Put the words in order:", words: ["exercises", "always", "regularly", "he"], answer: "He always exercises regularly" },
+      { type: "unscramble", text: "Put the words in order:", words: ["should", "choose", "snacks", "healthy", "you"], answer: "You should choose healthy snacks" },
+      { type: "unscramble", text: "Put the words in order:", words: ["drink", "glass", "every", "I", "a", "water", "of", "morning"], answer: "I drink a glass of water every morning" },
+      { type: "unscramble", text: "Put the words in order:", words: ["gym", "twice", "go", "the", "a", "week", "to", "they"], answer: "They go to the gym twice a week" },
+      {
+        type: "note",
+        text: "<b>Part 6 · Review — Present Continuous.</b> Complete each sentence with the correct form of the verb in parentheses."
+      },
+      { type: "fill", text: "Right now, he ______ (drink) tea instead of soda.", answer: "is drinking" },
+      { type: "fill", text: "She ______ (eat) more vegetables this month.", answer: "is eating" },
+      { type: "fill", text: "Look! They ______ (run) in the park.", answer: "are running" },
+      { type: "fill", text: "My sister and I ______ (try) to sleep earlier these days.", answer: "are trying" },
+      { type: "fill", text: "He ______ (watch) a documentary instead of going out.", answer: "is watching" }
+    ]
   }
 ];
 
