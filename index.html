@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>English Practice — CBTIS 40</title>
 <style>
-  /* ============================================================
-     PALETA Y TIPOGRAFÍA
-     Pizarrón (verde oscuro) + tiza (blanco cálido) + gis rojo
-     (el color con el que un profe marca correcto/incorrecto)
-     ============================================================ */
   @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap');
 
   :root{
@@ -71,7 +66,6 @@
   .q-text{font-size:18px;margin-bottom:18px;line-height:1.5;}
   .q-text b{color:var(--accent-yellow);font-weight:600;}
 
-  /* Opción múltiple */
   .options{display:flex;flex-direction:column;gap:10px;}
   .option{
     display:flex;align-items:center;gap:12px;
@@ -83,7 +77,6 @@
   .option.correct{border-color:var(--accent-green);background:rgba(127,176,105,0.12);}
   .option.incorrect{border-color:var(--accent-red);background:rgba(226,87,76,0.12);}
 
-  /* Fill in the blank */
   .fill-input{
     background:transparent;border:none;border-bottom:2px solid var(--chalk-dim);
     color:var(--chalk);font-size:17px;font-family:'Work Sans',sans-serif;
@@ -93,7 +86,6 @@
   .fill-input.correct{border-color:var(--accent-green);color:var(--accent-green);}
   .fill-input.incorrect{border-color:var(--accent-red);color:var(--accent-red);}
 
-  /* Matching */
   .match-row{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
   .match-term{width:150px;font-weight:600;flex-shrink:0;}
   .match-select{
@@ -103,8 +95,6 @@
   .match-select.correct{border-color:var(--accent-green);}
   .match-select.incorrect{border-color:var(--accent-red);}
 
-
-  /* True / False y ordenar palabras */
   .tf-options{display:flex;gap:10px;flex-wrap:wrap;}
   .tf-options .option{min-width:120px;justify-content:center;}
   .unscramble-bank{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
@@ -157,6 +147,12 @@
   .shadow-btn:hover{background:rgba(224,184,74,0.1);}
   .shadow-divider{border-top:1px dashed var(--line);margin:16px 0;}
   .shadow-record-audio{width:100%;margin-top:10px;}
+  .practice-btn{
+    background:var(--board);border:1px solid var(--accent-green);color:var(--accent-green);
+    padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Work Sans',sans-serif;
+    font-size:14px;font-weight:600;margin-top:4px;
+  }
+  .practice-btn.done{background:var(--accent-green);color:var(--board-dark);cursor:default;}
 
   .audio-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .audio-btn{
@@ -188,6 +184,7 @@
   }
   .score-num{font-family:'Patrick Hand',cursive;font-size:64px;color:var(--accent-yellow);line-height:1;}
   .score-label{color:var(--chalk-dim);font-size:14px;margin-top:6px;}
+  .practice-num{font-family:'Patrick Hand',cursive;font-size:40px;color:var(--accent-green);line-height:1;margin-top:18px;}
 
   footer{margin-top:50px;border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--chalk-dim);}
   footer code{background:var(--board-dark);padding:2px 6px;border-radius:4px;}
@@ -249,23 +246,7 @@
 </script>
 
 <script>
-/* ============================================================
-   1) EL CONTENIDO — esto es lo único que necesitas tocar
-      para adaptarlo a tus clases.
-
-   Cada "unidad" tiene un id, un título, y una lista de preguntas.
-   Cada pregunta tiene un "type": "mc" (opción múltiple),
-   "fill" (completar), "match" (relacionar columnas),
-   "truefalse" (verdadero/falso) o "unscramble" (ordenar palabras).
-
-   Copia el bloque de un tipo de pregunta y cambia los textos
-   para crear las tuyas. No necesitas tocar el resto del código.
-   ============================================================ */
 const UNITS = [
-  /* ==========================================================
-     1.er SEMESTRE — se conservan los IDs originales para que
-     el progreso y los resultados ya guardados sigan funcionando.
-     ========================================================== */
   {
     id: "unit0",
     semester: 1,
@@ -340,12 +321,6 @@ const UNITS = [
       { type: "shadowing", sentence: "Can you tell me where the nearest bus stop is, please?" }
     ]
   },
-
-  /* ==========================================================
-     5.º SEMESTRE — pronunciación y shadowing.
-     La práctica de la J se conserva también para Inglés V.
-     El shadowing usa estructuras y temas presentes en el diagnóstico.
-     ========================================================== */
   {
     id: "pron-j-5",
     semester: 5,
@@ -376,20 +351,12 @@ const UNITS = [
       { type: "shadowing", sentence: "Have you already done your homework, or are you still working on it?" }
     ]
   },
-
-  /* ==========================================================
-     5.º SEMESTRE — diagnóstico paralelo a Spiral 5.
-     Evalúa las mismas habilidades, pero con textos y reactivos nuevos.
-     ========================================================== */
   {
     id: "diag-5",
     semester: 5,
     title: "Diagnostic Evaluation — 5th Semester",
     questions: [
-      {
-        type: "note",
-        text: "<b>Part 1 · Listening comprehension.</b> Listen carefully. You may play the audio more than once, then answer the five questions."
-      },
+      { type: "note", text: "<b>Part 1 · Listening comprehension.</b> Listen carefully. You may play the audio more than once, then answer the five questions." },
       {
         type: "mc",
         text: "What time does Daniel usually wake up on weekdays?",
@@ -424,31 +391,22 @@ const UNITS = [
         options: ["Because it is always quiet", "Because his school is very small", "Because there are many things to do and he can see the sea", "Because his cousins live in his house"],
         answer: "Because there are many things to do and he can see the sea"
       },
-
       {
         type: "note",
-        text: "<b>Part 2 · Reading comprehension.</b><br><br><b>A changed weekend, great memories</b><br><br>Valeria had planned to attend a music festival in Hermosillo last month, but the event was canceled because of heavy rain. Instead, she stayed in Guaymas and spent the weekend with her family.<br><br>On Friday night, Valeria wanted to send some photos to her friend Nora, but Nora had already gone to bed. On Saturday morning, the two friends visited a science exhibition downtown. They spent several hours trying interactive experiments and learning about space.<br><br>When Valeria returned home, she found her younger brother Diego preparing dinner. “Have you already done your school project?” she asked. Diego showed her the completed slides on his laptop. On Sunday, the weather improved, so the family went to the beach and played volleyball together."
+        text: "<b>Part 2 · Reading comprehension.</b><br><br><b>A changed weekend, great memories</b><br><br>Valeria had planned to attend a music festival in Hermosillo last month, but the event was canceled because of heavy rain. Instead, she stayed in Guaymas and spent the weekend with her family.<br><br>On Friday night, Valeria wanted to send some photos to her friend Nora, but Nora had already gone to bed. On Saturday morning, the two friends visited a science exhibition downtown. They spent several hours trying interactive experiments and learning about space.<br><br>When Valeria returned home, she found her younger brother Diego preparing dinner. \u201cHave you already done your school project?\u201d she asked. Diego showed her the completed slides on his laptop. On Sunday, the weather improved, so the family went to the beach and played volleyball together."
       },
       { type: "truefalse", text: "Valeria attended the music festival in Hermosillo last month.", answer: "False" },
       { type: "truefalse", text: "Nora had already gone to bed when Valeria wanted to send her photos.", answer: "True" },
       { type: "truefalse", text: "Valeria and Nora visited the science exhibition on Sunday.", answer: "False" },
       { type: "truefalse", text: "Diego had completed his school project when Valeria asked him about it.", answer: "True" },
       { type: "truefalse", text: "Valeria's family played volleyball at the beach.", answer: "True" },
-
-      {
-        type: "note",
-        text: "<b>Part 3 · Sentence structure.</b> Tap the words in the correct order to build each sentence. Tap a word in your answer to send it back."
-      },
+      { type: "note", text: "<b>Part 3 · Sentence structure.</b> Tap the words in the correct order to build each sentence. Tap a word in your answer to send it back." },
       { type: "unscramble", text: "Put the words in order:", words: ["usually", "I", "check", "my", "messages", "after", "breakfast"], answer: "I usually check my messages after breakfast" },
       { type: "unscramble", text: "Put the words in order:", words: ["are", "waiting", "They", "for", "the", "bus", "now"], answer: "They are waiting for the bus now" },
       { type: "unscramble", text: "Put the words in order:", words: ["never", "My", "friends", "arrive", "late", "to", "class"], answer: "My friends never arrive late to class" },
       { type: "unscramble", text: "Put the words in order:", words: ["practices", "Elena", "volleyball", "every", "Tuesday"], answer: "Elena practices volleyball every Tuesday" },
       { type: "unscramble", text: "Put the words in order:", words: ["am", "studying", "I", "for", "my", "English", "exam", "now"], answer: "I am studying for my English exam now" },
-
-      {
-        type: "note",
-        text: "<b>Part 4 · Present Simple.</b> Complete each sentence with the correct form of the verb in parentheses."
-      },
+      { type: "note", text: "<b>Part 4 · Present Simple.</b> Complete each sentence with the correct form of the verb in parentheses." },
       { type: "fill", text: "My brother ______ (study) at night.", answer: "studies" },
       { type: "fill", text: "We ______ (take) the bus to school every morning.", answer: "take" },
       { type: "fill", text: "Carlos ______ (watch) videos after he finishes his homework.", answer: "watches" },
@@ -458,31 +416,25 @@ const UNITS = [
   }
 ];
 
-/* ============================================================
-   2) EL MOTOR — esta parte ya funciona, no necesitas editarla
-      a menos que quieras agregar un nuevo TIPO de ejercicio.
-   ============================================================ */
 let currentUnit = null;
 let userAnswers = {};
+let practicedAnswers = {};
 
-/* Lee en voz alta usando la Web Speech API del navegador (gratis, sin
-   archivos de audio). Funciona en Chrome/Edge; en algunos navegadores
-   requiere que el usuario haya interactuado con la página primero. */
 function speak(text, rate = 0.95, times = 1){
   if (!('speechSynthesis' in window)) {
     alert('Este navegador no soporta audio integrado. Prueba en Chrome.');
     return;
   }
-  window.speechSynthesis.cancel(); // corta audio anterior si sigue sonando
+  window.speechSynthesis.cancel();
   for (let n = 0; n < times; n++) {
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'en-US';
     utter.rate = rate;
-    window.speechSynthesis.speak(utter); // se encolan solas, una tras otra
+    window.speechSynthesis.speak(utter);
   }
 }
 
-let completedUnits = {}; // { unitId: { score, total, attempts } }
+let completedUnits = {};
 
 function visibleUnits(){
   return UNITS.filter(u => Number(u.semester || 1) === Number(selectedSemester));
@@ -503,13 +455,11 @@ function renderUnitPicker(){
     } else {
       btn.textContent = u.title;
     }
-    btn.onclick = () => { currentUnit = u; userAnswers = {}; renderQuiz(); renderUnitPicker(); };
+    btn.onclick = () => { currentUnit = u; userAnswers = {}; practicedAnswers = {}; renderQuiz(); renderUnitPicker(); };
     el.appendChild(btn);
   });
 }
 
-/* Revisa qué unidades ya contestó este alumno (con este profesor),
-   para mostrarle un ✓ y su mejor calificación en el selector. */
 async function loadStudentProgress(){
   try {
     const snap = await db.collection('results')
@@ -520,11 +470,10 @@ async function loadStudentProgress(){
     const byUnit = {};
     snap.docs.forEach(d => {
       const r = d.data();
-      const resultSemester = Number(r.semester || 1); // resultados antiguos = 1.er semestre
+      const resultSemester = Number(r.semester || 1);
       if (resultSemester !== Number(selectedSemester)) return;
       if (!byUnit[r.unitId]) byUnit[r.unitId] = { score: 0, total: 0, attempts: 0 };
       byUnit[r.unitId].attempts++;
-      // Nos quedamos con la MEJOR calificación (en % ) que haya logrado
       const prevPct = byUnit[r.unitId].total ? byUnit[r.unitId].score / byUnit[r.unitId].total : -1;
       const newPct = r.total ? r.score / r.total : -1;
       if (newPct > prevPct) {
@@ -564,7 +513,7 @@ function renderQuiz(){
       text.innerHTML = q.text;
       card.appendChild(text);
       area.appendChild(card);
-      return; // no se califica, no tiene respuesta
+      return;
     }
 
     displayQuestionNumber++;
@@ -762,10 +711,6 @@ function renderQuiz(){
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             chunks = [];
-
-            // Prueba varios formatos hasta que uno funcione en este navegador
-            // (Safari/iPhone solo soporta algunos, y a veces isTypeSupported
-            // no está disponible, así que además probamos con try/catch).
             const preferredTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg', ''];
             mediaRecorder = null;
             for (const t of preferredTypes) {
@@ -813,6 +758,18 @@ function renderQuiz(){
         card.appendChild(audioPlayback);
       }
 
+      const practiceBtn = document.createElement('button');
+      practiceBtn.type = 'button';
+      practiceBtn.className = 'practice-btn';
+      practiceBtn.textContent = practicedAnswers[i] ? '✓ Practiced' : '✓ I practiced this sentence';
+      if (practicedAnswers[i]) practiceBtn.classList.add('done');
+      practiceBtn.onclick = () => {
+        practicedAnswers[i] = true;
+        practiceBtn.textContent = '✓ Practiced';
+        practiceBtn.classList.add('done');
+      };
+      card.appendChild(practiceBtn);
+
     } else if (q.type === 'speaking') {
       if (q.showWord && q.targetText) {
         const wordEl = document.createElement('div');
@@ -838,6 +795,8 @@ function renderQuiz(){
         transcriptBox.textContent = 'Your answer will appear here...';
 
         recBtn.onclick = () => {
+          practicedAnswers[i] = true;
+
           let recognition;
           try {
             recognition = new SR();
@@ -903,15 +862,6 @@ function renderQuiz(){
   area.appendChild(actions);
 }
 
-/* Compara lo que dijo el alumno contra la frase objetivo.
-   No exige coincidencia exacta (eso sería injusto con acentos
-   o pequeñas variaciones): calcula qué % de palabras clave
-   de la frase objetivo aparecieron en lo que dijo. */
-/* Para preguntas ABIERTAS (mode:"open"): no hay una sola respuesta
-   correcta, así que en vez de comparar contra una frase fija,
-   revisamos: 1) que haya hablado una oración completa (mínimo de
-   palabras) y 2) que haya usado la estructura gramatical que se
-   está practicando (ej. "usually" para hábitos). */
 function evaluateOpenSpeaking(said, q){
   const normalize = s => (s||'').toLowerCase().replace(/[^a-z0-9\s']/g,'').split(/\s+/).filter(Boolean);
   const words = normalize(said);
@@ -1064,26 +1014,40 @@ function checkAnswers(){
   });
 
   const scorableTotal = currentUnit.questions.filter(q => q.type !== 'note' && q.type !== 'shadowing').length;
-  showScore(correctCount, scorableTotal);
-  saveResults(correctCount, scorableTotal, questionResults);
+
+  const practiceQuestions = currentUnit.questions
+    .map((q, i) => ({ q, i }))
+    .filter(({ q }) => q.type === 'shadowing' || q.type === 'speaking');
+  const practiceTotal = practiceQuestions.length;
+  const practiceCompleted = practiceQuestions.filter(({ i }) => practicedAnswers[i]).length;
+
+  showScore(correctCount, scorableTotal, practiceCompleted, practiceTotal);
+  saveResults(correctCount, scorableTotal, questionResults, practiceCompleted, practiceTotal);
 }
 
-function showScore(correct, total){
+function showScore(correct, total, practiceCompleted, practiceTotal){
   const area = document.getElementById('quizArea');
   const panel = document.createElement('div');
   panel.className = 'score-panel';
   panel.id = 'scorePanel';
-  panel.innerHTML = `<div class="score-num">${correct}/${total}</div>
-                      <div class="score-label">correct answers — scroll up to review</div>
-                      <div class="record-status" id="saveStatus">Saving your result...</div>`;
+
+  let html = '';
+  if (total > 0) {
+    html += `<div class="score-num">${correct}/${total}</div>
+             <div class="score-label">correct answers — scroll up to review</div>`;
+  }
+  if (practiceTotal > 0) {
+    html += `<div class="practice-num">${practiceCompleted}/${practiceTotal}</div>
+             <div class="score-label">practice activities completed</div>`;
+  }
+  html += `<div class="record-status" id="saveStatus">Saving your result...</div>`;
+
+  panel.innerHTML = html;
   area.appendChild(panel);
   panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-/* Guarda el intento en Firestore: cuenta cuántas veces este alumno
-   ya había contestado esta unidad (para el número de intento),
-   y guarda el detalle de cada pregunta para el panel de maestro. */
-async function saveResults(score, total, questionResults){
+async function saveResults(score, total, questionResults, practiceCompleted, practiceTotal){
   const statusEl = document.getElementById('saveStatus');
   try {
     const existing = await db.collection('results')
@@ -1103,6 +1067,8 @@ async function saveResults(score, total, questionResults){
       unitTitle: currentUnit.title,
       score,
       total,
+      practiceCompleted,
+      practiceTotal,
       attemptNumber,
       questionResults,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -1122,10 +1088,6 @@ let studentGroup = '';
 let selectedTeacherId = '';
 let selectedSemester = '';
 
-/* Lista de profesores que comparten este mismo sitio. Para agregar
-   uno nuevo, copia una línea y cambia el id y el nombre — el id debe
-   ser único y sin espacios (se usa internamente para separar los
-   resultados de cada quien). */
 const TEACHERS = [
   { id: "jorge", name: "Profr. Jorge Sandoval" },
   { id: "esposa", name: "Profra. Merary García" }
@@ -1138,14 +1100,10 @@ function populateTeacherSelect(){
 }
 populateTeacherSelect();
 
-/* Normaliza el nombre para poder comparar "Prueba jorge" con
-   "Prueba Jorge" como el mismo alumno: minúsculas, sin acentos,
-   sin espacios extra. El nombre que se MUESTRA sigue siendo el
-   que el alumno escribió tal cual. */
 function normalizeName(name){
   return name
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita acentos
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -1188,6 +1146,7 @@ function startSession(){
   currentUnit = visibleUnits()[0] || null;
   completedUnits = {};
   userAnswers = {};
+  practicedAnswers = {};
   document.getElementById('nameGate').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
   renderUnitPicker();

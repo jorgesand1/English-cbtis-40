@@ -37,6 +37,8 @@
   tr:last-child td{border-bottom:none;}
   .pct-good{color:var(--accent-green);font-weight:600;}
   .pct-bad{color:var(--accent-red);font-weight:600;}
+  .practice-good{color:var(--accent-green);}
+  .practice-bad{color:var(--chalk-dim);}
 
   .error-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
   .error-q{flex:1;font-size:14px;}
@@ -103,9 +105,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
-  /* Debe ser EXACTAMENTE la misma configuración que usa tu archivo
-     de repasos (repasos-ingles-cbtis40.html), porque ambos leen y
-     escriben en la misma base de datos. */
   const firebaseConfig = {
     apiKey: "AIzaSyC_JqZlzxvhvcduK695YPqIHM5PukeLI64",
     authDomain: "cbtis-40-english-class.firebaseapp.com",
@@ -117,12 +116,6 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  /* Cuentas de acceso al panel — SOLO como filtro de entrada casual,
-     no es seguridad real (cualquiera que vea el código puede leerla).
-     Para agregar un profesor nuevo: copia una línea, ponle su propia
-     contraseña, su nombre, y el mismo "teacherId" que usaste en TEACHERS
-     dentro de repasos-ingles-cbtis40.html. scope:"own" = solo ve sus
-     propios alumnos. scope:"all" = ve los de todos (clave maestra). */
   const TEACHER_ACCOUNTS = {
     "cbtis40profe":     { name: "Profr. Jorge Sandoval", teacherId: "jorge",  scope: "own" },
     "cbtis40profe-esposa": { name: "Profra. Merary García", teacherId: "esposa", scope: "own" },
@@ -151,8 +144,6 @@
 
   let allResults = [];
 
-  // Compatibilidad: los resultados guardados antes de esta actualización
-  // no tenían campo semester y pertenecen al contenido original de 1.º.
   function resultSemester(r){
     return Number(r.semester || 1);
   }
@@ -268,8 +259,6 @@
     titleEl.style.display = 'block';
     el.style.display = 'block';
 
-    // Progreso en orden cronológico (más viejo primero), sin importar
-    // el filtro de unidad, para ver la evolución completa del alumno.
     const semester = document.getElementById('semesterFilter').value;
     const results = allResults
       .filter(r => r.studentNameKey === studentKey && (!semester || resultSemester(r) === Number(semester)))
@@ -285,9 +274,10 @@
       const pct = r.total ? Math.round((r.score / r.total) * 100) : 0;
       const date = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().toLocaleString('es-MX') : '—';
       const color = pct >= 70 ? 'var(--accent-green)' : 'var(--accent-red)';
+      const practiceNote = r.practiceTotal ? ` · práctica ${r.practiceCompleted || 0}/${r.practiceTotal}` : '';
       return `<div class="progress-row">
         <div class="progress-date">${date}</div>
-        <div class="progress-unit">${r.unitTitle || r.unitId} · intento #${r.attemptNumber || 1}</div>
+        <div class="progress-unit">${r.unitTitle || r.unitId} · intento #${r.attemptNumber || 1}${practiceNote}</div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%; background:${color}"></div></div>
         <div class="progress-pct" style="color:${color}">${pct}%</div>
       </div>`;
@@ -299,7 +289,6 @@
     const el = document.getElementById('errorAnalysis');
     if (!results.length) { el.innerHTML = '<div class="empty">Todavía no hay resultados.</div>'; return; }
 
-    // Cuenta cuántas veces se falló cada pregunta (por texto de pregunta)
     const counts = {};
     results.forEach(r => {
       (r.questionResults || []).forEach(q => {
@@ -330,19 +319,25 @@
     const rows = results.map(r => {
       const pct = r.total ? Math.round((r.score / r.total) * 100) : 0;
       const date = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().toLocaleString('es-MX') : '—';
+      const hasPractice = r.practiceTotal !== undefined && r.practiceTotal !== null && r.practiceTotal > 0;
+      const practiceCell = hasPractice
+        ? `<span class="${(r.practiceCompleted || 0) === r.practiceTotal ? 'practice-good' : 'practice-bad'}">${r.practiceCompleted || 0}/${r.practiceTotal}</span>`
+        : '—';
+      const scoreCell = r.total ? `<span class="${pct >= 70 ? 'pct-good' : 'pct-bad'}">${r.score}/${r.total} (${pct}%)</span>` : '—';
       return `<tr>
         <td>${r.studentName || '—'}</td>
         <td>${r.studentGroup || '—'}</td>
         <td>${resultSemester(r)}.º</td>
         <td>${r.unitTitle || r.unitId || '—'}</td>
-        <td class="${pct >= 70 ? 'pct-good' : 'pct-bad'}">${r.score}/${r.total} (${pct}%)</td>
+        <td>${scoreCell}</td>
+        <td>${practiceCell}</td>
         <td>${r.attemptNumber || 1}</td>
         <td>${date}</td>
       </tr>`;
     }).join('');
 
     el.innerHTML = `<table>
-      <thead><tr><th>Alumno</th><th>Grupo</th><th>Semestre</th><th>Unidad</th><th>Calificación</th><th>Intento #</th><th>Fecha</th></tr></thead>
+      <thead><tr><th>Alumno</th><th>Grupo</th><th>Semestre</th><th>Unidad</th><th>Calificación</th><th>Práctica</th><th>Intento #</th><th>Fecha</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }
