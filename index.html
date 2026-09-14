@@ -682,6 +682,21 @@ function renderQuiz(){
       recordLabel.textContent = 'Opcional: graba tu intento y compáralo';
       card.appendChild(recordLabel);
 
+      // Botón de práctica: se declara aquí (antes del bloque de grabación)
+      // para poder marcarlo automáticamente si la grabación sale bien,
+      // y como respaldo manual si grabar no funciona en su navegador.
+      const practiceBtn = document.createElement('button');
+      practiceBtn.type = 'button';
+      practiceBtn.className = 'practice-btn';
+      const markPracticed = () => {
+        practicedAnswers[i] = true;
+        practiceBtn.textContent = '✓ Practiced';
+        practiceBtn.classList.add('done');
+      };
+      practiceBtn.textContent = practicedAnswers[i] ? '✓ Practiced' : '✓ I practiced this sentence';
+      if (practicedAnswers[i]) practiceBtn.classList.add('done');
+      practiceBtn.onclick = markPracticed;
+
       const MR = window.MediaRecorder;
       if (!navigator.mediaDevices || !MR) {
         const warn = document.createElement('div');
@@ -743,6 +758,9 @@ function renderQuiz(){
                 status.textContent = '⚠ Se grabó, pero este navegador no puede reproducirlo. Prueba en Chrome.';
               };
               status.textContent = '✓ Listo — dale play para escucharte y comparar con el modelo.';
+              // Si sí logró grabar audio real, ya sabemos que practicó —
+              // no lo obligamos a dar clic aparte en el botón verde.
+              markPracticed();
             };
             mediaRecorder.start();
             recBtn.classList.add('recording');
@@ -758,16 +776,6 @@ function renderQuiz(){
         card.appendChild(audioPlayback);
       }
 
-      const practiceBtn = document.createElement('button');
-      practiceBtn.type = 'button';
-      practiceBtn.className = 'practice-btn';
-      practiceBtn.textContent = practicedAnswers[i] ? '✓ Practiced' : '✓ I practiced this sentence';
-      if (practicedAnswers[i]) practiceBtn.classList.add('done');
-      practiceBtn.onclick = () => {
-        practicedAnswers[i] = true;
-        practiceBtn.textContent = '✓ Practiced';
-        practiceBtn.classList.add('done');
-      };
       card.appendChild(practiceBtn);
 
     } else if (q.type === 'speaking') {
