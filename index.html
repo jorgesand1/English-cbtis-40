@@ -196,6 +196,8 @@
     <div class="eyebrow">CBTIS 40 · Inglés</div>
     <h1>Practice &amp; Check ✓</h1>
     <p>Repasos autorevisables — elige la unidad y responde. Se corrige solo, al instante.</p>
+    <button type="button" class="ghost" style="margin-top:12px;font-size:12px;" onclick="runAudioDiagnostic()">🔧 Probar audio (diagnóstico)</button>
+    <div id="audioDiagnosticBox" style="display:none;margin-top:10px;background:var(--board-dark);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px;color:var(--chalk-dim);white-space:pre-wrap;"></div>
   </header>
 
   <div id="nameGate" class="card" style="max-width:420px;margin:0 auto 20px;">
@@ -539,6 +541,60 @@ const UNITS = [
 let currentUnit = null;
 let userAnswers = {};
 let practicedAnswers = {};
+
+/* Diagnóstico de audio: muestra en pantalla (sin necesitar consola de
+   desarrollador) si el navegador tiene voces disponibles, y si el
+   intento de reproducir realmente comienza/termina/falla. Útil para
+   diagnosticar en el celular de un alumno sin herramientas técnicas. */
+function runAudioDiagnostic(){
+  const box = document.getElementById('audioDiagnosticBox');
+  box.style.display = 'block';
+  const lines = [];
+
+  lines.push(`window.speechSynthesis existe: ${'speechSynthesis' in window ? 'SÍ' : 'NO'}`);
+
+  if (!('speechSynthesis' in window)) {
+    lines.push('→ Este navegador no soporta audio integrado en absoluto.');
+    box.textContent = lines.join('\n');
+    return;
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  lines.push(`Voces disponibles ahora mismo: ${voices.length}`);
+  const enVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  lines.push(`Voces en inglés encontradas: ${enVoices.length}`);
+  if (enVoices.length) {
+    lines.push('  → ' + enVoices.map(v => `${v.name} (${v.lang})`).slice(0, 5).join(', '));
+  }
+
+  box.textContent = lines.join('\n') + '\n\nIntentando reproducir un audio de prueba...';
+
+  const utter = new SpeechSynthesisUtterance('This is a test.');
+  utter.lang = 'en-US';
+  let started = false;
+  utter.onstart = () => {
+    started = true;
+    box.textContent = lines.join('\n') + '\n\n✓ El navegador SÍ empezó a reproducir el audio de prueba.\nSi no escuchaste nada, el problema es volumen/silencio del teléfono, no la app.';
+  };
+  utter.onerror = (e) => {
+    box.textContent = lines.join('\n') + `\n\n⚠ ERROR al reproducir: "${e.error}"`;
+  };
+  utter.onend = () => {
+    if (started) {
+      box.textContent += '\n\n(Terminó de reproducir sin errores.)';
+    }
+  };
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+
+  // Si después de 2.5 segundos nunca empezó, probablemente el navegador
+  // se quedó "atorado" sin voces cargadas — aviso también de eso.
+  setTimeout(() => {
+    if (!started) {
+      box.textContent = lines.join('\n') + '\n\n⚠ El navegador NUNCA empezó a reproducir el audio (ni error, ni sonido).\nEsto apunta a que no tiene un motor de voz en inglés instalado o funcionando.';
+    }
+  }, 2500);
+}
 
 function speak(text, rate = 0.95, times = 1){
   if (!('speechSynthesis' in window)) {
