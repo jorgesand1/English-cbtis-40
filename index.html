@@ -300,6 +300,7 @@ const UNITS = [
   {
     id: "pron-j-5",
     semester: 5,
+    teachers: ["jorge"],
     title: "🔊 Pronunciation Focus — The J Sound",
     questions: [
       { type: "note", text: "En español, la J suena como una exhalación fuerte desde la garganta (jamón, jugo). En inglés, la J <b>siempre</b> suena distinto: es un sonido que empieza como 'd' y termina como 'sh' suave — algo como \"dyu\". Escucha cada palabra, dale play las veces que quieras, y luego grábate repitiéndola." },
@@ -587,7 +588,10 @@ function speak(text, rate = 0.95, times = 1){
 let completedUnits = {};
 
 function visibleUnits(){
-  return UNITS.filter(u => Number(u.semester || 1) === Number(selectedSemester));
+  return UNITS.filter(u =>
+    Number(u.semester || 1) === Number(selectedSemester) &&
+    (!u.teachers || u.teachers.includes(selectedTeacherId))
+  );
 }
 
 function renderUnitPicker(){
