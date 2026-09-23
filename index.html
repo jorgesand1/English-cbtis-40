@@ -380,22 +380,22 @@ const UNITS = [
         type: "note",
         text: "<b>Part 5 · Numbers.</b> Complete each sentence with the number written out in words."
       },
-      { type: "fill", text: "I have ______ (450) stickers.", answer: "four hundred fifty" },
+      { type: "fill", text: "I have ______ (450) stickers.", answer: "four hundred fifty", acceptableAny: ["four hundred and fifty"] },
       { type: "fill", text: "There are ______ (1,200) books in the library.", answer: "one thousand two hundred" },
       { type: "fill", text: "The stadium holds ______ (8,500) people.", answer: "eight thousand five hundred" },
       { type: "fill", text: "She saved ______ (10,000) pesos.", answer: "ten thousand" },
-      { type: "fill", text: "My school has ______ (630) students.", answer: "six hundred thirty" },
+      { type: "fill", text: "My school has ______ (630) students.", answer: "six hundred thirty", acceptableAny: ["six hundred and thirty"] },
 
       {
         type: "note",
         text: "<b>Part 5b · Reading 4-digit numbers.</b> In English, a 4-digit number (like a year) can be read TWO ways: as a YEAR (in pairs, e.g. 1985 → \"nineteen eighty-five\") or as a REGULAR number (e.g. 1985 → \"one thousand nine hundred eighty-five\"). Write both forms."
       },
       { type: "fill", text: "Write 1985 the way we say a YEAR:", answer: "nineteen eighty-five", acceptableAny: ["nineteen eighty five"] },
-      { type: "fill", text: "Write 1985 as a REGULAR number:", answer: "one thousand nine hundred eighty-five", acceptableAny: ["one thousand nine hundred eighty five"] },
+      { type: "fill", text: "Write 1985 as a REGULAR number:", answer: "one thousand nine hundred eighty-five", acceptableAny: ["one thousand nine hundred eighty five", "one thousand nine hundred and eighty-five", "one thousand nine hundred and eighty five"] },
       { type: "fill", text: "Write 2024 the way we say a YEAR:", answer: "twenty twenty-four", acceptableAny: ["twenty twenty four", "two thousand twenty-four", "two thousand twenty four"] },
-      { type: "fill", text: "Write 2024 as a REGULAR number:", answer: "two thousand twenty-four", acceptableAny: ["two thousand twenty four"] },
+      { type: "fill", text: "Write 2024 as a REGULAR number:", answer: "two thousand twenty-four", acceptableAny: ["two thousand twenty four", "two thousand and twenty-four", "two thousand and twenty four"] },
       { type: "fill", text: "Write 1776 the way we say a YEAR:", answer: "seventeen seventy-six", acceptableAny: ["seventeen seventy six"] },
-      { type: "fill", text: "Write 1776 as a REGULAR number:", answer: "one thousand seven hundred seventy-six", acceptableAny: ["one thousand seven hundred seventy six"] },
+      { type: "fill", text: "Write 1776 as a REGULAR number:", answer: "one thousand seven hundred seventy-six", acceptableAny: ["one thousand seven hundred seventy six", "one thousand seven hundred and seventy-six", "one thousand seven hundred and seventy six"] },
 
       {
         type: "note",
@@ -1248,8 +1248,16 @@ function checkAnswers(){
 
     } else if (q.type === 'fill') {
       const input = document.querySelector(`.fill-input[data-q-index="${i}"]`);
-      const chosen = (userAnswers[i] || '').toLowerCase();
-      const isCorrect = chosen === q.answer.toLowerCase();
+      // Normaliza de forma flexible: minúsculas, sin puntuación final,
+      // y SIN espacios ni guiones — así "555-9876", "5559876" y
+      // "555 9876" cuentan como lo mismo, igual que "eighty-five" y
+      // "eighty five".
+      const normalize = s => (s || '').toLowerCase().trim().replace(/[.!?]+$/, '').replace(/[\s-]+/g, '');
+      const chosen = normalize(userAnswers[i]);
+      let isCorrect = chosen === normalize(q.answer);
+      if (!isCorrect && q.acceptableAny) {
+        isCorrect = q.acceptableAny.some(opt => chosen === normalize(opt));
+      }
       input.classList.remove('correct','incorrect');
       input.classList.add(isCorrect ? 'correct' : 'incorrect');
       fb.textContent = isCorrect ? '✓ Correct!' : `✗ Correct answer: "${q.answer}"`;
