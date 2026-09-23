@@ -315,26 +315,26 @@ const UNITS = [
 
       {
         type: "note",
-        text: "<b>Part 2 · Personal Pronouns.</b> Rewrite each sentence, replacing the underlined noun with the correct pronoun (I, you, he, she, it, we, they)."
+        text: "<b>Part 2 · Personal Pronouns.</b> Rewrite each sentence, replacing the underlined name or noun with the correct pronoun (I, you, he, she, it, we, they)."
       },
-      { type: "fill", text: "Laura is my sister. → ___ is my sister.", answer: "She" },
-      { type: "fill", text: "Diego and I are neighbors. → ___ are neighbors.", answer: "We" },
-      { type: "fill", text: "The cat is small. → ___ is small.", answer: "It" },
-      { type: "fill", text: "Mr. and Mrs. Lopez are teachers. → ___ are teachers.", answer: "They" },
-      { type: "fill", text: "The pencil is on the desk. → ___ is on the desk.", answer: "It" },
+      { type: "fill", text: "Miguel plays basketball every weekend. → ___ plays basketball every weekend.", answer: "He" },
+      { type: "fill", text: "My grandparents traveled to Spain last year. → ___ traveled to Spain last year.", answer: "They" },
+      { type: "fill", text: "This old bicycle still works perfectly. → ___ still works perfectly.", answer: "It" },
+      { type: "fill", text: "Carla and I finished the project early. → ___ finished the project early.", answer: "We" },
+      { type: "fill", text: "Natalia wants to become a doctor. → ___ wants to become a doctor.", answer: "She" },
 
       {
         type: "note",
         text: "<b>Part 3 · Nouns: common/proper, singular/plural.</b> A common noun names any person, place or thing (city, teacher). A proper noun names a SPECIFIC one and is always capitalized (Mexico, Ana)."
       },
-      { type: "mc", text: "Which of these is a proper noun?", options: ["city", "Canada", "teacher"], answer: "Canada" },
-      { type: "mc", text: "Which of these is a common noun?", options: ["London", "school", "Microsoft"], answer: "school" },
-      { type: "mc", text: "Which of these is a proper noun?", options: ["book", "Oxford", "chair"], answer: "Oxford" },
-      { type: "fill", text: "Singular: foot → Plural: ______", answer: "feet" },
-      { type: "fill", text: "Singular: pen → Plural: ______", answer: "pens" },
-      { type: "fill", text: "Singular: woman → Plural: ______", answer: "women" },
-      { type: "fill", text: "Singular: goose → Plural: ______", answer: "geese" },
-      { type: "fill", text: "Singular: bag → Plural: ______", answer: "bags" },
+      { type: "mc", text: "Which of these is a proper noun?", options: ["river", "Egypt", "notebook"], answer: "Egypt" },
+      { type: "mc", text: "Which of these is a common noun?", options: ["Paris", "backpack", "Samsung"], answer: "backpack" },
+      { type: "mc", text: "Which of these is a proper noun?", options: ["mountain", "Peru", "bridge"], answer: "Peru" },
+      { type: "fill", text: "Singular: leaf → Plural: ______", answer: "leaves" },
+      { type: "fill", text: "Singular: key → Plural: ______", answer: "keys" },
+      { type: "fill", text: "Singular: shelf → Plural: ______", answer: "shelves" },
+      { type: "fill", text: "Singular: fox → Plural: ______", answer: "foxes" },
+      { type: "fill", text: "Singular: watch → Plural: ______", answer: "watches" },
 
       {
         type: "note",
@@ -380,11 +380,11 @@ const UNITS = [
         type: "note",
         text: "<b>Part 5 · Numbers.</b> Complete each sentence with the number written out in words."
       },
-      { type: "fill", text: "I have ______ (450) stickers.", answer: "four hundred fifty", acceptableAny: ["four hundred and fifty"] },
-      { type: "fill", text: "There are ______ (1,200) books in the library.", answer: "one thousand two hundred" },
-      { type: "fill", text: "The stadium holds ______ (8,500) people.", answer: "eight thousand five hundred" },
-      { type: "fill", text: "She saved ______ (10,000) pesos.", answer: "ten thousand" },
-      { type: "fill", text: "My school has ______ (630) students.", answer: "six hundred thirty", acceptableAny: ["six hundred and thirty"] },
+      { type: "fill", text: "A famous library in this city stores ______ (450) rare manuscripts.", answer: "four hundred fifty", acceptableAny: ["four hundred and fifty"] },
+      { type: "fill", text: "This year's marathon had ______ (1,200) runners register.", answer: "one thousand two hundred" },
+      { type: "fill", text: "Our new stadium can seat ______ (8,500) fans during a concert.", answer: "eight thousand five hundred" },
+      { type: "fill", text: "The charity collected ______ (10,000) pesos for the local shelter last month.", answer: "ten thousand" },
+      { type: "fill", text: "This factory produces ______ (630) toys every single day.", answer: "six hundred thirty", acceptableAny: ["six hundred and thirty"] },
 
       {
         type: "note",
@@ -399,17 +399,17 @@ const UNITS = [
 
       {
         type: "note",
-        text: "<b>Part 5c · Ordinal numbers.</b> Match each daily activity with its correct ordinal number."
+        text: "<b>Part 5c · Ordinal numbers.</b> Match each step of a weekend chore routine with its correct ordinal number."
       },
       {
         type: "match",
-        text: "Match each ordinal number with the correct daily activity:",
+        text: "Match each ordinal number with the correct step:",
         pairs: [
-          { term: "1st — first", options: ["Wake up", "Go to bed", "Have lunch"], answer: "Wake up" },
-          { term: "2nd — second", options: ["Have lunch", "Take a shower", "Go to bed"], answer: "Take a shower" },
-          { term: "3rd — third", options: ["Eat breakfast", "Go to bed", "Wake up"], answer: "Eat breakfast" },
-          { term: "4th — fourth", options: ["Go to school", "Take a shower", "Wake up"], answer: "Go to school" },
-          { term: "5th — fifth", options: ["Have lunch", "Wake up", "Go to bed"], answer: "Have lunch" }
+          { term: "1st — first", options: ["Check your phone", "Cook dinner", "Water the plants"], answer: "Check your phone" },
+          { term: "2nd — second", options: ["Feed the dog", "Water the plants", "Check your phone"], answer: "Feed the dog" },
+          { term: "3rd — third", options: ["Water the plants", "Cook dinner", "Feed the dog"], answer: "Water the plants" },
+          { term: "4th — fourth", options: ["Walk to the bus stop", "Feed the dog", "Cook dinner"], answer: "Walk to the bus stop" },
+          { term: "5th — fifth", options: ["Cook dinner", "Check your phone", "Walk to the bus stop"], answer: "Cook dinner" }
         ]
       },
       { type: "mc", text: "I have ___ notebooks.", options: ["fifth", "five", "5th"], answer: "five" },
@@ -424,19 +424,19 @@ const UNITS = [
       },
       { type: "fill", text: "Unscramble: amnyerg", answer: "Germany" },
       { type: "fill", text: "Unscramble: nagremn", answer: "German" },
-      { type: "fill", text: "Unscramble: iarzlb", answer: "Brazil" },
-      { type: "fill", text: "Unscramble: ailrbaizn", answer: "Brazilian" },
+      { type: "fill", text: "Unscramble: yerkut", answer: "Turkey" },
+      { type: "fill", text: "Unscramble: hirtuks", answer: "Turkish" },
       { type: "fill", text: "Unscramble: sisura", answer: "Russia" },
       { type: "fill", text: "Unscramble: nissura", answer: "Russian" },
       {
         type: "note",
-        text: "<b>My Classmates from Everywhere</b><br><br>Hi! My name is Pedro. I am Mexican, and I live in Monterrey. I have classmates from many countries. My classmate Hans is German, and he lives in Berlin. He loves playing soccer. Another classmate, Yuki, is Japanese, and she lives in Osaka. She is very good at painting. I also have a friend named Sam, and he is American, from Chicago. He likes basketball and pizza. Finally, my classmate Chiara is Italian, from Milan. She loves music and travel. We are all from different countries, but we speak English to communicate and share our cultures."
+        text: "<b>A Video Call with New Friends</b><br><br>Yesterday, I joined an online project with students from different countries. My name is Fernando, and I am from Argentina. During the call, I met Mina first. She told us she is Korean and studies music in Seoul, where she practices the violin every afternoon. Next, a girl named Amara introduced herself; she comes from Kenya and lives in Nairobi, where she trains for track competitions after school. Then Omar joined late because of the time difference — he lives in Cairo, Egypt, and told us he prefers chess over sports, although he also enjoys swimming on weekends. The last person to speak was Freya, from Oslo, Norway; she showed us photos from a recent hiking trip and said photography is her favorite hobby. Even though none of us share a native language, English made it possible for all of us to understand each other and plan our next project together."
       },
-      { type: "mc", text: "Where is Pedro from?", options: ["Berlin", "Monterrey", "Chicago"], answer: "Monterrey" },
-      { type: "mc", text: "What nationality is Hans?", options: ["Japanese", "American", "German"], answer: "German" },
-      { type: "mc", text: "Who lives in Osaka?", options: ["Chiara", "Yuki", "Sam"], answer: "Yuki" },
-      { type: "mc", text: "What does Sam like?", options: ["Painting", "Music", "Basketball and pizza"], answer: "Basketball and pizza" },
-      { type: "mc", text: "What language do the classmates use to communicate?", options: ["Spanish", "English", "Italian"], answer: "English" },
+      { type: "mc", text: "What did Fernando join yesterday?", options: ["A cooking class", "An online project with students from different countries", "A football match"], answer: "An online project with students from different countries" },
+      { type: "mc", text: "Where does Mina study music?", options: ["Cairo", "Oslo", "Seoul"], answer: "Seoul" },
+      { type: "mc", text: "Why did Omar join the call late?", options: ["He forgot about it", "Because of the time difference", "His internet was slow"], answer: "Because of the time difference" },
+      { type: "mc", text: "What is Freya's favorite hobby?", options: ["Chess", "Track running", "Photography"], answer: "Photography" },
+      { type: "mc", text: "What allowed everyone to understand each other?", options: ["A translator", "English", "Sign language"], answer: "English" },
 
       {
         type: "note",
