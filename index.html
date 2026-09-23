@@ -298,6 +298,177 @@ const UNITS = [
     ]
   },
   {
+    id: "unit1-ingles1",
+    semester: 1,
+    title: "Unit 1 — Introducing Yourself & Others",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Part 1 · Verb to be.</b> I → am · He/She/It → is · You/We/They → are"
+      },
+      { type: "fill", text: "She ___ a doctor.", answer: "is" },
+      { type: "fill", text: "You ___ my classmate.", answer: "are" },
+      { type: "fill", text: "I ___ ready.", answer: "am" },
+      { type: "fill", text: "They ___ from Spain.", answer: "are" },
+      { type: "fill", text: "He ___ my brother.", answer: "is" },
+
+      {
+        type: "note",
+        text: "<b>Part 2 · Personal Pronouns.</b> Rewrite each sentence, replacing the underlined noun with the correct pronoun (I, you, he, she, it, we, they)."
+      },
+      { type: "fill", text: "Laura is my sister. → ___ is my sister.", answer: "She" },
+      { type: "fill", text: "Diego and I are neighbors. → ___ are neighbors.", answer: "We" },
+      { type: "fill", text: "The cat is small. → ___ is small.", answer: "It" },
+      { type: "fill", text: "Mr. and Mrs. Lopez are teachers. → ___ are teachers.", answer: "They" },
+      { type: "fill", text: "The pencil is on the desk. → ___ is on the desk.", answer: "It" },
+
+      {
+        type: "note",
+        text: "<b>Part 3 · Nouns: common/proper, singular/plural.</b> A common noun names any person, place or thing (city, teacher). A proper noun names a SPECIFIC one and is always capitalized (Mexico, Ana)."
+      },
+      { type: "mc", text: "Which of these is a proper noun?", options: ["city", "Canada", "teacher"], answer: "Canada" },
+      { type: "mc", text: "Which of these is a common noun?", options: ["London", "school", "Microsoft"], answer: "school" },
+      { type: "mc", text: "Which of these is a proper noun?", options: ["book", "Oxford", "chair"], answer: "Oxford" },
+      { type: "fill", text: "Singular: foot → Plural: ______", answer: "feet" },
+      { type: "fill", text: "Singular: pen → Plural: ______", answer: "pens" },
+      { type: "fill", text: "Singular: woman → Plural: ______", answer: "women" },
+      { type: "fill", text: "Singular: goose → Plural: ______", answer: "geese" },
+      { type: "fill", text: "Singular: bag → Plural: ______", answer: "bags" },
+
+      {
+        type: "note",
+        text: "<b>Part 4 · Personal Information.</b> Listen to Miguel and Sofía introducing themselves, then answer with a short answer."
+      },
+      {
+        type: "fill",
+        text: "How old is Miguel?",
+        audioText: "Miguel: Hi! What is your name? Sofia: Hello! I am Sofia. What is your name? Miguel: My name is Miguel. Nice to meet you! Sofia: Nice to meet you too! How old are you? Miguel: I am 16 years old. And you? Sofia: I am 15 years old. Where are you from? Miguel: I am from Mexico. And you? Sofia: I am from Colombia. What is your phone number? Miguel: My phone number is 555-9876. And yours? Sofia: My phone number is 555-1234. Where do you live? Miguel: I live in Guadalajara. And you? Sofia: I live in Bogota. Thank you! It was nice talking to you. Miguel: You too! See you later!",
+        answer: "16",
+        acceptableAny: ["16", "sixteen"]
+      },
+      {
+        type: "fill",
+        text: "Where is Sofía from?",
+        audioText: "Miguel: Hi! What is your name? Sofia: Hello! I am Sofia. What is your name? Miguel: My name is Miguel. Nice to meet you! Sofia: Nice to meet you too! How old are you? Miguel: I am 16 years old. And you? Sofia: I am 15 years old. Where are you from? Miguel: I am from Mexico. And you? Sofia: I am from Colombia. What is your phone number? Miguel: My phone number is 555-9876. And yours? Sofia: My phone number is 555-1234. Where do you live? Miguel: I live in Guadalajara. And you? Sofia: I live in Bogota. Thank you! It was nice talking to you. Miguel: You too! See you later!",
+        answer: "Colombia",
+        acceptableAny: ["colombia"]
+      },
+      {
+        type: "fill",
+        text: "What is Miguel's phone number?",
+        audioText: "Miguel: Hi! What is your name? Sofia: Hello! I am Sofia. What is your name? Miguel: My name is Miguel. Nice to meet you! Sofia: Nice to meet you too! How old are you? Miguel: I am 16 years old. And you? Sofia: I am 15 years old. Where are you from? Miguel: I am from Mexico. And you? Sofia: I am from Colombia. What is your phone number? Miguel: My phone number is 555-9876. And yours? Sofia: My phone number is 555-1234. Where do you live? Miguel: I live in Guadalajara. And you? Sofia: I live in Bogota. Thank you! It was nice talking to you. Miguel: You too! See you later!",
+        answer: "555-9876",
+        acceptableAny: ["555-9876", "5559876", "555 9876"]
+      },
+      {
+        type: "fill",
+        text: "Where does Sofía live?",
+        audioText: "Miguel: Hi! What is your name? Sofia: Hello! I am Sofia. What is your name? Miguel: My name is Miguel. Nice to meet you! Sofia: Nice to meet you too! How old are you? Miguel: I am 16 years old. And you? Sofia: I am 15 years old. Where are you from? Miguel: I am from Mexico. And you? Sofia: I am from Colombia. What is your phone number? Miguel: My phone number is 555-9876. And yours? Sofia: My phone number is 555-1234. Where do you live? Miguel: I live in Guadalajara. And you? Sofia: I live in Bogota. Thank you! It was nice talking to you. Miguel: You too! See you later!",
+        answer: "Bogota",
+        acceptableAny: ["bogota", "bogotá"]
+      },
+      {
+        type: "fill",
+        text: "Where is Miguel from?",
+        audioText: "Miguel: Hi! What is your name? Sofia: Hello! I am Sofia. What is your name? Miguel: My name is Miguel. Nice to meet you! Sofia: Nice to meet you too! How old are you? Miguel: I am 16 years old. And you? Sofia: I am 15 years old. Where are you from? Miguel: I am from Mexico. And you? Sofia: I am from Colombia. What is your phone number? Miguel: My phone number is 555-9876. And yours? Sofia: My phone number is 555-1234. Where do you live? Miguel: I live in Guadalajara. And you? Sofia: I live in Bogota. Thank you! It was nice talking to you. Miguel: You too! See you later!",
+        answer: "Mexico",
+        acceptableAny: ["mexico"]
+      },
+
+      {
+        type: "note",
+        text: "<b>Part 5 · Numbers.</b> Complete each sentence with the number written out in words."
+      },
+      { type: "fill", text: "I have ______ (450) stickers.", answer: "four hundred fifty" },
+      { type: "fill", text: "There are ______ (1,200) books in the library.", answer: "one thousand two hundred" },
+      { type: "fill", text: "The stadium holds ______ (8,500) people.", answer: "eight thousand five hundred" },
+      { type: "fill", text: "She saved ______ (10,000) pesos.", answer: "ten thousand" },
+      { type: "fill", text: "My school has ______ (630) students.", answer: "six hundred thirty" },
+
+      {
+        type: "note",
+        text: "<b>Part 5b · Reading 4-digit numbers.</b> In English, a 4-digit number (like a year) can be read TWO ways: as a YEAR (in pairs, e.g. 1985 → \"nineteen eighty-five\") or as a REGULAR number (e.g. 1985 → \"one thousand nine hundred eighty-five\"). Write both forms."
+      },
+      { type: "fill", text: "Write 1985 the way we say a YEAR:", answer: "nineteen eighty-five", acceptableAny: ["nineteen eighty five"] },
+      { type: "fill", text: "Write 1985 as a REGULAR number:", answer: "one thousand nine hundred eighty-five", acceptableAny: ["one thousand nine hundred eighty five"] },
+      { type: "fill", text: "Write 2024 the way we say a YEAR:", answer: "twenty twenty-four", acceptableAny: ["twenty twenty four", "two thousand twenty-four", "two thousand twenty four"] },
+      { type: "fill", text: "Write 2024 as a REGULAR number:", answer: "two thousand twenty-four", acceptableAny: ["two thousand twenty four"] },
+      { type: "fill", text: "Write 1776 the way we say a YEAR:", answer: "seventeen seventy-six", acceptableAny: ["seventeen seventy six"] },
+      { type: "fill", text: "Write 1776 as a REGULAR number:", answer: "one thousand seven hundred seventy-six", acceptableAny: ["one thousand seven hundred seventy six"] },
+
+      {
+        type: "note",
+        text: "<b>Part 5c · Ordinal numbers.</b> Match each daily activity with its correct ordinal number."
+      },
+      {
+        type: "match",
+        text: "Match each ordinal number with the correct daily activity:",
+        pairs: [
+          { term: "1st — first", options: ["Wake up", "Go to bed", "Have lunch"], answer: "Wake up" },
+          { term: "2nd — second", options: ["Have lunch", "Take a shower", "Go to bed"], answer: "Take a shower" },
+          { term: "3rd — third", options: ["Eat breakfast", "Go to bed", "Wake up"], answer: "Eat breakfast" },
+          { term: "4th — fourth", options: ["Go to school", "Take a shower", "Wake up"], answer: "Go to school" },
+          { term: "5th — fifth", options: ["Have lunch", "Wake up", "Go to bed"], answer: "Have lunch" }
+        ]
+      },
+      { type: "mc", text: "I have ___ notebooks.", options: ["fifth", "five", "5th"], answer: "five" },
+      { type: "mc", text: "She was the ___ student to arrive.", options: ["one", "first", "1"], answer: "first" },
+      { type: "mc", text: "We visited ___ museums this year.", options: ["sixth", "six", "6th"], answer: "six" },
+      { type: "mc", text: "This is his ___ time here.", options: ["second", "two", "2"], answer: "second" },
+      { type: "mc", text: "I saw ___ birds.", options: ["ninth", "nine", "9th"], answer: "nine" },
+
+      {
+        type: "note",
+        text: "<b>Part 6 · Countries & Nationalities.</b> Unscramble the letters to find the country or nationality. Don't forget capital letters."
+      },
+      { type: "fill", text: "Unscramble: amnyerg", answer: "Germany" },
+      { type: "fill", text: "Unscramble: nagremn", answer: "German" },
+      { type: "fill", text: "Unscramble: iarzlb", answer: "Brazil" },
+      { type: "fill", text: "Unscramble: ailrbaizn", answer: "Brazilian" },
+      { type: "fill", text: "Unscramble: sisura", answer: "Russia" },
+      { type: "fill", text: "Unscramble: nissura", answer: "Russian" },
+      {
+        type: "note",
+        text: "<b>My Classmates from Everywhere</b><br><br>Hi! My name is Pedro. I am Mexican, and I live in Monterrey. I have classmates from many countries. My classmate Hans is German, and he lives in Berlin. He loves playing soccer. Another classmate, Yuki, is Japanese, and she lives in Osaka. She is very good at painting. I also have a friend named Sam, and he is American, from Chicago. He likes basketball and pizza. Finally, my classmate Chiara is Italian, from Milan. She loves music and travel. We are all from different countries, but we speak English to communicate and share our cultures."
+      },
+      { type: "mc", text: "Where is Pedro from?", options: ["Berlin", "Monterrey", "Chicago"], answer: "Monterrey" },
+      { type: "mc", text: "What nationality is Hans?", options: ["Japanese", "American", "German"], answer: "German" },
+      { type: "mc", text: "Who lives in Osaka?", options: ["Chiara", "Yuki", "Sam"], answer: "Yuki" },
+      { type: "mc", text: "What does Sam like?", options: ["Painting", "Music", "Basketball and pizza"], answer: "Basketball and pizza" },
+      { type: "mc", text: "What language do the classmates use to communicate?", options: ["Spanish", "English", "Italian"], answer: "English" },
+
+      {
+        type: "note",
+        text: "<b>Part 7 · Formal and Informal Greetings.</b> Match each greeting with the correct response."
+      },
+      {
+        type: "match",
+        text: "Match each greeting with its correct response:",
+        pairs: [
+          { term: "Good afternoon.", options: ["Good afternoon.", "Bye!", "Not much."], answer: "Good afternoon." },
+          { term: "Hey!", options: ["What's up?", "Goodbye.", "Nice to meet you."], answer: "What's up?" },
+          { term: "How do you do?", options: ["How do you do?", "See you!", "Hello!"], answer: "How do you do?" },
+          { term: "Nice to meet you.", options: ["Nice to meet you, too.", "Good morning.", "Bye!"], answer: "Nice to meet you, too." },
+          { term: "Goodbye.", options: ["See you!", "Hi!", "Good evening."], answer: "See you!" }
+        ]
+      },
+
+      {
+        type: "note",
+        text: "<b>Part 8 · Speaking.</b> Introduce a friend out loud, like: 'Hi, this is my friend [name]. Nice to meet you.'"
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Introduce a friend out loud (Present Simple / greetings):",
+        keywords: ["friend"],
+        minWords: 5,
+        hint: 'use a full sentence like "This is my friend [name]"',
+        sampleAnswer: "Hi, this is my friend Laura. Nice to meet you."
+      }
+    ]
+  },
+  {
     id: "pron-j-5",
     semester: 5,
     teachers: ["jorge"],
