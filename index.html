@@ -205,16 +205,20 @@
     <div class="q-text">Tu profesor(a):</div>
     <select id="teacherSelect" class="match-select" style="width:100%;">
     </select>
-    <div class="q-text" style="margin-top:16px;">Escribe tu nombre completo:</div>
-    <input type="text" id="studentNameInput" class="fill-input" style="width:100%;font-size:16px;" placeholder="Nombre y apellido">
-    <div class="q-text" style="margin-top:16px;">Tu grupo:</div>
-    <input type="text" id="studentGroupInput" class="fill-input" style="width:100%;font-size:16px;" placeholder="Ej. 1A, 2B, 3C...">
     <div class="q-text" style="margin-top:16px;">Tu semestre:</div>
     <select id="semesterSelect" class="match-select" style="width:100%;">
       <option value="">— selecciona —</option>
       <option value="1">1.er semestre — Inglés I</option>
       <option value="5">5.º semestre — Inglés V</option>
     </select>
+    <div class="q-text" style="margin-top:16px;">Tu grupo:</div>
+    <select id="studentGroupInput" class="match-select" style="width:100%;">
+      <option value="">— selecciona —</option>
+    </select>
+    <div class="q-text" style="margin-top:16px;">Tu(s) apellido(s):</div>
+    <input type="text" id="studentLastNameInput" class="fill-input" style="width:100%;font-size:16px;" placeholder="Ej. García López">
+    <div class="q-text" style="margin-top:16px;">Tu(s) nombre(s):</div>
+    <input type="text" id="studentFirstNameInput" class="fill-input" style="width:100%;font-size:16px;" placeholder="Ej. Juan Carlos">
     <div class="actions" style="margin-top:16px;">
       <button class="primary" onclick="startSession()">Start / Comenzar</button>
     </div>
@@ -1277,12 +1281,24 @@ const TEACHERS = [
   { id: "esposa", name: "Profra. Merary García" }
 ];
 
+/* Lista de grupos. Edítala aquí si cambian de un semestre a otro —
+   el selector del alumno toma esta lista tal cual, así evitas que
+   escriban el grupo de formas distintas (1A, 1-A, 1 A...). */
+const GROUPS = ["5AVG", "5AVC", "5AVE", "5AVM", "5AVP"];
+
 function populateTeacherSelect(){
   const sel = document.getElementById('teacherSelect');
   sel.innerHTML = '<option value="">— selecciona —</option>' +
     TEACHERS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 }
 populateTeacherSelect();
+
+function populateGroupSelect(){
+  const sel = document.getElementById('studentGroupInput');
+  sel.innerHTML = '<option value="">— selecciona —</option>' +
+    GROUPS.map(g => `<option value="${g}">${g}</option>`).join('');
+}
+populateGroupSelect();
 
 function normalizeName(name){
   return name
@@ -1294,11 +1310,13 @@ function normalizeName(name){
 
 function startSession(){
   const teacherSelect = document.getElementById('teacherSelect');
-  const nameInput = document.getElementById('studentNameInput');
+  const lastNameInput = document.getElementById('studentLastNameInput');
+  const firstNameInput = document.getElementById('studentFirstNameInput');
   const groupInput = document.getElementById('studentGroupInput');
   const semesterSelect = document.getElementById('semesterSelect');
   const teacherId = teacherSelect.value;
-  const name = nameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  const firstName = firstNameInput.value.trim();
   const group = groupInput.value.trim();
   const semester = semesterSelect.value;
   let ok = true;
@@ -1306,14 +1324,18 @@ function startSession(){
     teacherSelect.style.borderColor = 'var(--accent-red)';
     ok = false;
   }
-  if (!name) {
-    nameInput.style.borderColor = 'var(--accent-red)';
-    nameInput.placeholder = 'Escribe tu nombre para continuar';
+  if (!lastName) {
+    lastNameInput.style.borderColor = 'var(--accent-red)';
+    lastNameInput.placeholder = 'Escribe tu(s) apellido(s) para continuar';
+    ok = false;
+  }
+  if (!firstName) {
+    firstNameInput.style.borderColor = 'var(--accent-red)';
+    firstNameInput.placeholder = 'Escribe tu(s) nombre(s) para continuar';
     ok = false;
   }
   if (!group) {
     groupInput.style.borderColor = 'var(--accent-red)';
-    groupInput.placeholder = 'Escribe tu grupo para continuar';
     ok = false;
   }
   if (!semester) {
@@ -1321,6 +1343,8 @@ function startSession(){
     ok = false;
   }
   if (!ok) return;
+
+  const name = `${lastName} ${firstName}`;
 
   selectedTeacherId = teacherId;
   studentName = name;
