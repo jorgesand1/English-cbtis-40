@@ -207,9 +207,7 @@
     </select>
     <div class="q-text" style="margin-top:16px;">Tu semestre:</div>
     <select id="semesterSelect" class="match-select" style="width:100%;">
-      <option value="">— selecciona —</option>
-      <option value="1">1.er semestre — Inglés I</option>
-      <option value="5">5.º semestre — Inglés V</option>
+      <option value="">— primero elige profesor(a) —</option>
     </select>
     <div class="q-text" style="margin-top:16px;">Tu grupo:</div>
     <select id="studentGroupInput" class="match-select" style="width:100%;">
@@ -1302,6 +1300,31 @@ function populateTeacherSelect(){
 }
 populateTeacherSelect();
 
+const SEMESTER_LABELS = { 1: "1.er semestre — Inglés I", 5: "5.º semestre — Inglés V" };
+
+/* Rellena el selector de semestre solo con los semestres que ese
+   profesor de verdad imparte (según las llaves de
+   GROUPS_BY_TEACHER_SEMESTER), para no ofrecer semestres que no dan. */
+function populateSemesterSelect(){
+  const sel = document.getElementById('semesterSelect');
+  const teacherId = document.getElementById('teacherSelect').value;
+
+  if (!teacherId) {
+    sel.innerHTML = '<option value="">— primero elige profesor(a) —</option>';
+    return;
+  }
+
+  const semesters = Object.keys(GROUPS_BY_TEACHER_SEMESTER[teacherId] || {});
+  if (!semesters.length) {
+    sel.innerHTML = '<option value="">— sin semestres configurados —</option>';
+    return;
+  }
+
+  sel.innerHTML = '<option value="">— selecciona —</option>' +
+    semesters.map(s => `<option value="${s}">${SEMESTER_LABELS[s] || s}</option>`).join('');
+}
+populateSemesterSelect();
+
 /* Rellena el selector de grupo según el profesor y semestre ya
    elegidos. Si todavía falta alguno de los dos, muestra un aviso
    en vez de una lista vacía confusa. */
@@ -1326,7 +1349,10 @@ function populateGroupSelect(){
 }
 populateGroupSelect();
 
-document.getElementById('teacherSelect').addEventListener('change', populateGroupSelect);
+document.getElementById('teacherSelect').addEventListener('change', () => {
+  populateSemesterSelect();
+  populateGroupSelect();
+});
 document.getElementById('semesterSelect').addEventListener('change', populateGroupSelect);
 
 function normalizeName(name){
