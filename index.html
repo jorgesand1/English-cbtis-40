@@ -1281,10 +1281,19 @@ const TEACHERS = [
   { id: "esposa", name: "Profra. Merary García" }
 ];
 
-/* Lista de grupos. Edítala aquí si cambian de un semestre a otro —
-   el selector del alumno toma esta lista tal cual, así evitas que
-   escriban el grupo de formas distintas (1A, 1-A, 1 A...). */
-const GROUPS = ["5AVG", "5AVC", "5AVE", "5AVM", "5AVP"];
+/* Grupos, organizados por profesor y luego por semestre — así el
+   selector de grupo solo muestra las opciones que corresponden a
+   quien seleccionaron como profesor(a) y el semestre elegido.
+   Para agregar/editar grupos, solo cambia estas listas. */
+const GROUPS_BY_TEACHER_SEMESTER = {
+  jorge: {
+    5: ["5AVG", "5AVC", "5AVE", "5AVM", "5AVP"]
+  },
+  esposa: {
+    1: ["1AM", "1BM", "1CM", "1DM", "1EM"],
+    5: ["5AME", "5AMM", "5AMV"]
+  }
+};
 
 function populateTeacherSelect(){
   const sel = document.getElementById('teacherSelect');
@@ -1293,12 +1302,32 @@ function populateTeacherSelect(){
 }
 populateTeacherSelect();
 
+/* Rellena el selector de grupo según el profesor y semestre ya
+   elegidos. Si todavía falta alguno de los dos, muestra un aviso
+   en vez de una lista vacía confusa. */
 function populateGroupSelect(){
   const sel = document.getElementById('studentGroupInput');
+  const teacherId = document.getElementById('teacherSelect').value;
+  const semester = document.getElementById('semesterSelect').value;
+
+  if (!teacherId || !semester) {
+    sel.innerHTML = '<option value="">— primero elige profesor(a) y semestre —</option>';
+    return;
+  }
+
+  const groups = (GROUPS_BY_TEACHER_SEMESTER[teacherId] || {})[semester] || [];
+  if (!groups.length) {
+    sel.innerHTML = '<option value="">— sin grupos configurados para esa combinación —</option>';
+    return;
+  }
+
   sel.innerHTML = '<option value="">— selecciona —</option>' +
-    GROUPS.map(g => `<option value="${g}">${g}</option>`).join('');
+    groups.map(g => `<option value="${g}">${g}</option>`).join('');
 }
 populateGroupSelect();
+
+document.getElementById('teacherSelect').addEventListener('change', populateGroupSelect);
+document.getElementById('semesterSelect').addEventListener('change', populateGroupSelect);
 
 function normalizeName(name){
   return name
