@@ -690,170 +690,212 @@ const UNITS = [
     questions: [
       {
         type: "note",
+        text: "<b>Palabras clave de esta unidad</b> (las mismas que practicamos en clase con la leyenda de la p. 26):<br><b>whispered · echo · mysterious · creature · saw · said · glowing · heard · investigate · walked · appeared · suddenly · ran · dared · when · while</b>"
+      },
+      {
+        type: "note",
         text: "<b>Part 1 · Vocabulary.</b> Match each word with its correct meaning."
       },
       {
         type: "match",
         text: "Match each word with its meaning:",
         pairs: [
-          { term: "Legend", options: ["An old story that people repeat, but nobody can prove it is true", "A thick cloud near the ground that makes it hard to see", "A small piece of information that helps solve a mystery"], answer: "An old story that people repeat, but nobody can prove it is true" },
-          { term: "Haunted", options: ["Visited by ghosts or spirits, according to people", "Speaking very quietly so others can't hear", "A dark shape made when something blocks the light"], answer: "Visited by ghosts or spirits, according to people" },
-          { term: "Whisper", options: ["A thick cloud near the ground that makes it hard to see", "To speak very quietly so others can't hear", "A strange animal or being, real or imaginary"], answer: "To speak very quietly so others can't hear" },
-          { term: "Fog", options: ["A thick cloud near the ground that makes it hard to see", "An old story that people repeat", "Information that people share but may not be true"], answer: "A thick cloud near the ground that makes it hard to see" },
-          { term: "Creature", options: ["A small piece of information that helps solve a mystery", "A strange animal or being, real or imaginary", "Visited by ghosts or spirits"], answer: "A strange animal or being, real or imaginary" },
-          { term: "Shadow", options: ["A dark shape made when something blocks the light", "To speak very quietly", "A thick cloud near the ground"], answer: "A dark shape made when something blocks the light" },
-          { term: "Rumor", options: ["Information that people share but may not be true", "A strange animal or being", "A dark shape made when something blocks the light"], answer: "Information that people share but may not be true" },
-          { term: "Clue", options: ["A small piece of information that helps solve a mystery", "Information that people share but may not be true", "Visited by ghosts or spirits"], answer: "A small piece of information that helps solve a mystery" }
+          { term: "Whispered", options: ["Spoke very quietly so others couldn't hear", "Moved very fast with your legs", "Had the courage to do something scary"], answer: "Spoke very quietly so others couldn't hear" },
+          { term: "Echo", options: ["A sound that repeats when it bounces off walls or rocks", "A strange animal or being", "Giving light in the dark"], answer: "A sound that repeats when it bounces off walls or rocks" },
+          { term: "Mysterious", options: ["Strange and difficult to explain", "Happening very fast, without warning", "Spoke very quietly"], answer: "Strange and difficult to explain" },
+          { term: "Creature", options: ["Giving light in the dark", "A strange animal or being, real or imaginary", "A sound that repeats"], answer: "A strange animal or being, real or imaginary" },
+          { term: "Glowing", options: ["Giving light in the dark", "Strange and difficult to explain", "Had the courage to do something scary"], answer: "Giving light in the dark" },
+          { term: "Investigate", options: ["To look carefully for information to find the truth", "To speak very quietly", "To move very fast with your legs"], answer: "To look carefully for information to find the truth" },
+          { term: "Suddenly", options: ["Strange and difficult to explain", "Happening very fast, without warning", "A sound that repeats"], answer: "Happening very fast, without warning" },
+          { term: "Dared", options: ["Had the courage to do something scary", "Came into view", "Giving light in the dark"], answer: "Had the courage to do something scary" }
+        ]
+      },
+      {
+        type: "match",
+        text: "Match each past form with its base verb:",
+        pairs: [
+          { term: "Saw", options: ["see", "say", "sit"], answer: "see" },
+          { term: "Said", options: ["see", "say", "sell"], answer: "say" },
+          { term: "Heard", options: ["hold", "have", "hear"], answer: "hear" },
+          { term: "Ran", options: ["run", "rain", "ride"], answer: "run" },
+          { term: "Walked", options: ["wake", "walk", "want"], answer: "walk" },
+          { term: "Appeared", options: ["appear", "apply", "open"], answer: "appear" }
         ]
       },
       {
         type: "note",
-        text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud. Ojo con la terminación <b>-ed</b>: en <i>whispered</i> suena como \"d\", en <i>haunted</i> suena como \"id\" y en <i>walked</i> suena como \"t\"."
+        text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud. Ojo con la terminación <b>-ed</b>: en <i>whispered</i>, <i>appeared</i> y <i>dared</i> suena como \"d\"; en <i>walked</i> suena como \"t\"."
       },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📜", audioText: "legend", targetText: "legend" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏚️", audioText: "haunted", targetText: "haunted" },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🤫", audioText: "whispered", targetText: "whispered" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚶", audioText: "walked", targetText: "walked" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👾", audioText: "creature", targetText: "creature" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🔁", audioText: "echo", targetText: "echo" },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "❓", audioText: "mysterious", targetText: "mysterious" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👾", audioText: "creature", targetText: "creature" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👀", audioText: "saw", targetText: "saw" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "💬", audioText: "said", targetText: "said" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✨", audioText: "glowing", targetText: "glowing" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👂", audioText: "heard", targetText: "heard" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🔍", audioText: "investigate", targetText: "investigate" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚶", audioText: "walked", targetText: "walked" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👻", audioText: "appeared", targetText: "appeared" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⚡", audioText: "suddenly", targetText: "suddenly" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏃", audioText: "ran", targetText: "ran" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "😨", audioText: "dared", targetText: "dared" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⏰", audioText: "when", targetText: "when" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⏳", audioText: "while", targetText: "while" },
       {
         type: "note",
-        text: "<b>Part 2 · Listening comprehension.</b> Listen to the story \"The Light on the Old Pier\". You may play it more than once, then answer the questions."
+        text: "<b>Part 2 · Listening comprehension.</b> Listen to the legend \"The Creature of the Old Mine\". You may play it more than once, then answer the questions."
       },
       {
         type: "mc",
-        text: "1. Where were the narrator and Andrea staying?",
-        audioText: "The Light on the Old Pier. Last summer, my cousin Andrea and I were staying with our grandmother in a quiet fishing town. One night, the wind was blowing hard and the waves were crashing against the old pier. We were walking home from the market when Andrea suddenly stopped. A small blue light was moving slowly above the water. Nobody was standing on the pier, and there were no boats nearby. I took out my phone to record it, but the battery died. While we were watching, the light disappeared into the fog. The next morning, our grandmother laughed and told us about a fisherman who lost his lantern there many years ago. People in town say he still looks for it on windy nights. Andrea says she doesn't believe in legends, but now she never walks near the pier at night.",
-        options: ["In a hotel near the beach", "With their grandmother in a fishing town", "At a friend's house in the city"],
-        answer: "With their grandmother in a fishing town"
+        text: "1. Where did the mysterious creature live?",
+        audioText: "The Creature of the Old Mine. Many years ago, people in a small mining town whispered about a mysterious creature that lived in the old mine. Some people said they saw two glowing eyes at the entrance, and others heard strange sounds echoing from deep inside. One night, a young woman named Lucía decided to investigate. While she was walking toward the mine, the wind was blowing and the dogs were barking. She walked slowly into the dark tunnel, and she heard her own echo. When she reached the end of the tunnel, everything was silent. Suddenly, a glowing shape appeared on the wall. Lucía ran out of the mine as fast as she could. After that night, nobody in the town dared to enter the old mine again.",
+        options: ["In a dark forest", "In the old mine", "Under a bridge"],
+        answer: "In the old mine"
+      },
+      {
+        type: "mc",
+        text: "2. What did some people say they saw?",
+        audioText: "Some people said they saw two glowing eyes at the entrance, and others heard strange sounds echoing from deep inside.",
+        options: ["Two glowing eyes", "A woman in white", "A big black dog"],
+        answer: "Two glowing eyes"
       },
       {
         type: "truefalse",
-        text: "2. The weather was calm that night.",
-        audioText: "One night, the wind was blowing hard and the waves were crashing against the old pier.",
+        text: "3. The night was quiet while Lucía was walking toward the mine.",
+        audioText: "While she was walking toward the mine, the wind was blowing and the dogs were barking.",
         answer: "False"
       },
       {
         type: "mc",
-        text: "3. What were they doing when Andrea suddenly stopped?",
-        audioText: "We were walking home from the market when Andrea suddenly stopped. A small blue light was moving slowly above the water.",
-        options: ["They were fishing on the pier", "They were walking home from the market", "They were swimming in the sea"],
-        answer: "They were walking home from the market"
+        text: "4. What happened when Lucía reached the end of the tunnel?",
+        audioText: "When she reached the end of the tunnel, everything was silent. Suddenly, a glowing shape appeared on the wall. Lucía ran out of the mine as fast as she could.",
+        options: ["She found an old lamp", "A glowing shape suddenly appeared on the wall", "She heard her friends calling her"],
+        answer: "A glowing shape suddenly appeared on the wall"
       },
       {
         type: "truefalse",
-        text: "4. The narrator recorded a video of the light.",
-        audioText: "I took out my phone to record it, but the battery died. While we were watching, the light disappeared into the fog.",
+        text: "5. After that night, many people dared to enter the mine.",
+        audioText: "After that night, nobody in the town dared to enter the old mine again.",
         answer: "False"
       },
       {
+        type: "note",
+        text: "<b>Part 3 · Reading comprehension.</b> The next day, Lucía talks with her friend Marco.<br><br><b>Marco:</b> People are saying you went into the old mine last night. You didn't go alone, did you?<br><b>Lucía:</b> I did! I wanted to investigate the mysterious sounds.<br><b>Marco:</b> What happened?<br><b>Lucía:</b> While I was walking through the tunnel, I heard someone whisper my name. At first, I thought it was just an echo.<br><b>Marco:</b> But it wasn't an echo, was it?<br><b>Lucía:</b> I don't know. When I reached the end, a glowing shape suddenly appeared on the wall. I ran as fast as I could.<br><b>Marco:</b> You saw the creature, didn't you?<br><b>Lucía:</b> I saw a light, not a creature. My grandfather said it was only the moon on the wet rocks.<br><b>Marco:</b> Maybe... but I never dared to walk near that mine, and I'm not going to start now!"
+      },
+      { type: "truefalse", text: "1. Lucía went into the mine with Marco.", answer: "False" },
+      { type: "truefalse", text: "2. Lucía heard someone whisper her name in the tunnel.", answer: "True" },
+      { type: "truefalse", text: "3. Lucía says she saw a creature with glowing eyes.", answer: "False" },
+      { type: "truefalse", text: "4. Marco never dared to walk near the mine.", answer: "True" },
+      {
         type: "mc",
-        text: "5. According to the grandmother, who lost something near the pier?",
-        audioText: "The next morning, our grandmother laughed and told us about a fisherman who lost his lantern there many years ago. People in town say he still looks for it on windy nights.",
-        options: ["A fisherman", "A sailor's daughter", "The narrator's grandfather"],
-        answer: "A fisherman"
+        text: "5. According to Lucía's grandfather, what was the glowing shape?",
+        options: ["A creature from the mine", "The moon on the wet rocks", "A lamp that somebody left there"],
+        answer: "The moon on the wet rocks"
       },
       {
         type: "note",
-        text: "<b>Part 3 · Reading comprehension.</b><br><br><b>Why Do Legends Survive?</b><br><br>Every town has a story that people tell in the dark. Long before phones existed, grandparents were sharing these stories while families were sitting around a fire or waiting for a storm to end. Most legends started with a real event: a strange noise, an accident, or a person who disappeared. Each time someone repeated the story, they added a new detail, and little by little the event became a mystery.<br><br>Today, legends travel faster than ever. A student posts a blurry video, thousands of people share it, and a new legend is born in a few hours. Experts say legends survive for two reasons: they teach a lesson, like \"don't go out alone at night,\" and they connect people to the place where they live."
-      },
-      { type: "truefalse", text: "1. Families were sharing legends long before phones existed.", answer: "True" },
-      { type: "truefalse", text: "2. According to the text, legends never begin with a real event.", answer: "False" },
-      { type: "truefalse", text: "3. People added new details each time they repeated a story.", answer: "True" },
-      { type: "truefalse", text: "4. Today, legends spread more slowly than in the past.", answer: "False" },
-      {
-        type: "mc",
-        text: "5. According to experts, why do legends survive?",
-        options: ["Because they are always true", "Because they teach a lesson and connect people to their place", "Because only grandparents know them"],
-        answer: "Because they teach a lesson and connect people to their place"
-      },
-      {
-        type: "note",
-        text: "<b>Grammar reminder:</b> <b>Past Simple</b> = una acción que empezó y terminó (<i>saw, heard, ran</i>). <b>Past Progressive</b> = <b>was/were + -ing</b>, una acción que estaba en progreso (<i>was walking, were sleeping</i>).<br>Tip: <b>while</b> + acción larga (was/were + -ing) · <b>when</b> + la acción corta que interrumpe (past simple)."
+        text: "<b>Grammar reminder:</b> <b>Past Simple</b> = acción que empezó y terminó (<i>saw, heard, ran, appeared</i>). <b>Past Progressive</b> = <b>was/were + -ing</b>, acción que estaba en progreso (<i>was walking, were whispering</i>).<br><b>while</b> + acción larga (was/were + -ing) · <b>when</b> + la acción corta que interrumpe (past simple)."
       },
       {
         type: "note",
         text: "<b>Part 4 · Past Simple or Past Progressive?</b> Complete each sentence with the correct form of the verb in parentheses."
       },
-      { type: "fill", text: "We ______ (watch) a horror movie when someone knocked on the door.", answer: "were watching" },
-      { type: "fill", text: "My grandfather ______ (tell) us a scary legend last night.", answer: "told" },
-      { type: "fill", text: "While Sofía ______ (sleep), the dog started to bark.", answer: "was sleeping" },
-      { type: "fill", text: "The kids ______ (hear) a strange noise and ran outside.", answer: "heard" },
-      { type: "fill", text: "At midnight, the wind ______ (blow) and the windows were shaking.", answer: "was blowing" },
-      { type: "fill", text: "I ______ (not / see) anything in the fog.", answer: "didn't see", acceptableAny: ["did not see", "didnt see"] },
+      { type: "fill", text: "While we ______ (walk) home, we heard a strange whisper.", answer: "were walking" },
+      { type: "fill", text: "Lucía ______ (see) two glowing eyes in the dark.", answer: "saw" },
+      { type: "fill", text: "The creature ______ (appear) suddenly at the window.", answer: "appeared" },
+      { type: "fill", text: "My brother was investigating the old house when he ______ (hear) an echo.", answer: "heard" },
+      { type: "fill", text: "My grandmother ______ (say) the old bridge was mysterious.", answer: "said" },
+      { type: "fill", text: "We ______ (run) to the car when the lights started glowing.", answer: "ran" },
+      { type: "fill", text: "The kids ______ (whisper) when the teacher walked in.", answer: "were whispering" },
+      { type: "fill", text: "Nobody ______ (dare) to open the door.", answer: "dared" },
       {
         type: "note",
-        text: "<b>Part 5 · Choose the correct pair.</b> Pick the option that completes the sentence correctly."
+        text: "<b>Part 5 · When or while?</b> Pick the option that completes the sentence correctly."
       },
       {
         type: "mc",
-        text: "Tomás ______ (fix) his bike when it ______ (start) to get dark.",
-        options: ["fixed / was starting", "was fixing / started", "was fixing / was starting"],
-        answer: "was fixing / started"
+        text: "I ______ (walk) to the mine when something ______ (appear) in the dark.",
+        options: ["walked / was appearing", "was walking / appeared", "was walking / was appearing"],
+        answer: "was walking / appeared"
       },
       {
         type: "mc",
-        text: "While we ______ (camp) near the river, we ______ (find) an old map.",
-        options: ["were camping / found", "camped / were finding", "were camping / were finding"],
-        answer: "were camping / found"
+        text: "While Marco ______ (investigate) the cave, he ______ (hear) a whisper.",
+        options: ["was investigating / heard", "investigated / was hearing", "was investigating / was hearing"],
+        answer: "was investigating / heard"
       },
       {
         type: "mc",
-        text: "She ______ (open) the door and ______ (see) nobody.",
-        options: ["was opening / was seeing", "opened / was seeing", "opened / saw"],
-        answer: "opened / saw"
+        text: "The creature ______ (appear) and everybody ______ (run).",
+        options: ["was appearing / was running", "appeared / was running", "appeared / ran"],
+        answer: "appeared / ran"
+      },
+      {
+        type: "mc",
+        text: "I was sleeping ______ I heard the mysterious echo.",
+        options: ["when", "while"],
+        answer: "when"
+      },
+      {
+        type: "mc",
+        text: "______ they were walking in the forest, they saw a glowing light.",
+        options: ["While", "Suddenly"],
+        answer: "While"
       },
       {
         type: "note",
-        text: "<b>Grammar reminder · Tag questions:</b> sirven para confirmar información. Si la oración es <b>afirmativa</b>, la pregunta es <b>negativa</b> (<i>The house was empty, wasn't it?</i>). Si la oración es <b>negativa</b>, la pregunta es <b>afirmativa</b> (<i>You didn't go, did you?</i>). En Past Simple se usa <b>did / didn't</b>."
+        text: "<b>Grammar reminder · Tag questions:</b> sirven para confirmar información. Si la oración es <b>afirmativa</b>, la pregunta es <b>negativa</b> (<i>You saw it, didn't you?</i>). Si la oración es <b>negativa</b>, la pregunta es <b>afirmativa</b> (<i>It wasn't an echo, was it?</i>). En Past Simple se usa <b>did / didn't</b>; en Past Progressive, <b>was / were</b>."
       },
       {
         type: "note",
         text: "<b>Part 6 · Tag questions.</b> Write or choose the correct tag question."
       },
-      { type: "fill", text: "The house was empty, ______?", answer: "wasn't it", acceptableAny: ["wasnt it"] },
-      { type: "fill", text: "You didn't believe the story, ______?", answer: "did you" },
-      { type: "fill", text: "Your neighbors were telling ghost stories, ______?", answer: "weren't they", acceptableAny: ["werent they"] },
-      { type: "fill", text: "Mario found the old key, ______?", answer: "didn't he", acceptableAny: ["didnt he"] },
+      { type: "fill", text: "You heard the echo, ______?", answer: "didn't you", acceptableAny: ["didnt you"] },
+      { type: "fill", text: "The creature appeared suddenly, ______?", answer: "didn't it", acceptableAny: ["didnt it"] },
+      { type: "fill", text: "Lucía wasn't walking alone, ______?", answer: "was she" },
+      { type: "fill", text: "They were whispering, ______?", answer: "weren't they", acceptableAny: ["werent they"] },
       {
         type: "mc",
-        text: "The kids weren't scared, ______?",
-        options: ["weren't they", "were they", "did they"],
-        answer: "were they"
+        text: "Marco ran very fast, ______?",
+        options: ["didn't he", "did he", "wasn't he"],
+        answer: "didn't he"
       },
       {
         type: "mc",
-        text: "Ana heard the whisper, ______?",
-        options: ["didn't she", "did she", "wasn't she"],
-        answer: "didn't she"
+        text: "The eyes were glowing, ______?",
+        options: ["were they", "weren't they", "didn't they"],
+        answer: "weren't they"
       },
       {
         type: "note",
         text: "<b>Part 7 · Review — Unscramble.</b> Put the words in order to form correct sentences."
       },
-      { type: "unscramble", text: "Put the words in order:", words: ["walking", "We", "home", "were", "when", "heard", "we", "a", "scream"], answer: "We were walking home when we heard a scream" },
-      { type: "unscramble", text: "Put the words in order:", words: ["opened", "The", "old", "door", "by", "itself"], answer: "The old door opened by itself" },
-      { type: "unscramble", text: "Put the words in order:", words: ["was", "Nobody", "in", "living", "that", "house"], answer: "Nobody was living in that house" },
-      { type: "unscramble", text: "Put the words in order:", words: ["see", "Did", "the", "you", "light", "last", "night"], answer: "Did you see the light last night" },
+      { type: "unscramble", text: "Put the words in order:", words: ["appeared", "Suddenly", "a", "in", "creature", "the", "tunnel"], answer: "Suddenly a creature appeared in the tunnel" },
+      { type: "unscramble", text: "Put the words in order:", words: ["heard", "We", "mysterious", "a", "echo"], answer: "We heard a mysterious echo" },
+      { type: "unscramble", text: "Put the words in order:", words: ["was", "While", "walking", "she", "she", "heard", "a", "whisper"], answer: "While she was walking she heard a whisper" },
+      { type: "unscramble", text: "Put the words in order:", words: ["dared", "Nobody", "investigate", "to", "the", "mine"], answer: "Nobody dared to investigate the mine" },
+      { type: "unscramble", text: "Put the words in order:", words: ["ran", "They", "when", "saw", "they", "the", "glowing", "eyes"], answer: "They ran when they saw the glowing eyes" },
       {
         type: "note",
         text: "<b>Part 8 · Shadowing.</b> Habla EN VOZ ALTA al mismo tiempo que escuchas. Fíjate cómo la voz <b>baja</b> en la tag question cuando solo confirmamos algo."
       },
-      { type: "shadowing", sentence: "It was a strange night, wasn't it?" },
-      { type: "shadowing", sentence: "While we were walking home, a dog started to howl." },
-      { type: "shadowing", sentence: "Nobody believed the story, did they?" },
+      { type: "shadowing", sentence: "People whispered about a mysterious creature in the mine." },
+      { type: "shadowing", sentence: "While I was walking, I heard a strange echo." },
+      { type: "shadowing", sentence: "Suddenly, a glowing shape appeared, and we ran." },
+      { type: "shadowing", sentence: "You saw it too, didn't you?" },
       {
         type: "note",
-        text: "<b>Part 9 · Speaking.</b> Tell a short mystery or legend from your town in one or two sentences. Use <b>was/were + -ing</b> for the background and the <b>Past Simple</b> for what happened."
+        text: "<b>Part 9 · Speaking.</b> Tell a short mystery from your town in one or two sentences. Use <b>when</b> or <b>while</b>, and some of the key words (saw, heard, appeared, suddenly, ran...)."
       },
       {
         type: "speaking",
         mode: "open",
-        text: "Tell a short mystery from your town (Past Progressive + Past Simple):",
-        keywords: ["was", "were"],
+        text: "Tell a short mystery from your town (use when or while):",
+        keywords: ["when", "while"],
         minWords: 8,
-        hint: "include was/were + -ing, like 'I was walking home when I saw a shadow'",
-        sampleAnswer: "My uncle was driving at night when he saw a woman in white on the road."
+        hint: "include when or while, like 'I was walking home when I heard a whisper'",
+        sampleAnswer: "My uncle was driving at night when a glowing light suddenly appeared on the road."
       }
     ]
   }
