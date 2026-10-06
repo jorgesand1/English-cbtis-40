@@ -89,7 +89,7 @@
   .match-row{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
   .match-term{width:150px;font-weight:600;flex-shrink:0;}
   .match-select{
-    flex:1;background:var(--board);color:var(--chalk);border:1px solid var(--line);
+    flex:1;min-width:0;background:var(--board);color:var(--chalk);border:1px solid var(--line);
     border-radius:6px;padding:8px 10px;font-family:'Work Sans',sans-serif;font-size:14px;
   }
   .match-select.correct{border-color:var(--accent-green);}
@@ -682,6 +682,180 @@ const UNITS = [
       { type: "fill", text: "My sister and I ______ (try) to sleep earlier these days.", answer: "are trying" },
       { type: "fill", text: "He ______ (watch) a documentary instead of going out.", answer: "is watching" }
     ]
+  },
+  {
+    id: "unit2-ingles5",
+    semester: 5,
+    title: "Unit 2 — Mysteries & Legends",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Part 1 · Vocabulary.</b> Match each word with its correct meaning."
+      },
+      {
+        type: "match",
+        text: "Match each word with its meaning:",
+        pairs: [
+          { term: "Legend", options: ["An old story that people repeat, but nobody can prove it is true", "A thick cloud near the ground that makes it hard to see", "A small piece of information that helps solve a mystery"], answer: "An old story that people repeat, but nobody can prove it is true" },
+          { term: "Haunted", options: ["Visited by ghosts or spirits, according to people", "Speaking very quietly so others can't hear", "A dark shape made when something blocks the light"], answer: "Visited by ghosts or spirits, according to people" },
+          { term: "Whisper", options: ["A thick cloud near the ground that makes it hard to see", "To speak very quietly so others can't hear", "A strange animal or being, real or imaginary"], answer: "To speak very quietly so others can't hear" },
+          { term: "Fog", options: ["A thick cloud near the ground that makes it hard to see", "An old story that people repeat", "Information that people share but may not be true"], answer: "A thick cloud near the ground that makes it hard to see" },
+          { term: "Creature", options: ["A small piece of information that helps solve a mystery", "A strange animal or being, real or imaginary", "Visited by ghosts or spirits"], answer: "A strange animal or being, real or imaginary" },
+          { term: "Shadow", options: ["A dark shape made when something blocks the light", "To speak very quietly", "A thick cloud near the ground"], answer: "A dark shape made when something blocks the light" },
+          { term: "Rumor", options: ["Information that people share but may not be true", "A strange animal or being", "A dark shape made when something blocks the light"], answer: "Information that people share but may not be true" },
+          { term: "Clue", options: ["A small piece of information that helps solve a mystery", "Information that people share but may not be true", "Visited by ghosts or spirits"], answer: "A small piece of information that helps solve a mystery" }
+        ]
+      },
+      {
+        type: "note",
+        text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud. Ojo con la terminación <b>-ed</b>: en <i>whispered</i> suena como \"d\", en <i>haunted</i> suena como \"id\" y en <i>walked</i> suena como \"t\"."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📜", audioText: "legend", targetText: "legend" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏚️", audioText: "haunted", targetText: "haunted" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🤫", audioText: "whispered", targetText: "whispered" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚶", audioText: "walked", targetText: "walked" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👾", audioText: "creature", targetText: "creature" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "❓", audioText: "mysterious", targetText: "mysterious" },
+      {
+        type: "note",
+        text: "<b>Part 2 · Listening comprehension.</b> Listen to the story \"The Light on the Old Pier\". You may play it more than once, then answer the questions."
+      },
+      {
+        type: "mc",
+        text: "1. Where were the narrator and Andrea staying?",
+        audioText: "The Light on the Old Pier. Last summer, my cousin Andrea and I were staying with our grandmother in a quiet fishing town. One night, the wind was blowing hard and the waves were crashing against the old pier. We were walking home from the market when Andrea suddenly stopped. A small blue light was moving slowly above the water. Nobody was standing on the pier, and there were no boats nearby. I took out my phone to record it, but the battery died. While we were watching, the light disappeared into the fog. The next morning, our grandmother laughed and told us about a fisherman who lost his lantern there many years ago. People in town say he still looks for it on windy nights. Andrea says she doesn't believe in legends, but now she never walks near the pier at night.",
+        options: ["In a hotel near the beach", "With their grandmother in a fishing town", "At a friend's house in the city"],
+        answer: "With their grandmother in a fishing town"
+      },
+      {
+        type: "truefalse",
+        text: "2. The weather was calm that night.",
+        audioText: "One night, the wind was blowing hard and the waves were crashing against the old pier.",
+        answer: "False"
+      },
+      {
+        type: "mc",
+        text: "3. What were they doing when Andrea suddenly stopped?",
+        audioText: "We were walking home from the market when Andrea suddenly stopped. A small blue light was moving slowly above the water.",
+        options: ["They were fishing on the pier", "They were walking home from the market", "They were swimming in the sea"],
+        answer: "They were walking home from the market"
+      },
+      {
+        type: "truefalse",
+        text: "4. The narrator recorded a video of the light.",
+        audioText: "I took out my phone to record it, but the battery died. While we were watching, the light disappeared into the fog.",
+        answer: "False"
+      },
+      {
+        type: "mc",
+        text: "5. According to the grandmother, who lost something near the pier?",
+        audioText: "The next morning, our grandmother laughed and told us about a fisherman who lost his lantern there many years ago. People in town say he still looks for it on windy nights.",
+        options: ["A fisherman", "A sailor's daughter", "The narrator's grandfather"],
+        answer: "A fisherman"
+      },
+      {
+        type: "note",
+        text: "<b>Part 3 · Reading comprehension.</b><br><br><b>Why Do Legends Survive?</b><br><br>Every town has a story that people tell in the dark. Long before phones existed, grandparents were sharing these stories while families were sitting around a fire or waiting for a storm to end. Most legends started with a real event: a strange noise, an accident, or a person who disappeared. Each time someone repeated the story, they added a new detail, and little by little the event became a mystery.<br><br>Today, legends travel faster than ever. A student posts a blurry video, thousands of people share it, and a new legend is born in a few hours. Experts say legends survive for two reasons: they teach a lesson, like \"don't go out alone at night,\" and they connect people to the place where they live."
+      },
+      { type: "truefalse", text: "1. Families were sharing legends long before phones existed.", answer: "True" },
+      { type: "truefalse", text: "2. According to the text, legends never begin with a real event.", answer: "False" },
+      { type: "truefalse", text: "3. People added new details each time they repeated a story.", answer: "True" },
+      { type: "truefalse", text: "4. Today, legends spread more slowly than in the past.", answer: "False" },
+      {
+        type: "mc",
+        text: "5. According to experts, why do legends survive?",
+        options: ["Because they are always true", "Because they teach a lesson and connect people to their place", "Because only grandparents know them"],
+        answer: "Because they teach a lesson and connect people to their place"
+      },
+      {
+        type: "note",
+        text: "<b>Grammar reminder:</b> <b>Past Simple</b> = una acción que empezó y terminó (<i>saw, heard, ran</i>). <b>Past Progressive</b> = <b>was/were + -ing</b>, una acción que estaba en progreso (<i>was walking, were sleeping</i>).<br>Tip: <b>while</b> + acción larga (was/were + -ing) · <b>when</b> + la acción corta que interrumpe (past simple)."
+      },
+      {
+        type: "note",
+        text: "<b>Part 4 · Past Simple or Past Progressive?</b> Complete each sentence with the correct form of the verb in parentheses."
+      },
+      { type: "fill", text: "We ______ (watch) a horror movie when someone knocked on the door.", answer: "were watching" },
+      { type: "fill", text: "My grandfather ______ (tell) us a scary legend last night.", answer: "told" },
+      { type: "fill", text: "While Sofía ______ (sleep), the dog started to bark.", answer: "was sleeping" },
+      { type: "fill", text: "The kids ______ (hear) a strange noise and ran outside.", answer: "heard" },
+      { type: "fill", text: "At midnight, the wind ______ (blow) and the windows were shaking.", answer: "was blowing" },
+      { type: "fill", text: "I ______ (not / see) anything in the fog.", answer: "didn't see", acceptableAny: ["did not see", "didnt see"] },
+      {
+        type: "note",
+        text: "<b>Part 5 · Choose the correct pair.</b> Pick the option that completes the sentence correctly."
+      },
+      {
+        type: "mc",
+        text: "Tomás ______ (fix) his bike when it ______ (start) to get dark.",
+        options: ["fixed / was starting", "was fixing / started", "was fixing / was starting"],
+        answer: "was fixing / started"
+      },
+      {
+        type: "mc",
+        text: "While we ______ (camp) near the river, we ______ (find) an old map.",
+        options: ["were camping / found", "camped / were finding", "were camping / were finding"],
+        answer: "were camping / found"
+      },
+      {
+        type: "mc",
+        text: "She ______ (open) the door and ______ (see) nobody.",
+        options: ["was opening / was seeing", "opened / was seeing", "opened / saw"],
+        answer: "opened / saw"
+      },
+      {
+        type: "note",
+        text: "<b>Grammar reminder · Tag questions:</b> sirven para confirmar información. Si la oración es <b>afirmativa</b>, la pregunta es <b>negativa</b> (<i>The house was empty, wasn't it?</i>). Si la oración es <b>negativa</b>, la pregunta es <b>afirmativa</b> (<i>You didn't go, did you?</i>). En Past Simple se usa <b>did / didn't</b>."
+      },
+      {
+        type: "note",
+        text: "<b>Part 6 · Tag questions.</b> Write or choose the correct tag question."
+      },
+      { type: "fill", text: "The house was empty, ______?", answer: "wasn't it", acceptableAny: ["wasnt it"] },
+      { type: "fill", text: "You didn't believe the story, ______?", answer: "did you" },
+      { type: "fill", text: "Your neighbors were telling ghost stories, ______?", answer: "weren't they", acceptableAny: ["werent they"] },
+      { type: "fill", text: "Mario found the old key, ______?", answer: "didn't he", acceptableAny: ["didnt he"] },
+      {
+        type: "mc",
+        text: "The kids weren't scared, ______?",
+        options: ["weren't they", "were they", "did they"],
+        answer: "were they"
+      },
+      {
+        type: "mc",
+        text: "Ana heard the whisper, ______?",
+        options: ["didn't she", "did she", "wasn't she"],
+        answer: "didn't she"
+      },
+      {
+        type: "note",
+        text: "<b>Part 7 · Review — Unscramble.</b> Put the words in order to form correct sentences."
+      },
+      { type: "unscramble", text: "Put the words in order:", words: ["walking", "We", "home", "were", "when", "heard", "we", "a", "scream"], answer: "We were walking home when we heard a scream" },
+      { type: "unscramble", text: "Put the words in order:", words: ["opened", "The", "old", "door", "by", "itself"], answer: "The old door opened by itself" },
+      { type: "unscramble", text: "Put the words in order:", words: ["was", "Nobody", "in", "living", "that", "house"], answer: "Nobody was living in that house" },
+      { type: "unscramble", text: "Put the words in order:", words: ["see", "Did", "the", "you", "light", "last", "night"], answer: "Did you see the light last night" },
+      {
+        type: "note",
+        text: "<b>Part 8 · Shadowing.</b> Habla EN VOZ ALTA al mismo tiempo que escuchas. Fíjate cómo la voz <b>baja</b> en la tag question cuando solo confirmamos algo."
+      },
+      { type: "shadowing", sentence: "It was a strange night, wasn't it?" },
+      { type: "shadowing", sentence: "While we were walking home, a dog started to howl." },
+      { type: "shadowing", sentence: "Nobody believed the story, did they?" },
+      {
+        type: "note",
+        text: "<b>Part 9 · Speaking.</b> Tell a short mystery or legend from your town in one or two sentences. Use <b>was/were + -ing</b> for the background and the <b>Past Simple</b> for what happened."
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Tell a short mystery from your town (Past Progressive + Past Simple):",
+        keywords: ["was", "were"],
+        minWords: 8,
+        hint: "include was/were + -ing, like 'I was walking home when I saw a shadow'",
+        sampleAnswer: "My uncle was driving at night when he saw a woman in white on the road."
+      }
+    ]
   }
 ];
 
@@ -1252,7 +1426,9 @@ function checkAnswers(){
       // y SIN espacios ni guiones — así "555-9876", "5559876" y
       // "555 9876" cuentan como lo mismo, igual que "eighty-five" y
       // "eighty five".
-      const normalize = s => (s || '').toLowerCase().trim().replace(/[.!?]+$/, '').replace(/[\s-]+/g, '');
+      // También unifica el apóstrofo "curvo" (’) que ponen los teclados
+      // de iPhone y Android, y quita comas al inicio (", wasn't it").
+      const normalize = s => (s || '').toLowerCase().replace(/[’‘`´]/g, "'").trim().replace(/^,+/, '').replace(/[.!?]+$/, '').replace(/[\s-]+/g, '');
       const chosen = normalize(userAnswers[i]);
       let isCorrect = chosen === normalize(q.answer);
       if (!isCorrect && q.acceptableAny) {
