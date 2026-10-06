@@ -62,6 +62,17 @@
     padding:26px 24px;
     margin-bottom:18px;
   }
+  /* Pregunta ya contestada bien: queda fija con palomita y ya no se
+     puede cambiar, para que el alumno solo corrija las que tienen ✗. */
+  .card.locked{position:relative;border-color:var(--accent-green);}
+  .card.locked::after{
+    content:'✓';position:absolute;top:10px;right:14px;
+    color:var(--accent-green);font-size:22px;font-weight:700;
+  }
+  .card.locked .options,
+  .card.locked .unscramble-bank,
+  .card.locked .answer-builder,
+  .card.locked .record-btn{pointer-events:none;}
   .q-meta{font-size:12px;color:var(--accent-yellow);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-weight:600;}
   .q-text{font-size:18px;margin-bottom:18px;line-height:1.5;}
   .q-text b{color:var(--accent-yellow);font-weight:600;}
@@ -905,6 +916,11 @@ const UNITS = [
 let currentUnit = null;
 let userAnswers = {};
 let practicedAnswers = {};
+// Preguntas ya correctas (se bloquean) y cuántas veces ha fallado cada
+// una; la respuesta correcta solo se muestra después de 2 intentos.
+let lockedQuestions = {};
+let wrongChecks = {};
+const REVEAL_AFTER_WRONG = 2;
 
 /* Diagnóstico de audio: muestra en pantalla (sin necesitar consola de
    desarrollador) si el navegador tiene voces disponibles, y si el
@@ -1034,6 +1050,8 @@ async function loadStudentProgress(){
 function renderQuiz(){
   const area = document.getElementById('quizArea');
   area.innerHTML = '';
+  lockedQuestions = {};
+  wrongChecks = {};
   if (!currentUnit) return;
 
   const semesterTag = document.createElement('div');
@@ -1409,8 +1427,22 @@ function renderQuiz(){
   const actions = document.createElement('div');
   actions.className = 'actions';
   actions.innerHTML = `<button class="primary" onclick="checkAnswers()">Check my answers</button>
-                        <button class="ghost" onclick="renderQuiz()">Reset</button>`;
+                        <button class="ghost" onclick="resetQuiz()">Reset</button>`;
   area.appendChild(actions);
+}
+
+function resetQuiz(){
+  userAnswers = {};
+  renderQuiz();
+}
+
+function lockQuestion(i){
+  lockedQuestions[i] = true;
+  const fb = document.getElementById(`fb-${i}`);
+  const card = fb && fb.closest('.card');
+  if (!card) return;
+  card.classList.add('locked');
+  card.querySelectorAll('input, select').forEach(el => { el.disabled = true; });
 }
 
 function evaluateOpenSpeaking(said, q){
@@ -1444,9 +1476,22 @@ function checkAnswers(){
     });
   };
 
+  const oldPanel = document.getElementById('scorePanel');
+  if (oldPanel) oldPanel.remove();
+  document.querySelectorAll('#quizArea .score-bar-wrap').forEach(el => el.remove());
+
   currentUnit.questions.forEach((q, i) => {
     if (q.type === 'note' || q.type === 'shadowing') return;
     const fb = document.getElementById(`fb-${i}`);
+
+    // Ya estaba bien en un intento anterior: se cuenta y no se toca.
+    if (lockedQuestions[i]) {
+      correctCount++;
+      pushResult(q, true);
+      return;
+    }
+    const reveal = (wrongChecks[i] || 0) + 1 >= REVEAL_AFTER_WRONG;
+    const resultsBefore = questionResults.length;
 
     if (q.type === 'mc') {
       const labels = document.querySelectorAll(`.option[data-q-index="${i}"]`);
@@ -1455,10 +1500,10 @@ function checkAnswers(){
       labels.forEach(label => {
         const val = label.querySelector('input').value;
         label.classList.remove('correct','incorrect');
-        if (val === q.answer) label.classList.add('correct');
+        if (val === q.answer && (isCorrect || reveal)) label.classList.add('correct');
         else if (val === chosen && !isCorrect) label.classList.add('incorrect');
       });
-      fb.textContent = isCorrect ? '✓ Correct!' : `✗ Not quite — correct answer: "${q.answer}"`;
+      fb.textContent = isCorrect ? '✓ Correct!' : (reveal ? `✗ Not quite — correct answer: "${q.answer}"` : '✗ Not quite — try again');
       fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
       if (isCorrect) correctCount++;
       pushResult(q, isCorrect);
@@ -1479,7 +1524,7 @@ function checkAnswers(){
       }
       input.classList.remove('correct','incorrect');
       input.classList.add(isCorrect ? 'correct' : 'incorrect');
-      fb.textContent = isCorrect ? '✓ Correct!' : `✗ Correct answer: "${q.answer}"`;
+      fb.textContent = isCorrect ? '✓ Correct!' : (reveal ? `✗ Correct answer: "${q.answer}"` : '✗ Not quite — try again');
       fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
       if (isCorrect) correctCount++;
       pushResult(q, isCorrect);
@@ -1491,10 +1536,10 @@ function checkAnswers(){
       labels.forEach(label => {
         const val = label.querySelector('input').value;
         label.classList.remove('correct','incorrect');
-        if (val === q.answer) label.classList.add('correct');
+        if (val === q.answer && (isCorrect || reveal)) label.classList.add('correct');
         else if (val === chosen && !isCorrect) label.classList.add('incorrect');
       });
-      fb.textContent = isCorrect ? '✓ Correct!' : `✗ Correct answer: ${q.answer}`;
+      fb.textContent = isCorrect ? '✓ Correct!' : (reveal ? `✗ Correct answer: ${q.answer}` : '✗ Not quite — try again');
       fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
       if (isCorrect) correctCount++;
       pushResult(q, isCorrect);
@@ -1508,7 +1553,7 @@ function checkAnswers(){
         builder.classList.remove('correct','incorrect');
         builder.classList.add(isCorrect ? 'correct' : 'incorrect');
       }
-      fb.textContent = isCorrect ? '✓ Correct order!' : `✗ Correct sentence: "${q.answer}."`;
+      fb.textContent = isCorrect ? '✓ Correct order!' : (reveal ? `✗ Correct sentence: "${q.answer}."` : '✗ Not quite — try again');
       fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
       if (isCorrect) correctCount++;
       pushResult(q, isCorrect);
@@ -1519,7 +1564,7 @@ function checkAnswers(){
       selects.forEach((sel, pIdx) => {
         const correct = q.pairs[pIdx].answer;
         sel.classList.remove('correct','incorrect');
-        if (sel.value === correct) sel.classList.add('correct');
+        if (sel.value === correct) { sel.classList.add('correct'); sel.disabled = true; }
         else { sel.classList.add('incorrect'); allCorrect = false; }
       });
       fb.textContent = allCorrect ? '✓ All matched correctly!' : '✗ Some pairs are wrong — check the highlighted ones.';
@@ -1572,6 +1617,10 @@ function checkAnswers(){
         pushResult(q, false);
       }
     }
+
+    const last = questionResults[questionResults.length - 1];
+    if (questionResults.length > resultsBefore && last.correct) lockQuestion(i);
+    else wrongChecks[i] = (wrongChecks[i] || 0) + 1;
   });
 
   const scorableTotal = currentUnit.questions.filter(q => q.type !== 'note' && q.type !== 'shadowing').length;
@@ -1595,7 +1644,9 @@ function showScore(correct, total, practiceCompleted, practiceTotal){
   let html = '';
   if (total > 0) {
     html += `<div class="score-num">${correct}/${total}</div>
-             <div class="score-label">correct answers — scroll up to review</div>`;
+             <div class="score-label">${correct < total
+               ? 'correct answers — corrige solo las que tienen ✗ y vuelve a presionar "Check my answers"'
+               : 'correct answers — ¡todo correcto!'}</div>`;
   }
   if (practiceTotal > 0) {
     html += `<div class="practice-num">${practiceCompleted}/${practiceTotal}</div>
