@@ -71,8 +71,9 @@
   }
   .card.locked .options,
   .card.locked .unscramble-bank,
-  .card.locked .answer-builder,
-  .card.locked .record-btn{pointer-events:none;}
+  .card.locked .answer-builder{pointer-events:none;}
+  /* El micrófono sigue disponible aunque la pregunta ya esté bien:
+     pueden seguir practicando sin que cambie su calificación. */
   .q-meta{font-size:12px;color:var(--accent-yellow);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-weight:600;}
   .q-text{font-size:18px;margin-bottom:18px;line-height:1.5;}
   .q-text b{color:var(--accent-yellow);font-weight:600;}
@@ -990,6 +991,18 @@ function speak(text, rate = 0.95, times = 1){
   }
 }
 
+/* En muchos celulares el micrófono no arranca mientras el audio de
+   ejemplo (speechSynthesis) sigue sonando o acaba de terminar: el
+   sistema todavía tiene "ocupado" el audio. Antes de grabar, se corta
+   el ejemplo y se espera un momento para que el teléfono suelte el audio. */
+function releaseAudioForMic(){
+  const synth = window.speechSynthesis;
+  const wasBusy = !!synth && (synth.speaking || synth.pending);
+  if (synth) synth.cancel();
+  return new Promise(r => setTimeout(r, wasBusy ? 600 : 250));
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
 let completedUnits = {};
 
 function visibleUnits(){
@@ -1285,7 +1298,17 @@ function renderQuiz(){
             return;
           }
           try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            status.textContent = 'Preparando micrófono...';
+            await releaseAudioForMic();
+            let stream;
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (firstErr) {
+              // Si el permiso está negado, reintentar no sirve.
+              if (firstErr && firstErr.name === 'NotAllowedError') throw firstErr;
+              await wait(800);
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
             chunks = [];
             const preferredTypes = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg', ''];
             mediaRecorder = null;
@@ -1328,7 +1351,10 @@ function renderQuiz(){
             recBtn.innerHTML = '⏹ Stop';
             status.textContent = '🎙️ Recording... habla ahora';
           } catch (err) {
-            status.textContent = '⚠ No se pudo acceder al micrófono. Revisa permisos.';
+            const name = (err && err.name) || 'error';
+            status.textContent = name === 'NotAllowedError'
+              ? '⚠ El micrófono está bloqueado para esta página. Toca el candado junto a la dirección → Permisos → Micrófono → Permitir.'
+              : `⚠ El micrófono está ocupado (${name}). Espera a que termine el audio de ejemplo y vuelve a presionar Record.`;
           }
         };
 
@@ -1363,8 +1389,11 @@ function renderQuiz(){
         transcriptBox.className = 'transcript-box';
         transcriptBox.textContent = 'Your answer will appear here...';
 
-        recBtn.onclick = () => {
+        let retriedCapture = false;
+        recBtn.onclick = async () => {
           practicedAnswers[i] = true;
+          status.textContent = 'Preparando micrófono...';
+          await releaseAudioForMic();
 
           let recognition;
           try {
@@ -1381,11 +1410,21 @@ function renderQuiz(){
           status.textContent = '🎙️ Listening... speak now';
 
           recognition.onresult = (e) => {
+            retriedCapture = false;
             const said = e.results[0][0].transcript;
             userAnswers[i] = said;
             transcriptBox.textContent = `"${said}"`;
           };
           recognition.onerror = (e) => {
+            // Micrófono todavía ocupado por el audio de ejemplo: un
+            // reintento automático después de una pausa suele bastar.
+            if ((e.error === 'audio-capture' || e.error === 'aborted') && !retriedCapture) {
+              retriedCapture = true;
+              status.textContent = 'Reintentando micrófono...';
+              setTimeout(() => recBtn.onclick(), 900);
+              return;
+            }
+            retriedCapture = false;
             const messages = {
               'not-allowed': '⚠ Permiso de micrófono bloqueado. Revisa Ajustes → Safari → Micrófono.',
               'no-speech': 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.',
@@ -1395,10 +1434,11 @@ function renderQuiz(){
               'service-not-allowed': '⚠ Este navegador bloqueó el servicio de reconocimiento de voz.'
             };
             status.textContent = messages[e.error] || `⚠ Error: ${e.error} — intenta de nuevo.`;
+            if (e.error === 'audio-capture') status.textContent = '⚠ El micrófono está ocupado. Espera a que termine el audio de ejemplo y vuelve a presionar Record.';
           };
           recognition.onend = () => {
             recBtn.classList.remove('recording');
-            if (!status.textContent.includes('⚠') && !status.textContent.includes('No se detectó')) {
+            if (!status.textContent.includes('⚠') && !status.textContent.includes('No se detectó') && !status.textContent.includes('Reintentando')) {
               status.textContent = 'Recording finished. Press "Check my answers" when ready, or record again.';
             }
           };
