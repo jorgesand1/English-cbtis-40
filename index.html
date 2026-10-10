@@ -64,6 +64,7 @@
   }
   /* Pregunta ya contestada bien: queda fija con palomita y ya no se
      puede cambiar, para que el alumno solo corrija las que tienen ✗. */
+  .q-image{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:8px;margin:4px 0 14px;}
   .card.locked{position:relative;border-color:var(--accent-green);}
   .card.locked::after{
     content:'✓';position:absolute;top:10px;right:14px;
@@ -739,24 +740,26 @@ const UNITS = [
         type: "note",
         text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud. Ojo con la terminación <b>-ed</b>: en <i>whispered</i>, <i>appeared</i> y <i>dared</i> suena como \"d\"; en <i>walked</i> suena como \"t\"."
       },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🤫", audioText: "whispered", targetText: "whispered" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🔁", audioText: "echo", targetText: "echo" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "❓", audioText: "mysterious", targetText: "mysterious" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👾", audioText: "creature", targetText: "creature" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👀", audioText: "saw", targetText: "saw" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "💬", audioText: "said", targetText: "said" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✨", audioText: "glowing", targetText: "glowing" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👂", audioText: "heard", targetText: "heard" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🔍", audioText: "investigate", targetText: "investigate" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚶", audioText: "walked", targetText: "walked" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👻", audioText: "appeared", targetText: "appeared" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⚡", audioText: "suddenly", targetText: "suddenly" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏃", audioText: "ran", targetText: "ran" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "😨", audioText: "dared", targetText: "dared" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🤫", audioText: "whispered", targetText: "whispered", image: "img/u2-whispered.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🔁", audioText: "echo", targetText: "echo", image: "img/u2-echo.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "❓", audioText: "mysterious", targetText: "mysterious", image: "img/u2-mysterious.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👾", audioText: "creature", targetText: "creature", image: "img/u2-creature.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👀", audioText: "saw", targetText: "saw", image: "img/u2-saw.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "💬", audioText: "said", targetText: "said", image: "img/u2-said.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✨", audioText: "glowing", targetText: "glowing", image: "img/u2-glowing.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👂", audioText: "heard", targetText: "heard", image: "img/u2-heard.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🔍", audioText: "investigate", targetText: "investigate", image: "img/u2-investigate.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚶", audioText: "walked", targetText: "walked", image: "img/u2-walked.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👻", audioText: "appeared", targetText: "appeared", image: "img/u2-appeared.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⚡", audioText: "suddenly", targetText: "suddenly", image: "img/u2-suddenly.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏃", audioText: "ran", targetText: "ran", image: "img/u2-ran.jpg" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "😨", audioText: "dared", targetText: "dared", image: "img/u2-dared.jpg" },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⏰", audioText: "when", targetText: "when" },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⏳", audioText: "while", targetText: "while" },
       {
         type: "note",
+        image: "img/u2-mine.jpg",
+        imageAlt: "The entrance of an old mine at night",
         text: "<b>Part 2 · Listening comprehension.</b> Listen to the legend \"The Creature of the Old Mine\". You may play it more than once, then answer the questions."
       },
       {
@@ -794,6 +797,8 @@ const UNITS = [
       },
       {
         type: "note",
+        image: "img/u2-lucia-marco.jpg",
+        imageAlt: "Two teenagers talking the next morning",
         text: "<b>Part 3 · Reading comprehension.</b> The next day, Lucía talks with her friend Marco.<br><br><b>Marco:</b> People are saying you went into the old mine last night. You didn't go alone, did you?<br><b>Lucía:</b> I did! I wanted to investigate the mysterious sounds.<br><b>Marco:</b> What happened?<br><b>Lucía:</b> While I was walking through the tunnel, I heard someone whisper my name. At first, I thought it was just an echo.<br><b>Marco:</b> But it wasn't an echo, was it?<br><b>Lucía:</b> I don't know. When I reached the end, a glowing shape suddenly appeared on the wall. I ran as fast as I could.<br><b>Marco:</b> You saw the creature, didn't you?<br><b>Lucía:</b> I saw a light, not a creature. My grandfather said it was only the moon on the wet rocks.<br><b>Marco:</b> Maybe... but I never dared to walk near that mine, and I'm not going to start now!"
       },
       { type: "truefalse", text: "1. Lucía went into the mine with Marco.", answer: "False" },
@@ -909,6 +914,275 @@ const UNITS = [
         minWords: 8,
         hint: "include when or while, like 'I was walking home when I heard a whisper'",
         sampleAnswer: "My uncle was driving at night when a glowing light suddenly appeared on the road."
+      }
+    ]
+  },
+  {
+    id: "unit3-ingles5",
+    semester: 5,
+    title: "Unit 3 — Future Bodies & Lifestyles",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Palabras clave de esta unidad</b> (las del texto de la p. 33 que practicamos en clase):<br><b>appearance · disease · wearable · transportation · work-life balance · self-driving · scooters · traffic · pollution · leisure</b><br><br>Recuerda: <b>WILL</b> = \"yo creo\" o lo decido en este momento · <b>GOING TO</b> = \"ya se ve\" o \"ya está planeado\"."
+      },
+      {
+        type: "note",
+        text: "<b>Part 1 · Vocabulary.</b> Match each word with its correct meaning."
+      },
+      {
+        type: "match",
+        text: "Match each word with its meaning:",
+        pairs: [
+          { term: "Appearance", options: ["The way a person looks", "Free time to relax and have fun", "Dirty air, water or land"], answer: "The way a person looks" },
+          { term: "Disease", options: ["Too many cars on the street", "An illness that affects the body", "The way a person looks"], answer: "An illness that affects the body" },
+          { term: "Wearable", options: ["Something you can use on your body, like a smartwatch", "A car that drives without a driver", "An illness that affects the body"], answer: "Something you can use on your body, like a smartwatch" },
+          { term: "Transportation", options: ["Free time to relax and have fun", "The ways we travel from one place to another", "Dirty air, water or land"], answer: "The ways we travel from one place to another" },
+          { term: "Work-life balance", options: ["Having time for your job AND for your family and yourself", "Too many cars on the street", "The way a person looks"], answer: "Having time for your job AND for your family and yourself" },
+          { term: "Self-driving", options: ["Something you can use on your body", "Able to drive without a person controlling it", "An illness that affects the body"], answer: "Able to drive without a person controlling it" },
+          { term: "Scooters", options: ["Small vehicles with two wheels and a handle", "The ways we travel", "Free time to relax"], answer: "Small vehicles with two wheels and a handle" },
+          { term: "Traffic", options: ["Dirty air, water or land", "Too many cars on the street", "Small vehicles with two wheels"], answer: "Too many cars on the street" },
+          { term: "Pollution", options: ["Dirty air, water or land", "The way a person looks", "Having time for your job and your family"], answer: "Dirty air, water or land" },
+          { term: "Leisure", options: ["Free time to relax and have fun", "An illness that affects the body", "Too many cars on the street"], answer: "Free time to relax and have fun" }
+        ]
+      },
+      {
+        type: "match",
+        text: "Future technology (ex. F, p. 35). Match each idea with its meaning:",
+        pairs: [
+          { term: "Virtual reality", options: ["A digital world you can see and move in with special glasses", "Meat made from animal cells in a laboratory", "Traveling to space as a tourist"], answer: "A digital world you can see and move in with special glasses" },
+          { term: "Lab-grown meat", options: ["Machines that can think and learn", "Meat made from animal cells in a laboratory", "Printing real objects layer by layer"], answer: "Meat made from animal cells in a laboratory" },
+          { term: "Artificial intelligence", options: ["Machines that can think and learn", "Traveling to space as a tourist", "A digital world you see with special glasses"], answer: "Machines that can think and learn" },
+          { term: "3D printing", options: ["Printing real objects layer by layer", "Meat made from animal cells", "Machines that can think and learn"], answer: "Printing real objects layer by layer" },
+          { term: "Space tourism", options: ["A digital world you see with special glasses", "Printing real objects layer by layer", "Traveling to space as a tourist"], answer: "Traveling to space as a tourist" }
+        ]
+      },
+      {
+        type: "note",
+        text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🪞", audioText: "appearance", targetText: "appearance" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🤒", audioText: "disease", targetText: "disease" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⌚", audioText: "wearable", targetText: "wearable", image: "img/u3-wearables.jpg", imageAlt: "A teenager using wearable health devices" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚆", audioText: "transportation", targetText: "transportation", image: "img/u3-transportation.jpg", imageAlt: "Traffic today and future transportation" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "⚖️", audioText: "balance", targetText: "balance" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚗", audioText: "self-driving", targetText: "self-driving", image: "img/u3-self-driving.jpg", imageAlt: "A woman reading in a self-driving car" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🛴", audioText: "scooters", targetText: "scooters" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚦", audioText: "traffic", targetText: "traffic" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏭", audioText: "pollution", targetText: "pollution" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏖️", audioText: "leisure", targetText: "leisure", image: "img/u3-leisure.jpg", imageAlt: "A family enjoying leisure time with virtual reality" },
+      {
+        type: "note",
+        text: "<b>Part 2 · Which sentence is it?</b> Igual que en clase: mira cada imagen y elige la oración del texto de la p. 33 que le corresponde."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-self-driving.jpg", imageAlt: "A woman reading in a car that drives by itself",
+        options: ["Many cars will be self-driving.", "People will have more leisure time.", "They will use wearable devices."],
+        answer: "Many cars will be self-driving."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-leisure.jpg", imageAlt: "A family at home, a boy using virtual reality",
+        options: ["Transportation will be different.", "People will have more leisure time.", "Doctors will be able to fix problems in our bodies."],
+        answer: "People will have more leisure time."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-shared-bikes.jpg", imageAlt: "A student taking a shared bike with his phone",
+        options: ["People will not need to own cars.", "Our lives will be very different.", "People will be able to do their jobs anywhere."],
+        answer: "People will not need to own cars."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-doctors.jpg", imageAlt: "A doctor showing a patient a hologram of his knee",
+        options: ["Many cars will be self-driving.", "Doctors will be able to fix problems in our bodies.", "People will not need to own cars."],
+        answer: "Doctors will be able to fix problems in our bodies."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-future-city.jpg", imageAlt: "A green futuristic city with flying cars",
+        options: ["They will use wearable devices.", "People will have more leisure time.", "Our lives will be very different."],
+        answer: "Our lives will be very different."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-work-anywhere.jpg", imageAlt: "A young woman working on her laptop at the beach",
+        options: ["People will be able to do their jobs anywhere.", "Transportation will be different.", "Doctors will be able to fix problems in our bodies."],
+        answer: "People will be able to do their jobs anywhere."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-wearables.jpg", imageAlt: "A teenager with smart glasses and a health sensor on his arm",
+        options: ["People will not need to own cars.", "They will use wearable devices.", "Our lives will be very different."],
+        answer: "They will use wearable devices."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u3-transportation.jpg", imageAlt: "Traffic and pollution today next to future flying transport",
+        options: ["Transportation will be different.", "People will have more leisure time.", "Many cars will be self-driving."],
+        answer: "Transportation will be different."
+      },
+      {
+        type: "note",
+        image: "img/u3-future-city.jpg", imageAlt: "A green futuristic city",
+        text: "<b>Part 3 · Listening comprehension.</b> Listen to Diego talking about his town in 2050. You may play it more than once, then answer the questions."
+      },
+      {
+        type: "mc",
+        text: "1. What problems does Diego's town have today?",
+        audioText: "My Town in 2050. Hi, I'm Diego. My grandmother says life was very different when she was young, and I think life will be very different in 2050 too. Look at my town today: there is a lot of traffic and pollution. But the city is building new bike lanes right now, so people are going to use bikes and scooters a lot more. I think many cars will be self-driving, and families won't need to own a car. Health will change too. My cousin already has a wearable watch that sends information to her doctor. In the future, I believe doctors will find a disease before it even starts. As for me, I'm going to study engineering next year. I already signed up! I think I will work from home two days a week, so I will have more leisure time and a better work-life balance. I'm sure of one thing: the future is going to be exciting.",
+        options: ["Traffic and pollution", "No hospitals and no schools", "Too many bikes"],
+        answer: "Traffic and pollution"
+      },
+      {
+        type: "mc",
+        text: "2. Why are people going to use bikes and scooters more?",
+        audioText: "But the city is building new bike lanes right now, so people are going to use bikes and scooters a lot more.",
+        options: ["Because cars will be very expensive", "Because the city is building new bike lanes", "Because Diego told them to"],
+        answer: "Because the city is building new bike lanes"
+      },
+      {
+        type: "truefalse",
+        text: "3. Diego's cousin already has a wearable watch.",
+        audioText: "My cousin already has a wearable watch that sends information to her doctor.",
+        answer: "True"
+      },
+      {
+        type: "mc",
+        text: "4. What is Diego going to do next year?",
+        audioText: "As for me, I'm going to study engineering next year. I already signed up!",
+        options: ["Buy a self-driving car", "Study engineering", "Work at a hospital"],
+        answer: "Study engineering"
+      },
+      {
+        type: "truefalse",
+        text: "5. Diego thinks he will work from home every day.",
+        audioText: "I think I will work from home two days a week, so I will have more leisure time and a better work-life balance.",
+        answer: "False"
+      },
+      {
+        type: "note",
+        text: "<b>Grammar reminder · will vs. going to:</b><br>🧠 <b>WILL</b>: opinión o creencia (<i>I think cars will fly</i>) y decisión del momento, como cuando suena el teléfono (<i>The phone is ringing! I'll answer it.</i>).<br>👀 <b>GOING TO</b>: algo que ya se ve (<i>Look at those clouds! It's going to rain.</i>) o un plan que ya hiciste (<i>I'm going to visit my aunt on Sunday.</i>)."
+      },
+      {
+        type: "note",
+        text: "<b>Part 4 · Will or going to?</b> Choose the correct option. Piensa: ¿es una opinión o decisión del momento (will), o ya se ve / ya está planeado (going to)?"
+      },
+      {
+        type: "mc",
+        text: "Look at all those cars! There ______ a lot of traffic today.",
+        options: ["will be", "is going to be"],
+        answer: "is going to be"
+      },
+      {
+        type: "mc",
+        text: "I think people ______ more scooters in 2050.",
+        options: ["will use", "are going to use"],
+        answer: "will use"
+      },
+      {
+        type: "mc",
+        text: "The phone is ringing! — Don't worry, I ______ it.",
+        options: ["'ll answer", "am going to answer"],
+        answer: "'ll answer"
+      },
+      {
+        type: "mc",
+        text: "We already bought the tickets. We ______ the science fair on Saturday.",
+        options: ["will visit", "are going to visit"],
+        answer: "are going to visit"
+      },
+      {
+        type: "mc",
+        text: "The sky is full of smoke. The pollution ______ worse this afternoon.",
+        options: ["will get", "is going to get"],
+        answer: "is going to get"
+      },
+      {
+        type: "mc",
+        text: "In my opinion, doctors ______ robots in every hospital.",
+        options: ["will use", "are going to use"],
+        answer: "will use"
+      },
+      {
+        type: "note",
+        text: "<b>Part 5 · Complete the sentences.</b> Write <b>will / won't</b> or <b>am / is / are going to</b> + the verb in parentheses."
+      },
+      { type: "fill", text: "Next year, my sister ______ (study) medicine. She already enrolled.", answer: "is going to study" },
+      { type: "fill", text: "I think doctors ______ (find) diseases much earlier in the future.", answer: "will find" },
+      { type: "fill", text: "Look at that traffic jam! We ______ (be) late.", answer: "are going to be" },
+      { type: "fill", text: "Don't worry, I ______ (call) the doctor for you.", answer: "will call", acceptableAny: ["'ll call"] },
+      { type: "fill", text: "In 2050, people ______ (not / need) to own a car.", answer: "won't need", acceptableAny: ["will not need", "wont need"] },
+      { type: "fill", text: "My parents ______ (buy) an electric car next month. They already chose it.", answer: "are going to buy" },
+      {
+        type: "note",
+        text: "<b>Part 6 · Tag questions with will and going to</b> (como en la P2). Oración afirmativa → pregunta negativa: <i>Cars will fly, won't they?</i> · Oración negativa → pregunta afirmativa: <i>You aren't going to drive, are you?</i>"
+      },
+      {
+        type: "mc",
+        text: "Cars will fly in the future, ______?",
+        options: ["won't they", "will they", "don't they"],
+        answer: "won't they"
+      },
+      {
+        type: "mc",
+        text: "You're going to study engineering, ______?",
+        options: ["are you", "aren't you", "won't you"],
+        answer: "aren't you"
+      },
+      {
+        type: "mc",
+        text: "People won't need their own cars, ______?",
+        options: ["will they", "won't they", "do they"],
+        answer: "will they"
+      },
+      {
+        type: "note",
+        text: "<b>Part 7 · Review — Unscramble.</b> Put the words in order to form correct sentences."
+      },
+      { type: "unscramble", text: "Put the words in order:", words: ["going", "People", "use", "are", "to", "more", "scooters"], answer: "People are going to use more scooters" },
+      { type: "unscramble", text: "Put the words in order:", words: ["find", "Doctors", "diseases", "will", "earlier"], answer: "Doctors will find diseases earlier" },
+      { type: "unscramble", text: "Put the words in order:", words: ["be", "There", "so", "won't", "much", "traffic"], answer: "There won't be so much traffic" },
+      { type: "unscramble", text: "Put the words in order:", words: ["work", "I", "am", "from", "to", "going", "home"], answer: "I am going to work from home" },
+      { type: "unscramble", text: "Put the words in order:", words: ["reduce", "Self-driving", "will", "cars", "pollution"], answer: "Self-driving cars will reduce pollution" },
+      {
+        type: "note",
+        text: "<b>Part 8 · Shadowing.</b> Habla EN VOZ ALTA al mismo tiempo que escuchas."
+      },
+      { type: "shadowing", sentence: "I think our lives will be very different in the future." },
+      { type: "shadowing", sentence: "Look at the traffic! We're going to be late." },
+      { type: "shadowing", sentence: "People will use wearable devices to check their health." },
+      { type: "shadowing", sentence: "I'm going to have more leisure time next year." },
+      {
+        type: "note",
+        text: "<b>Part 9 · Speaking.</b> Graba dos oraciones: una <b>predicción</b> sobre tu vida en 2050 con <b>will</b>, y un <b>plan</b> que ya tengas con <b>going to</b>."
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Make a prediction about your life in 2050 (use will):",
+        keywords: ["will", "i'll"],
+        minWords: 6,
+        hint: "use will, like 'In 2050 I will work from home'",
+        sampleAnswer: "In 2050 I think I will travel in a self-driving car."
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Say a plan you already have (use going to):",
+        keywords: ["going"],
+        minWords: 6,
+        hint: "use going to, like 'I am going to visit my grandmother this weekend'",
+        sampleAnswer: "I am going to play soccer with my friends on Saturday."
       }
     ]
   }
@@ -1095,6 +1369,7 @@ function renderQuiz(){
       meta.className = 'q-meta';
       meta.textContent = '💡 Tip';
       card.appendChild(meta);
+      addQuestionImage(card, q, null);
       const text = document.createElement('div');
       text.className = 'q-text';
       text.innerHTML = q.text;
@@ -1110,13 +1385,15 @@ function renderQuiz(){
     meta.textContent = `Question ${displayQuestionNumber} — ${typeLabels[q.type] || ''}`;
     card.appendChild(meta);
 
+    let emojiEl = null;
     if (q.emoji) {
-      const emojiEl = document.createElement('div');
+      emojiEl = document.createElement('div');
       emojiEl.style.fontSize = '54px';
       emojiEl.style.marginBottom = '8px';
       emojiEl.textContent = q.emoji;
       card.appendChild(emojiEl);
     }
+    addQuestionImage(card, q, emojiEl);
 
     if (q.text) {
       const text = document.createElement('div');
@@ -1493,6 +1770,24 @@ function renderQuiz(){
   actions.innerHTML = `<button class="primary" onclick="checkAnswers()">Check my answers</button>
                         <button class="ghost" onclick="resetQuiz()">Reset</button>`;
   area.appendChild(actions);
+}
+
+/* Imagen opcional de una pregunta (campo "image", p. ej. "img/u2-echo.jpg").
+   Si el archivo todavía no está subido, no se muestra nada y se queda el
+   emoji como respaldo; cuando la imagen sí carga, reemplaza al emoji. */
+function addQuestionImage(card, q, fallbackEl){
+  if (!q.image) return;
+  const img = document.createElement('img');
+  img.className = 'q-image';
+  img.alt = q.imageAlt || q.targetText || '';
+  img.style.display = 'none';
+  img.onload = () => {
+    img.style.display = 'block';
+    if (fallbackEl) fallbackEl.style.display = 'none';
+  };
+  img.onerror = () => img.remove();
+  img.src = q.image;
+  card.appendChild(img);
 }
 
 function resetQuiz(){
