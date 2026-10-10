@@ -1016,23 +1016,6 @@ function speechHelpMessage(){
   return '⚠ Este navegador no permite el reconocimiento de voz. Abre la página en Google Chrome y vuelve a intentarlo.';
 }
 
-/* Si no se puede usar la voz, el alumno escribe lo que diría en voz alta
-   para no quedarse atorado en la pregunta. */
-function addTypedFallback(card, i, transcriptBox){
-  if (card.querySelector('.typed-fallback')) return;
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'fill-input typed-fallback';
-  input.placeholder = 'Si el micrófono no funciona, escribe aquí lo que dirías en voz alta';
-  input.oninput = () => {
-    userAnswers[i] = input.value.trim();
-    if (transcriptBox) transcriptBox.textContent = input.value.trim() ? `"${input.value.trim()}"` : 'Your answer will appear here...';
-  };
-  input.style.cssText = 'display:block;width:100%;box-sizing:border-box;margin-top:12px;font-size:15px;';
-  if (transcriptBox && transcriptBox.parentNode === card) card.insertBefore(input, transcriptBox.nextSibling);
-  else card.appendChild(input);
-}
-
 let completedUnits = {};
 
 function visibleUnits(){
@@ -1408,7 +1391,6 @@ function renderQuiz(){
         warn.className = 'no-support';
         warn.textContent = speechHelpMessage();
         card.appendChild(warn);
-        addTypedFallback(card, i, null);
       } else {
         const recBtn = document.createElement('button');
         recBtn.className = 'record-btn';
@@ -1477,9 +1459,6 @@ function renderQuiz(){
             status.textContent = messages[e.error] || `⚠ Error: ${e.error} — intenta de nuevo.`;
             if (e.error === 'audio-capture') status.textContent = '⚠ El micrófono está ocupado. Espera a que termine el audio de ejemplo y vuelve a presionar Record.';
             if (e.error === 'service-not-allowed') status.textContent = speechHelpMessage();
-            if (e.error === 'service-not-allowed' || e.error === 'not-allowed' || e.error === 'network') {
-              addTypedFallback(card, i, transcriptBox);
-            }
           };
           recognition.onend = () => {
             recBtn.classList.remove('recording');
