@@ -101,6 +101,10 @@
 
   .match-row{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
   .match-term{width:150px;font-weight:600;flex-shrink:0;}
+  .match-img{width:150px;height:75px;border-radius:8px;}
+  .match-emoji{font-size:44px;line-height:1;}
+  .match-term.emoji-only{width:92px;}
+  .match-term.emoji-only .match-emoji{font-size:38px;white-space:nowrap;}
   .match-select{
     flex:1;min-width:0;background:var(--board);color:var(--chalk);border:1px solid var(--line);
     border-radius:6px;padding:8px 10px;font-family:'Work Sans',sans-serif;font-size:14px;
@@ -479,6 +483,105 @@ const UNITS = [
         minWords: 12,
         hint: "follow the full structure: name, best friend's name, their age, and something they like",
         sampleAnswer: "Hi, my name is Laura. My best friend is Ana. She is 15 years old, and she likes music."
+      }
+    ]
+  },
+  {
+    id: "unit2-ingles1",
+    semester: 1,
+    title: "Unit 2 — Classroom Supplies & Instructions",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Part 1 · Classroom supplies — Pronunciation.</b> Look at the picture, listen to the word and record yourself saying it out loud."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✏️", audioText: "pencil", targetText: "pencil", image: "img/i1u2-pencil.svg", imageAlt: "pencil" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🖊️", audioText: "pen", targetText: "pen", image: "img/i1u2-pen.svg", imageAlt: "pen" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧼", audioText: "eraser", targetText: "eraser", image: "img/i1u2-eraser.svg", imageAlt: "eraser" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✏️", audioText: "sharpener", targetText: "sharpener", image: "img/i1u2-sharpener.svg", imageAlt: "sharpener" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📏", audioText: "ruler", targetText: "ruler", image: "img/i1u2-ruler.svg", imageAlt: "ruler" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✂️", audioText: "scissors", targetText: "scissors", image: "img/i1u2-scissors.svg", imageAlt: "scissors" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧴", audioText: "glue stick", targetText: "glue stick", image: "img/i1u2-glue-stick.svg", imageAlt: "glue stick" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📎", audioText: "stapler", targetText: "stapler", image: "img/i1u2-stapler.svg", imageAlt: "stapler" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📓", audioText: "notebook", targetText: "notebook", image: "img/i1u2-notebook.svg", imageAlt: "notebook" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📕", audioText: "book", targetText: "book", image: "img/i1u2-book.svg", imageAlt: "book" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📘", audioText: "dictionary", targetText: "dictionary", image: "img/i1u2-dictionary.svg", imageAlt: "dictionary" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🎒", audioText: "backpack", targetText: "backpack", image: "img/i1u2-backpack.svg", imageAlt: "backpack" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🖍️", audioText: "marker", targetText: "marker", image: "img/i1u2-marker.svg", imageAlt: "marker" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧑‍🏫", audioText: "board", targetText: "board", image: "img/i1u2-board.svg", imageAlt: "board" },
+      {
+        type: "note",
+        text: "<b>Part 2 · Match the picture.</b> Choose the correct word for each picture."
+      },
+      {
+        type: "match",
+        text: "Match each picture with the classroom supply:",
+        pairs: [
+          { term: "pencil", emoji: "✏️", image: "img/i1u2-pencil.svg", imageAlt: "Picture", options: ["scissors", "glue stick", "ruler", "pencil", "sharpener", "pen", "eraser"], answer: "pencil" },
+          { term: "pen", emoji: "🖊️", image: "img/i1u2-pen.svg", imageAlt: "Picture", options: ["sharpener", "glue stick", "scissors", "pen", "pencil", "ruler", "eraser"], answer: "pen" },
+          { term: "eraser", emoji: "🧼", image: "img/i1u2-eraser.svg", imageAlt: "Picture", options: ["eraser", "scissors", "ruler", "pen", "pencil", "glue stick", "sharpener"], answer: "eraser" },
+          { term: "sharpener", emoji: "✏️", image: "img/i1u2-sharpener.svg", imageAlt: "Picture", options: ["sharpener", "scissors", "eraser", "pen", "glue stick", "ruler", "pencil"], answer: "sharpener" },
+          { term: "ruler", emoji: "📏", image: "img/i1u2-ruler.svg", imageAlt: "Picture", options: ["pen", "eraser", "scissors", "pencil", "sharpener", "glue stick", "ruler"], answer: "ruler" },
+          { term: "scissors", emoji: "✂️", image: "img/i1u2-scissors.svg", imageAlt: "Picture", options: ["scissors", "glue stick", "pencil", "sharpener", "eraser", "pen", "ruler"], answer: "scissors" },
+          { term: "glue stick", emoji: "🧴", image: "img/i1u2-glue-stick.svg", imageAlt: "Picture", options: ["sharpener", "scissors", "pencil", "pen", "glue stick", "eraser", "ruler"], answer: "glue stick" }
+        ]
+      },
+      {
+        type: "match",
+        text: "Match each picture with the classroom supply:",
+        pairs: [
+          { term: "stapler", emoji: "📎", image: "img/i1u2-stapler.svg", imageAlt: "Picture", options: ["notebook", "dictionary", "board", "marker", "backpack", "stapler", "book"], answer: "stapler" },
+          { term: "notebook", emoji: "📓", image: "img/i1u2-notebook.svg", imageAlt: "Picture", options: ["stapler", "book", "marker", "board", "dictionary", "notebook", "backpack"], answer: "notebook" },
+          { term: "book", emoji: "📕", image: "img/i1u2-book.svg", imageAlt: "Picture", options: ["notebook", "marker", "stapler", "board", "book", "dictionary", "backpack"], answer: "book" },
+          { term: "dictionary", emoji: "📘", image: "img/i1u2-dictionary.svg", imageAlt: "Picture", options: ["backpack", "board", "dictionary", "book", "stapler", "notebook", "marker"], answer: "dictionary" },
+          { term: "backpack", emoji: "🎒", image: "img/i1u2-backpack.svg", imageAlt: "Picture", options: ["notebook", "stapler", "backpack", "board", "dictionary", "marker", "book"], answer: "backpack" },
+          { term: "marker", emoji: "🖍️", image: "img/i1u2-marker.svg", imageAlt: "Picture", options: ["book", "board", "marker", "notebook", "dictionary", "backpack", "stapler"], answer: "marker" },
+          { term: "board", emoji: "🧑‍🏫", image: "img/i1u2-board.svg", imageAlt: "Picture", options: ["marker", "notebook", "book", "backpack", "stapler", "board", "dictionary"], answer: "board" }
+        ]
+      },
+      {
+        type: "note",
+        text: "<b>Part 3 · Imperatives — Pronunciation.</b> Imperatives are instructions. They start with the verb: <i>Open your book.</i> For the negative, add <b>Don't</b>: <i>Don't run.</i> Listen and repeat each instruction."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📖", audioText: "Open your book", targetText: "Open your book" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📕", audioText: "Close your book", targetText: "Close your book" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "✍️", audioText: "Write your name", targetText: "Write your name" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👂", audioText: "Listen carefully", targetText: "Listen carefully" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👀", audioText: "Look at the board", targetText: "Look at the board" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧍", audioText: "Stand up", targetText: "Stand up" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🪑", audioText: "Sit down", targetText: "Sit down" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🎨", audioText: "Draw a picture", targetText: "Draw a picture" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🗣️", audioText: "Repeat after me", targetText: "Repeat after me" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚫🏃", audioText: "Don't run", targetText: "Don't run" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🤫", audioText: "Don't speak", targetText: "Don't speak" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📵", audioText: "Don't use your phone", targetText: "Don't use your phone" },
+      {
+        type: "note",
+        text: "<b>Part 4 · Match the picture with the instruction.</b>"
+      },
+      {
+        type: "match",
+        text: "What is the instruction?",
+        pairs: [
+          { term: "Open your book", emoji: "📖", options: ["Open your book", "Close your book", "Look at the board", "Listen carefully", "Stand up", "Write your name"], answer: "Open your book" },
+          { term: "Close your book", emoji: "📕", options: ["Listen carefully", "Look at the board", "Close your book", "Write your name", "Stand up", "Open your book"], answer: "Close your book" },
+          { term: "Write your name", emoji: "✍️", options: ["Stand up", "Look at the board", "Close your book", "Listen carefully", "Write your name", "Open your book"], answer: "Write your name" },
+          { term: "Listen carefully", emoji: "👂", options: ["Listen carefully", "Look at the board", "Close your book", "Open your book", "Write your name", "Stand up"], answer: "Listen carefully" },
+          { term: "Look at the board", emoji: "👀", options: ["Write your name", "Listen carefully", "Stand up", "Open your book", "Look at the board", "Close your book"], answer: "Look at the board" },
+          { term: "Stand up", emoji: "🧍", options: ["Listen carefully", "Open your book", "Look at the board", "Stand up", "Write your name", "Close your book"], answer: "Stand up" }
+        ]
+      },
+      {
+        type: "match",
+        text: "What is the instruction?",
+        pairs: [
+          { term: "Sit down", emoji: "🪑", options: ["Draw a picture", "Repeat after me", "Sit down", "Don't speak", "Don't use your phone", "Don't run"], answer: "Sit down" },
+          { term: "Draw a picture", emoji: "🎨", options: ["Don't speak", "Draw a picture", "Sit down", "Repeat after me", "Don't use your phone", "Don't run"], answer: "Draw a picture" },
+          { term: "Repeat after me", emoji: "🗣️", options: ["Sit down", "Don't use your phone", "Draw a picture", "Don't run", "Repeat after me", "Don't speak"], answer: "Repeat after me" },
+          { term: "Don't run", emoji: "🚫🏃", options: ["Don't speak", "Repeat after me", "Don't run", "Sit down", "Don't use your phone", "Draw a picture"], answer: "Don't run" },
+          { term: "Don't speak", emoji: "🤫", options: ["Repeat after me", "Don't run", "Don't speak", "Sit down", "Don't use your phone", "Draw a picture"], answer: "Don't speak" },
+          { term: "Don't use your phone", emoji: "📵", options: ["Don't speak", "Draw a picture", "Don't run", "Sit down", "Don't use your phone", "Repeat after me"], answer: "Don't use your phone" }
+        ]
       }
     ]
   },
@@ -1502,7 +1605,27 @@ function renderQuiz(){
         row.className = 'match-row';
         const term = document.createElement('div');
         term.className = 'match-term';
-        term.textContent = pair.term;
+        // Matching con imagen: si el par trae `image` o `emoji`, se muestra
+        // el dibujo en lugar del texto (el emoji queda de respaldo).
+        if (pair.image || pair.emoji) {
+          if (!pair.image) term.classList.add('emoji-only');
+          const fallback = document.createElement('span');
+          fallback.className = 'match-emoji';
+          fallback.textContent = pair.emoji || '❓';
+          term.appendChild(fallback);
+          if (pair.image) {
+            const img = document.createElement('img');
+            img.className = 'match-img';
+            img.alt = pair.imageAlt || '';
+            img.style.display = 'none';
+            img.onload = () => { img.style.display = 'block'; fallback.style.display = 'none'; };
+            img.onerror = () => img.remove();
+            img.src = pair.image;
+            term.appendChild(img);
+          }
+        } else {
+          term.textContent = pair.term;
+        }
         const select = document.createElement('select');
         select.className = 'match-select';
         select.dataset.qIndex = i;
@@ -1805,7 +1928,7 @@ function lockQuestion(i){
 }
 
 function evaluateOpenSpeaking(said, q){
-  const normalize = s => (s||'').toLowerCase().replace(/[^a-z0-9\s']/g,'').split(/\s+/).filter(Boolean);
+  const normalize = s => (s||'').toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9\s']/g,'').split(/\s+/).filter(Boolean);
   const words = normalize(said);
   const hasMinWords = words.length >= (q.minWords || 3);
   const keywords = q.keywords || [];
@@ -1815,7 +1938,7 @@ function evaluateOpenSpeaking(said, q){
 }
 
 function scoreSpeaking(said, target){
-  const normalize = s => (s||'').toLowerCase().replace(/[^a-z0-9\s']/g,'').split(/\s+/).filter(Boolean);
+  const normalize = s => (s||'').toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9\s']/g,'').split(/\s+/).filter(Boolean);
   const targetWords = normalize(target);
   const saidWords = new Set(normalize(said));
   const matched = targetWords.filter(w => saidWords.has(w));

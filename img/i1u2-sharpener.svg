@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200"><rect x="0" y="0" width="400" height="200" rx="16" fill="#fdf6e3"/>
+<rect x="56" y="86" width="26" height="28" rx="5" fill="#f687b3" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="80" y="86" width="12" height="28" fill="#a0aec0" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="92" y="86" width="96" height="28" fill="#f6c343" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="188,86 214,100 188,114" fill="#f4d7b0" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M200 62 L300 62 L300 138 L200 138 L200 114 L188 114 L188 86 L200 86 Z" fill="#e53e3e" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="214" y="50" width="70" height="16" rx="3" fill="#cbd5e0" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="236" cy="58" r="4" fill="#2d3748"/>
+<path d="M312 120 q10 -16 22 -4 q8 -14 22 0" fill="none" stroke="#c05621" stroke-width="4" stroke-linecap="round"/>
+<path d="M318 146 q10 -12 20 -2" fill="none" stroke="#c05621" stroke-width="4" stroke-linecap="round"/></svg>

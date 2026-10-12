@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200"><rect x="0" y="0" width="400" height="200" rx="16" fill="#fdf6e3"/>
+<rect x="128" y="22" width="150" height="160" rx="6" fill="#2c5282" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="128" y="22" width="26" height="160" rx="4" fill="#1a365d" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="216" y="104" font-family="Arial" font-size="40" font-weight="bold" text-anchor="middle" fill="#f6e05e">A–Z</text>
+<line x1="176" y1="128" x2="256" y2="128" stroke="#f6e05e" stroke-width="4"/></svg>
