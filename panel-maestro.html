@@ -89,6 +89,7 @@
         <option value="">Todos los alumnos</option>
       </select>
       <button class="ghost" onclick="loadData()">↻ Actualizar</button>
+      <button class="ghost" id="excelBtn" onclick="downloadExcel()">⬇ Descargar Excel</button>
     </div>
 
     <div class="section-title">Errores más recurrentes</div>
@@ -340,6 +341,129 @@
       <thead><tr><th>Alumno</th><th>Grupo</th><th>Semestre</th><th>Unidad</th><th>Calificación</th><th>Práctica</th><th>Intento #</th><th>Fecha</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
+  }
+  // ---------- Exportar a Excel (una hoja por grupo, alumnos por apellido) ----------
+  const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+
+  function loadXlsx(){
+    if (window.XLSX) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = XLSX_URL;
+      s.onload = () => resolve();
+      s.onerror = () => { s.remove(); reject(new Error('xlsx')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function resultTime(r){
+    return r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().getTime() : 0;
+  }
+
+  function resultPct(r){
+    return r.total ? Math.round((r.score / r.total) * 100) : 0;
+  }
+
+  function byName(a, b){
+    return (a || '').localeCompare(b || '', 'es', { sensitivity: 'base', numeric: true });
+  }
+
+  function sheetName(name, used){
+    let base = String(name).replace(/[\[\]:*?\/\\]/g, '-').slice(0, 31) || 'Grupo';
+    let n = base, i = 2;
+    while (used.has(n.toLowerCase())) n = base.slice(0, 27) + ' (' + (i++) + ')';
+    used.add(n.toLowerCase());
+    return n;
+  }
+
+  async function downloadExcel(){
+    const btn = document.getElementById('excelBtn');
+    const semester = document.getElementById('semesterFilter').value;
+    const group = document.getElementById('groupFilter').value;
+    const unit = document.getElementById('unitFilter').value;
+    const results = allResults.filter(r =>
+      (!semester || resultSemester(r) === Number(semester)) &&
+      (!group || r.studentGroup === group) &&
+      (!unit || r.unitId === unit)
+    );
+    if (!results.length) { alert('No hay resultados con los filtros elegidos.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Preparando...';
+    try {
+      await loadXlsx();
+    } catch (e) {
+      alert('No se pudo cargar la herramienta de Excel. Revisa tu conexión e inténtalo de nuevo.');
+      btn.disabled = false;
+      btn.textContent = '⬇ Descargar Excel';
+      return;
+    }
+
+    const units = [...new Map(results.map(r => [r.unitId, r.unitTitle || r.unitId])).entries()]
+      .sort((a, b) => byName(a[0], b[0]));
+    const groups = [...new Set(results.map(r => r.studentGroup || 'Sin grupo'))].sort(byName);
+
+    const wb = XLSX.utils.book_new();
+    const used = new Set();
+
+    groups.forEach(g => {
+      const pool = results.filter(r => (r.studentGroup || 'Sin grupo') === g);
+      const students = new Map();
+      pool.forEach(r => {
+        const key = r.studentNameKey || r.studentName;
+        if (!students.has(key)) students.set(key, { name: r.studentName || '—', attempts: [] });
+        students.get(key).attempts.push(r);
+      });
+      const list = [...students.values()].sort((a, b) => byName(a.name, b.name));
+
+      const header1 = ['N.º', 'Alumno (apellido, nombre)'];
+      const header2 = ['', ''];
+      units.forEach(([, title]) => {
+        header1.push(title, '', '');
+        header2.push('1er intento %', 'Mejor %', 'Intentos');
+      });
+      const rows = list.map((st, i) => {
+        const row = [i + 1, st.name];
+        units.forEach(([uid]) => {
+          const att = st.attempts.filter(r => r.unitId === uid).sort((a, b) => resultTime(a) - resultTime(b));
+          if (!att.length) { row.push('', '', 0); return; }
+          row.push(resultPct(att[0]), Math.max(...att.map(resultPct)), att.length);
+        });
+        return row;
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet([header1, header2, ...rows]);
+      ws['!merges'] = units.map((u, k) => ({ s: { r: 0, c: 2 + k * 3 }, e: { r: 0, c: 4 + k * 3 } }));
+      ws['!cols'] = [{ wch: 5 }, { wch: 34 }, ...units.flatMap(() => [{ wch: 12 }, { wch: 9 }, { wch: 9 }])];
+      XLSX.utils.book_append_sheet(wb, ws, sheetName(g, used));
+    });
+
+    // Hoja con todos los intentos, por grupo, alumno y fecha
+    const detail = [...results].sort((a, b) =>
+      byName(a.studentGroup, b.studentGroup) || byName(a.studentName, b.studentName) ||
+      byName(a.unitId, b.unitId) || resultTime(a) - resultTime(b)
+    ).map(r => ({
+      'Grupo': r.studentGroup || '',
+      'Alumno': r.studentName || '',
+      'Semestre': resultSemester(r),
+      'Unidad': r.unitTitle || r.unitId || '',
+      'Intento #': r.attemptNumber || 1,
+      'Aciertos': r.score || 0,
+      'Total': r.total || 0,
+      '%': resultPct(r),
+      'Práctica': r.practiceTotal ? `${r.practiceCompleted || 0}/${r.practiceTotal}` : '',
+      'Fecha': r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().toLocaleString('es-MX') : ''
+    }));
+    const wsDetail = XLSX.utils.json_to_sheet(detail);
+    wsDetail['!cols'] = [{ wch: 8 }, { wch: 34 }, { wch: 9 }, { wch: 30 }, { wch: 9 }, { wch: 9 }, { wch: 7 }, { wch: 6 }, { wch: 9 }, { wch: 22 }];
+    XLSX.utils.book_append_sheet(wb, wsDetail, sheetName('Todos los intentos', used));
+
+    const today = new Date().toISOString().slice(0, 10);
+    const parts = ['informe', semester ? semester + 'sem' : '', group, today].filter(Boolean);
+    XLSX.writeFile(wb, parts.join('_') + '.xlsx');
+
+    btn.disabled = false;
+    btn.textContent = '⬇ Descargar Excel';
   }
 </script>
 </body>
