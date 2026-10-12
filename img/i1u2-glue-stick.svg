@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200"><rect x="0" y="0" width="400" height="200" rx="16" fill="#fdf6e3"/>
+<rect x="172" y="22" width="56" height="44" rx="8" fill="#b794f4" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="168" y="62" width="64" height="118" rx="8" fill="#805ad5" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="178" y="92" width="44" height="58" rx="4" fill="#fff" stroke="#2d3748" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="200" y="128" font-family="Arial" font-size="13" font-weight="bold" text-anchor="middle" fill="#805ad5">GLUE</text></svg>
