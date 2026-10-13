@@ -232,7 +232,7 @@
   </header>
 
   <!-- Concurso de canción: audios de los grupos de 5.º semestre (archivos en audio/). Se configura en SONG_CONTEST. -->
-  <details class="card group-audios" id="songContest">
+  <details class="card group-audios" id="songContest" style="display:none;">
     <summary>🎤 Concurso de canción — 5.º semestre</summary>
     <div id="songWinner"></div>
     <p class="audio-hint" style="margin:10px 0 14px;">Escucha a tu grupo y a los demás grupos. Reacciona a los que más te gusten.</p>
@@ -291,6 +291,7 @@
   // Para anunciar al ganador: escribe su grupo en "winner" y, si quieres, los puntajes (1 a 5).
   const SONG_CONTEST = {
     id: 'cancion-oct-2026',
+    teacherId: 'jorge',      // solo aparece para los alumnos de este profesor
     groups: ['5AVC', '5AVE', '5AVG', '5AVM', '5AVP'],
     winner: null,            // ej. '5AVG'
     scores: null             // ej. { '5AVG': { pronunciation: 5, lyrics: 5, participation: 4 }, ... }
@@ -2405,6 +2406,8 @@ function startSession(){
   practicedAnswers = {};
   document.getElementById('nameGate').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
+  // El concurso de canción es solo de los grupos del Profr. Jorge Sandoval
+  document.getElementById('songContest').style.display = SONG_CONTEST.teacherId === teacherId ? 'block' : 'none';
   renderUnitPicker();
   renderQuiz();
   loadStudentProgress();
