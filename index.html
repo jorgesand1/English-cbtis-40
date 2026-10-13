@@ -203,6 +203,12 @@
   .score-label{color:var(--chalk-dim);font-size:14px;margin-top:6px;}
   .practice-num{font-family:'Patrick Hand',cursive;font-size:40px;color:var(--accent-green);line-height:1;margin-top:18px;}
 
+  .group-audios{max-width:520px;margin:0 auto 20px;}
+  .group-audios summary{cursor:pointer;font-weight:700;color:var(--accent-yellow);font-size:16px;}
+  .group-audio-item{margin-bottom:14px;}
+  .group-audio-name{font-family:'Patrick Hand',cursive;font-size:20px;margin-bottom:4px;}
+  .group-audio-item audio{width:100%;}
+
   footer{margin-top:50px;border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--chalk-dim);}
   footer code{background:var(--board-dark);padding:2px 6px;border-radius:4px;}
 </style>
@@ -216,6 +222,17 @@
     <button type="button" class="ghost" style="margin-top:12px;font-size:12px;" onclick="runAudioDiagnostic()">🔧 Probar audio (diagnóstico)</button>
     <div id="audioDiagnosticBox" style="display:none;margin-top:10px;background:var(--board-dark);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px;color:var(--chalk-dim);white-space:pre-wrap;"></div>
   </header>
+
+  <!-- Audios de los grupos de 5º semestre (archivos en la carpeta audio/) -->
+  <details class="card group-audios">
+    <summary>🎧 Audios de los grupos — 5º semestre</summary>
+    <p class="audio-hint" style="margin:10px 0 14px;">Escucha el audio de tu grupo y también el de los demás grupos.</p>
+    <div class="group-audio-item"><div class="group-audio-name">5AVC</div><audio controls preload="none" src="audio/5AVC.mp3"></audio></div>
+    <div class="group-audio-item"><div class="group-audio-name">5AVE</div><audio controls preload="none" src="audio/5AVE.mp3"></audio></div>
+    <div class="group-audio-item"><div class="group-audio-name">5AVG</div><audio controls preload="none" src="audio/5AVG.mp3"></audio></div>
+    <div class="group-audio-item"><div class="group-audio-name">5AVM</div><audio controls preload="none" src="audio/5AVM.mp3"></audio></div>
+    <div class="group-audio-item"><div class="group-audio-name">5AVP</div><audio controls preload="none" src="audio/5AVP.mp3"></audio></div>
+  </details>
 
   <div id="nameGate" class="card" style="max-width:420px;margin:0 auto 20px;">
     <div class="q-meta">Antes de empezar</div>
