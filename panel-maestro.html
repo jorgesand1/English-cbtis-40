@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel de Maestro — CBTIS 40</title>
+<!-- Las fuentes se cargan sin detener la página (igual que en index.html). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap');
   :root{
     --board:#233d2f; --board-dark:#1a2f24; --chalk:#f4f1e6; --chalk-dim:#c9d3c9;
     --accent-red:#e2574c; --accent-yellow:#e0b84a; --accent-green:#7fb069; --line: rgba(244,241,230,0.18);
@@ -103,8 +106,6 @@
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyC_JqZlzxvhvcduK695YPqIHM5PukeLI64",
@@ -114,8 +115,35 @@
     messagingSenderId: "99688303455",
     appId: "1:99688303455:web:7c13b7c60086047eddc4ea"
   };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  // Firebase se carga en segundo plano para que el panel aparezca aunque
+  // gstatic.com tarde (mismo arreglo que en index.html).
+  const FIREBASE_SCRIPTS = [
+    'https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js'
+  ];
+  function loadScript(src){
+    return new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = () => reject(new Error('No cargó ' + src));
+      document.head.appendChild(el);
+    });
+  }
+  let dbPromise = null;
+  function getDb(){
+    if (!dbPromise){
+      dbPromise = (async () => {
+        if (!window.firebase) await loadScript(FIREBASE_SCRIPTS[0]);
+        if (!firebase.firestore) await loadScript(FIREBASE_SCRIPTS[1]);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        return firebase.firestore();
+      })();
+      dbPromise.catch(() => { dbPromise = null; });
+    }
+    return dbPromise;
+  }
+  getDb().catch(() => {});
 
   const TEACHER_ACCOUNTS = {
     "cbtis40profe":     { name: "Profr. Jorge Sandoval", teacherId: "jorge",  scope: "own" },
@@ -153,6 +181,7 @@
     document.getElementById('errorAnalysis').innerHTML = '<div class="loading">Cargando...</div>';
     document.getElementById('attemptsTable').innerHTML = '<div class="loading">Cargando...</div>';
     try {
+      const db = await getDb();
       let query = db.collection('results').orderBy('timestamp', 'desc');
       if (currentAccount.scope !== 'all') {
         query = db.collection('results').where('teacherId', '==', currentAccount.teacherId).orderBy('timestamp', 'desc');
