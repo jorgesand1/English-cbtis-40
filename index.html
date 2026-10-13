@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>English Practice — CBTIS 40</title>
+<!-- Las fuentes se cargan sin detener la página: si Google Fonts tarda,
+     la página se ve primero con la letra del teléfono. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap');
 
   :root{
     --board:#233d2f;
@@ -273,8 +277,6 @@
 </div>
 
 <!-- Firebase (guarda resultados en tu base de datos de Firestore) -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyC_JqZlzxvhvcduK695YPqIHM5PukeLI64",
@@ -284,8 +286,38 @@
     messagingSenderId: "99688303455",
     appId: "1:99688303455:web:7c13b7c60086047eddc4ea"
   };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  // Firebase se carga en segundo plano: antes, si gstatic.com tardaba
+  // (datos móviles lentos, navegador de WhatsApp/Facebook), la página se
+  // quedaba en blanco. Ahora la página aparece de inmediato y la base de
+  // datos se usa cuando termina de cargar (getDb).
+  const FIREBASE_SCRIPTS = [
+    'https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js'
+  ];
+  function loadScript(src){
+    return new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = () => reject(new Error('No cargó ' + src));
+      document.head.appendChild(el);
+    });
+  }
+  let dbPromise = null;
+  function getDb(){
+    if (!dbPromise){
+      dbPromise = (async () => {
+        if (!window.firebase) await loadScript(FIREBASE_SCRIPTS[0]);
+        if (!firebase.firestore) await loadScript(FIREBASE_SCRIPTS[1]);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        return firebase.firestore();
+      })();
+      // Si falló (sin señal), el siguiente intento vuelve a probar.
+      dbPromise.catch(() => { dbPromise = null; });
+    }
+    return dbPromise;
+  }
+  getDb().catch(() => {});
 
   // ---------- Concurso de canción ----------
   // Para anunciar al ganador: escribe su grupo en "winner" y, si quieres, los puntajes (1 a 5).
@@ -333,7 +365,7 @@
   async function loadSongReactions(){
     if (songLoaded) return; songLoaded = true;
     try {
-      const snap = await db.collection('songReactions').where('contestId', '==', SONG_CONTEST.id).get();
+      const snap = await (await getDb()).collection('songReactions').where('contestId', '==', SONG_CONTEST.id).get();
       songCounts = {};
       snap.forEach(d => { const r = d.data(); (songCounts[r.group] ||= {}); songCounts[r.group][r.emoji] = (songCounts[r.group][r.emoji] || 0) + 1; });
     } catch(e){ songReactionsOk = false; }
@@ -342,7 +374,7 @@
   async function reactSong(group, emoji){
     if (songMine(group, emoji)) return;
     try {
-      await db.collection('songReactions').add({ contestId: SONG_CONTEST.id, group, emoji, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+      await (await getDb()).collection('songReactions').add({ contestId: SONG_CONTEST.id, group, emoji, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
       try { localStorage.setItem(`song:${SONG_CONTEST.id}:${group}:${emoji}`, '1'); } catch(e){}
       (songCounts[group] ||= {}); songCounts[group][emoji] = (songCounts[group][emoji] || 0) + 1;
     } catch(e){ songReactionsOk = false; }
@@ -1510,7 +1542,7 @@ function renderUnitPicker(){
 
 async function loadStudentProgress(){
   try {
-    const snap = await db.collection('results')
+    const snap = await (await getDb()).collection('results')
       .where('teacherId', '==', selectedTeacherId)
       .where('studentNameKey', '==', studentNameKey)
       .get();
@@ -2230,14 +2262,14 @@ function showScore(correct, total, practiceCompleted, practiceTotal){
 async function saveResults(score, total, questionResults, practiceCompleted, practiceTotal){
   const statusEl = document.getElementById('saveStatus');
   try {
-    const existing = await db.collection('results')
+    const existing = await (await getDb()).collection('results')
       .where('teacherId', '==', selectedTeacherId)
       .where('studentNameKey', '==', studentNameKey)
       .where('unitId', '==', currentUnit.id)
       .get();
     const attemptNumber = existing.size + 1;
 
-    await db.collection('results').add({
+    await (await getDb()).collection('results').add({
       teacherId: selectedTeacherId,
       studentName,
       studentNameKey,
