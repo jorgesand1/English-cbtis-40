@@ -208,6 +208,14 @@
   .group-audio-item{margin-bottom:14px;}
   .group-audio-name{font-family:'Patrick Hand',cursive;font-size:20px;margin-bottom:4px;}
   .group-audio-item audio{width:100%;}
+  .group-audio-item.winner{border:2px solid var(--accent-yellow);border-radius:10px;padding:10px;}
+  .song-reacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .song-reacts button{background:var(--board-dark);border:1px solid var(--line);color:var(--chalk);border-radius:20px;padding:4px 12px;font-size:16px;cursor:pointer;}
+  .song-reacts button.mine{border-color:var(--accent-yellow);}
+  .song-winner{background:var(--board-dark);border:1px solid var(--accent-yellow);border-radius:10px;padding:12px;margin-top:10px;}
+  .song-winner table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;table-layout:fixed;}
+  .song-winner th,.song-winner td{padding:4px;border-bottom:1px solid var(--line);text-align:center;}
+  .song-winner th:first-child,.song-winner td:first-child{text-align:left;}
 
   footer{margin-top:50px;border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--chalk-dim);}
   footer code{background:var(--board-dark);padding:2px 6px;border-radius:4px;}
@@ -223,15 +231,12 @@
     <div id="audioDiagnosticBox" style="display:none;margin-top:10px;background:var(--board-dark);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px;color:var(--chalk-dim);white-space:pre-wrap;"></div>
   </header>
 
-  <!-- Audios de los grupos de 5º semestre (archivos en la carpeta audio/) -->
-  <details class="card group-audios">
-    <summary>🎧 Audios de los grupos — 5º semestre</summary>
-    <p class="audio-hint" style="margin:10px 0 14px;">Escucha el audio de tu grupo y también el de los demás grupos.</p>
-    <div class="group-audio-item"><div class="group-audio-name">5AVC</div><audio controls preload="none" src="audio/5AVC.mp3"></audio></div>
-    <div class="group-audio-item"><div class="group-audio-name">5AVE</div><audio controls preload="none" src="audio/5AVE.mp3"></audio></div>
-    <div class="group-audio-item"><div class="group-audio-name">5AVG</div><audio controls preload="none" src="audio/5AVG.mp3"></audio></div>
-    <div class="group-audio-item"><div class="group-audio-name">5AVM</div><audio controls preload="none" src="audio/5AVM.mp3"></audio></div>
-    <div class="group-audio-item"><div class="group-audio-name">5AVP</div><audio controls preload="none" src="audio/5AVP.mp3"></audio></div>
+  <!-- Concurso de canción: audios de los grupos de 5.º semestre (archivos en audio/). Se configura en SONG_CONTEST. -->
+  <details class="card group-audios" id="songContest">
+    <summary>🎤 Concurso de canción — 5.º semestre</summary>
+    <div id="songWinner"></div>
+    <p class="audio-hint" style="margin:10px 0 14px;">Escucha a tu grupo y a los demás grupos. Reacciona a los que más te gusten.</p>
+    <div id="songList"></div>
   </details>
 
   <div id="nameGate" class="card" style="max-width:420px;margin:0 auto 20px;">
@@ -281,6 +286,69 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+
+  // ---------- Concurso de canción ----------
+  // Para anunciar al ganador: escribe su grupo en "winner" y, si quieres, los puntajes (1 a 5).
+  const SONG_CONTEST = {
+    id: 'cancion-oct-2026',
+    groups: ['5AVC', '5AVE', '5AVG', '5AVM', '5AVP'],
+    winner: null,            // ej. '5AVG'
+    scores: null             // ej. { '5AVG': { pronunciation: 5, lyrics: 5, participation: 4 }, ... }
+  };
+  const SONG_EMOJIS = ['👏', '🔥', '❤️', '😂'];
+  let songCounts = {}, songReactionsOk = true, songLoaded = false;
+
+  function songMine(group, emoji){
+    try { return localStorage.getItem(`song:${SONG_CONTEST.id}:${group}:${emoji}`) === '1'; } catch(e){ return false; }
+  }
+  function renderSongContest(){
+    const list = document.getElementById('songList');
+    if (!list) return;
+    list.innerHTML = SONG_CONTEST.groups.map(g => `
+      <div class="group-audio-item${SONG_CONTEST.winner === g ? ' winner' : ''}">
+        <div class="group-audio-name">${g}${SONG_CONTEST.winner === g ? ' 🏆' : ''}</div>
+        <audio controls preload="none" src="audio/${g}.mp3"></audio>
+        ${songReactionsOk ? `<div class="song-reacts">${SONG_EMOJIS.map(e =>
+          `<button type="button" class="${songMine(g, e) ? 'mine' : ''}" data-g="${g}" data-e="${e}">${e} ${(songCounts[g] && songCounts[g][e]) || ''}</button>`
+        ).join('')}</div>` : ''}
+      </div>`).join('');
+    list.querySelectorAll('.song-reacts button').forEach(b => b.onclick = () => reactSong(b.dataset.g, b.dataset.e));
+
+    const w = document.getElementById('songWinner');
+    if (!SONG_CONTEST.winner){ w.innerHTML = ''; return; }
+    let table = '';
+    if (SONG_CONTEST.scores){
+      const rows = SONG_CONTEST.groups.filter(g => SONG_CONTEST.scores[g]).map(g => {
+        const s = SONG_CONTEST.scores[g];
+        const total = (s.pronunciation || 0) + (s.lyrics || 0) + (s.participation || 0);
+        return { g, s, total };
+      }).sort((a, b) => b.total - a.total);
+      table = `<table><thead><tr><th>Grupo</th><th title="Pronunciación">Pronun.</th><th>Letra</th><th title="Participación">Partic.</th><th>Total</th></tr></thead><tbody>${
+        rows.map(r => `<tr><td>${r.g}${r.g === SONG_CONTEST.winner ? ' 🏆' : ''}</td><td>${r.s.pronunciation ?? '—'}</td><td>${r.s.lyrics ?? '—'}</td><td>${r.s.participation ?? '—'}</td><td><b>${r.total}</b></td></tr>`).join('')
+      }</tbody></table>`;
+    }
+    w.innerHTML = `<div class="song-winner"><b>🏆 ¡Ganador: ${SONG_CONTEST.winner}!</b> Felicidades, se ganaron el convivio.${table}</div>`;
+  }
+  async function loadSongReactions(){
+    if (songLoaded) return; songLoaded = true;
+    try {
+      const snap = await db.collection('songReactions').where('contestId', '==', SONG_CONTEST.id).get();
+      songCounts = {};
+      snap.forEach(d => { const r = d.data(); (songCounts[r.group] ||= {}); songCounts[r.group][r.emoji] = (songCounts[r.group][r.emoji] || 0) + 1; });
+    } catch(e){ songReactionsOk = false; }
+    renderSongContest();
+  }
+  async function reactSong(group, emoji){
+    if (songMine(group, emoji)) return;
+    try {
+      await db.collection('songReactions').add({ contestId: SONG_CONTEST.id, group, emoji, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+      try { localStorage.setItem(`song:${SONG_CONTEST.id}:${group}:${emoji}`, '1'); } catch(e){}
+      (songCounts[group] ||= {}); songCounts[group][emoji] = (songCounts[group][emoji] || 0) + 1;
+    } catch(e){ songReactionsOk = false; }
+    renderSongContest();
+  }
+  renderSongContest();
+  document.getElementById('songContest').addEventListener('toggle', e => { if (e.target.open) loadSongReactions(); });
 </script>
 
 <script>
