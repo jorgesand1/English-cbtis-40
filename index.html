@@ -216,6 +216,7 @@
   .song-reacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
   .song-reacts button{background:var(--board-dark);border:1px solid var(--line);color:var(--chalk);border-radius:20px;padding:4px 12px;font-size:16px;cursor:pointer;}
   .song-reacts button.mine{border-color:var(--accent-yellow);}
+  .winner-badge{background:var(--accent-yellow);color:var(--board-dark);font-family:system-ui,sans-serif;font-weight:800;font-size:13px;letter-spacing:.08em;border-radius:6px;padding:2px 8px;vertical-align:middle;}
   .song-winner{background:var(--board-dark);border:1px solid var(--accent-yellow);border-radius:10px;padding:12px;margin-top:10px;}
   .song-winner table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;table-layout:fixed;}
   .song-winner th,.song-winner td{padding:4px;border-bottom:1px solid var(--line);text-align:center;}
@@ -325,7 +326,7 @@
     id: 'cancion-oct-2026',
     teacherId: 'jorge',      // solo aparece para los alumnos de este profesor
     groups: ['5AVC', '5AVE', '5AVG', '5AVM', '5AVP'],
-    winner: null,            // ej. '5AVG'
+    winner: '5AVC',          // grupo ganador (null = sin anunciar)
     scores: null             // ej. { '5AVG': { pronunciation: 5, lyrics: 5, participation: 4 }, ... }
   };
   const SONG_EMOJIS = ['👏', '🔥', '❤️', '😂'];
@@ -339,7 +340,7 @@
     if (!list) return;
     list.innerHTML = SONG_CONTEST.groups.map(g => `
       <div class="group-audio-item${SONG_CONTEST.winner === g ? ' winner' : ''}">
-        <div class="group-audio-name">${g}${SONG_CONTEST.winner === g ? ' 🏆' : ''}</div>
+        <div class="group-audio-name">${SONG_CONTEST.winner === g ? '👑 ' : ''}${g}${SONG_CONTEST.winner === g ? ' <span class="winner-badge">WINNER</span>' : ''}</div>
         <audio controls preload="none" src="audio/${g}.mp3"></audio>
         ${songReactionsOk ? `<div class="song-reacts">${SONG_EMOJIS.map(e =>
           `<button type="button" class="${songMine(g, e) ? 'mine' : ''}" data-g="${g}" data-e="${e}">${e} ${(songCounts[g] && songCounts[g][e]) || ''}</button>`
@@ -357,10 +358,10 @@
         return { g, s, total };
       }).sort((a, b) => b.total - a.total);
       table = `<table><thead><tr><th>Grupo</th><th title="Pronunciación">Pronun.</th><th>Letra</th><th title="Participación">Partic.</th><th>Total</th></tr></thead><tbody>${
-        rows.map(r => `<tr><td>${r.g}${r.g === SONG_CONTEST.winner ? ' 🏆' : ''}</td><td>${r.s.pronunciation ?? '—'}</td><td>${r.s.lyrics ?? '—'}</td><td>${r.s.participation ?? '—'}</td><td><b>${r.total}</b></td></tr>`).join('')
+        rows.map(r => `<tr><td>${r.g}${r.g === SONG_CONTEST.winner ? ' 👑' : ''}</td><td>${r.s.pronunciation ?? '—'}</td><td>${r.s.lyrics ?? '—'}</td><td>${r.s.participation ?? '—'}</td><td><b>${r.total}</b></td></tr>`).join('')
       }</tbody></table>`;
     }
-    w.innerHTML = `<div class="song-winner"><b>🏆 ¡Ganador: ${SONG_CONTEST.winner}!</b> Felicidades, se ganaron el convivio.${table}</div>`;
+    w.innerHTML = `<div class="song-winner"><b>👑 WINNER: ${SONG_CONTEST.winner}</b><br> Felicidades, se ganaron el convivio.${table}</div>`;
   }
   async function loadSongReactions(){
     if (songLoaded) return; songLoaded = true;
