@@ -22,3 +22,16 @@ Las fotos `u2-*.jpg` (Unidad 2) son de [Unsplash](https://unsplash.com) (licenci
 | u2-whispered.jpg | Ben White | [ver](https://unsplash.com/photos/woman-whispering-on-womans-ear-while-hands-on-lips-4Bs9kSDJsdc) |
 
 Las fotos `u3-*.jpg` (Unidad 3) son del Profr. Jorge Sandoval.
+
+Las fotos `u4-*.jpg` (Unidad 4) son de [Unsplash](https://unsplash.com) (licencia de Unsplash, uso libre).
+
+| Archivo | Fotógrafo | Foto original |
+|---|---|---|
+| u4-stress.jpg | Vitaly Gariev | [ver](https://unsplash.com/photos/man-writing-at-desk-with-laptop-looking-stressed-IudlW-na8zM) |
+| u4-meditation.jpg | Benjamin Child | [ver](https://unsplash.com/photos/woman-in-black-tank-top-and-black-pants-sitting-on-green-grass-field-during-daytime-rOn57CBgyMo) |
+| u4-break.jpg | Austin | [ver](https://unsplash.com/photos/two-people-relax-on-chairs-in-a-sunny-park-t7f6Y3e3m2k) |
+| u4-relaxation.jpg | Radek Grzybowski | [ver](https://unsplash.com/photos/woman-reading-book-on-hammock-dunnqE0fcfY) |
+| u4-exercise.jpg | Vitaly Gariev | [ver](https://unsplash.com/photos/man-with-headphones-running-in-a-forest-bD5dGE210sE) |
+| u4-diet.jpg | Anna Pelzer | [ver](https://unsplash.com/photos/bowl-of-vegetable-salads-IGfIGP5ONV0) |
+| u4-breathing.jpg | Richard Jaimes | [ver](https://unsplash.com/photos/womans-face-tt9BPCXvZc8) |
+| u4-sleep.jpg | Greg Pappas | [ver](https://unsplash.com/photos/woman-sleeping-on-bed-under-blankets-rUc9hVE-L-E) |
