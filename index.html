@@ -188,7 +188,24 @@
   .feedback.ok{color:var(--accent-green);}
   .feedback.no{color:var(--accent-red);}
 
-  .actions{display:flex;gap:12px;align-items:center;margin-top:28px;}
+  .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:28px;}
+  /* Guardar avance: botón fijo abajo para salir a medias y continuar después */
+  .save-fab{
+    position:fixed;right:16px;bottom:16px;z-index:50;
+    background:var(--accent-green);color:var(--board-dark);border:none;
+    padding:12px 18px;border-radius:999px;font-size:15px;font-weight:700;
+    cursor:pointer;font-family:'Work Sans',sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35);
+  }
+  .save-toast{
+    position:fixed;left:16px;right:16px;bottom:72px;z-index:50;max-width:420px;margin:0 auto;
+    background:var(--board-dark);color:var(--chalk);border:1px solid var(--accent-green);
+    padding:10px 14px;border-radius:10px;font-size:14px;text-align:center;display:none;
+  }
+  .resume-note{
+    border:1px dashed var(--accent-green);color:var(--accent-green);border-radius:10px;
+    padding:10px 14px;font-size:14px;margin-bottom:16px;
+  }
+  #quizArea{padding-bottom:70px;}
   button.primary{
     background:var(--accent-yellow);color:var(--board-dark);border:none;
     padding:12px 26px;border-radius:8px;font-size:15px;font-weight:700;
@@ -267,6 +284,8 @@
   </div>
 
   <div id="appContent" style="display:none;">
+    <button id="saveProgressBtn" class="save-fab" type="button" onclick="saveProgress(true)">💾 Guardar avance</button>
+    <div id="saveToast" class="save-toast" role="status"></div>
     <div class="unit-picker" id="unitPicker"></div>
     <div id="quizArea"></div>
   </div>
@@ -1407,6 +1426,285 @@ const UNITS = [
         sampleAnswer: "I am going to play soccer with my friends on Saturday."
       }
     ]
+  },
+  {
+    id: "unit4-ingles5",
+    semester: 5,
+    title: "Unit 4 — Conditionals & Stress (pp. 40–44)",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Palabras clave de esta unidad</b> (pp. 40–44 del libro):<br><b>stress · meditation · break · relaxation · exercise · healthy diet · deep breathing · sleep</b><br>y de las pp. 40–41: <b>energetic · energy · results · boost · make time</b><br><br>🔁 <b>Zero conditional</b> = siempre pasa (hechos, ciencia): <i>If + presente, presente</i> → <i>If you drop a pen, it falls.</i><br>🔀 <b>First conditional</b> = puede pasar (consejo, posibilidad): <i>If + presente, will + verbo</i> → <i>If you sleep 8 hours, you will feel better.</i>"
+      },
+      {
+        type: "note",
+        text: "<b>Part 1 · Vocabulary.</b> Match each word with its correct meaning."
+      },
+      {
+        type: "match",
+        text: "Match each word with its meaning:",
+        pairs: [
+          { term: "Stress", options: ["A feeling of pressure and worry", "Food that is good for your body", "Resting your body at night"], answer: "A feeling of pressure and worry" },
+          { term: "Meditation", options: ["Running or playing sports", "Sitting quietly and focusing your mind", "A short time to stop working"], answer: "Sitting quietly and focusing your mind" },
+          { term: "Break", options: ["A short time to stop working and rest", "A feeling of pressure and worry", "Food that is good for your body"], answer: "A short time to stop working and rest" },
+          { term: "Relaxation", options: ["Feeling calm and free of worry", "Running or playing sports", "Taking slow, big breaths"], answer: "Feeling calm and free of worry" },
+          { term: "Exercise", options: ["Resting your body at night", "Moving your body, like running or playing sports", "Sitting quietly and focusing your mind"], answer: "Moving your body, like running or playing sports" },
+          { term: "Healthy diet", options: ["Eating fruit, vegetables and good food", "A short time to stop working", "Feeling calm and free of worry"], answer: "Eating fruit, vegetables and good food" },
+          { term: "Deep breathing", options: ["Taking slow, big breaths", "Eating fruit and vegetables", "A feeling of pressure and worry"], answer: "Taking slow, big breaths" },
+          { term: "Sleep", options: ["Moving your body", "Resting your body and mind at night", "Taking slow, big breaths"], answer: "Resting your body and mind at night" }
+        ]
+      },
+      {
+        type: "note",
+        text: "<b>Part 1b · Pronunciation.</b> Listen to each word, then record yourself saying it out loud."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "😫", audioText: "stress", targetText: "stress", image: "img/u4-stress.jpg", imageAlt: "A stressed young man at his desk" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧘", audioText: "meditation", targetText: "meditation", image: "img/u4-meditation.jpg", imageAlt: "A woman meditating on the grass" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "☕", audioText: "break", targetText: "break", image: "img/u4-break.jpg", imageAlt: "Two students taking a break in a park" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "😌", audioText: "relaxation", targetText: "relaxation", image: "img/u4-relaxation.jpg", imageAlt: "A woman reading in a hammock" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🏃", audioText: "exercise", targetText: "exercise", image: "img/u4-exercise.jpg", imageAlt: "A man running in a forest" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🥗", audioText: "healthy diet", targetText: "healthy diet", image: "img/u4-diet.jpg", imageAlt: "A bowl of salad and vegetables" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🌬️", audioText: "deep breathing", targetText: "deep breathing", image: "img/u4-breathing.jpg", imageAlt: "A girl breathing with her eyes closed" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "😴", audioText: "sleep", targetText: "sleep", image: "img/u4-sleep.jpg", imageAlt: "A person sleeping in bed" },
+      {
+        type: "note",
+        text: "<b>Part A · Zero Conditional Lab</b> (los experimentos que hicimos con la hoja del laboratorio). <i>If + presente, presente</i> = siempre pasa. Une cada experimento con su resultado."
+      },
+      {
+        type: "match",
+        text: "What happens? Match the experiment with the result:",
+        pairs: [
+          { term: "If you drop a pen,", options: ["it falls.", "it gets wet.", "it moves."], answer: "it falls." },
+          { term: "If you put paper in water,", options: ["they get warm.", "it gets wet.", "it falls."], answer: "it gets wet." },
+          { term: "If you press the switch,", options: ["the light turns on.", "it makes bubbles.", "you get green."], answer: "the light turns on." },
+          { term: "If you blow on a small paper,", options: ["it moves.", "it gets wet.", "you don't hear well."], answer: "it moves." },
+          { term: "If you mix yellow and blue,", options: ["you get pink.", "you get green.", "the light turns on."], answer: "you get green." },
+          { term: "If you rub your hands fast,", options: ["they get warm.", "it falls.", "it makes bubbles."], answer: "they get warm." },
+          { term: "If you shake a bottle of water,", options: ["it moves.", "it makes bubbles.", "they get warm."], answer: "it makes bubbles." },
+          { term: "If you cover your ears,", options: ["you don't hear well.", "it gets wet.", "you get green."], answer: "you don't hear well." }
+        ]
+      },
+      { type: "fill", text: "If you ______ (heat) ice, it melts.", answer: "heat" },
+      { type: "fill", text: "If you mix red and white, you ______ (get) pink.", answer: "get" },
+      { type: "fill", text: "If you heat water to 100°C, it ______ (boil).", answer: "boils" },
+      { type: "fill", text: "If you don't drink water, you ______ (feel) tired.", answer: "feel" },
+      {
+        type: "note",
+        text: "<b>Part B · Listening (como el diálogo de la p. 40).</b> Listen to Luis and Sofía talking about exercise. Escucha varias veces y contesta."
+      },
+      {
+        type: "fill",
+        text: "Sofía: If you ______ (exercise) every day, you feel more energetic.",
+        audioText: "Luis: I'm always tired after school. Sofía: If you exercise every day, you feel more energetic. Luis: But I never have time. Sofía: If you make time for exercise, you will see good results in a month. Luis: Okay. If I walk to school, I will have more energy in class. Sofía: Yes! And if you eat healthy food, you will boost your energy even more. Luis: And if I don't do anything? Sofía: Then you won't notice any changes!",
+        answer: "exercise"
+      },
+      {
+        type: "fill",
+        text: "Sofía: If you make time for exercise, you ______ (see) good results in a month.",
+        audioText: "If you make time for exercise, you will see good results in a month.",
+        answer: "will see", acceptableAny: ["'ll see"]
+      },
+      {
+        type: "mc",
+        text: "How will Luis get more energy in class?",
+        audioText: "If I walk to school, I will have more energy in class.",
+        options: ["He will walk to school", "He will drink coffee", "He will sleep in class"],
+        answer: "He will walk to school"
+      },
+      {
+        type: "mc",
+        text: "What will boost Luis's energy even more?",
+        audioText: "And if you eat healthy food, you will boost your energy even more.",
+        options: ["Eating healthy food", "Playing video games", "Sleeping late"],
+        answer: "Eating healthy food"
+      },
+      {
+        type: "truefalse",
+        text: "Sofía says: if Luis doesn't do anything, he will notice big changes.",
+        audioText: "And if I don't do anything? Then you won't notice any changes!",
+        answer: "False"
+      },
+      {
+        type: "note",
+        text: "<b>Part 2 · Which advice is it?</b> Mira cada foto y elige el consejo que le corresponde."
+      },
+      {
+        type: "mc",
+        text: "Which advice matches the picture?",
+        image: "img/u4-sleep.jpg", imageAlt: "A person sleeping in bed",
+        options: ["If you sleep 8 hours, you will have more energy.", "If you eat vegetables, you will be strong.", "If you run every day, you will feel happy."],
+        answer: "If you sleep 8 hours, you will have more energy."
+      },
+      {
+        type: "mc",
+        text: "Which advice matches the picture?",
+        image: "img/u4-diet.jpg", imageAlt: "A bowl of salad and vegetables",
+        options: ["If you take a break, you will feel calm.", "If you have a healthy diet, your body will feel better.", "If you meditate, you will sleep well."],
+        answer: "If you have a healthy diet, your body will feel better."
+      },
+      {
+        type: "mc",
+        text: "Which advice matches the picture?",
+        image: "img/u4-exercise.jpg", imageAlt: "A man running in a forest",
+        options: ["If you exercise, you will reduce your stress.", "If you sleep more, you will be less tired.", "If you eat salad, you will be healthy."],
+        answer: "If you exercise, you will reduce your stress."
+      },
+      {
+        type: "mc",
+        text: "Which advice matches the picture?",
+        image: "img/u4-break.jpg", imageAlt: "Two students resting in chairs in a park",
+        options: ["If you have a healthy diet, you will feel better.", "If you take a break, you will study better later.", "If you meditate, you will feel calm."],
+        answer: "If you take a break, you will study better later."
+      },
+      {
+        type: "mc",
+        text: "Which advice matches the picture?",
+        image: "img/u4-breathing.jpg", imageAlt: "A girl breathing slowly with her eyes closed",
+        options: ["If you practice deep breathing, you will feel less nervous.", "If you run, you will be tired.", "If you sleep late, you will be tired."],
+        answer: "If you practice deep breathing, you will feel less nervous."
+      },
+      {
+        type: "mc",
+        text: "Which sentence matches the picture?",
+        image: "img/u4-stress.jpg", imageAlt: "A stressed young man at his desk",
+        options: ["He is relaxed and happy.", "He has a lot of stress.", "He is sleeping."],
+        answer: "He has a lot of stress."
+      },
+      {
+        type: "note",
+        image: "img/u4-stress.jpg", imageAlt: "A stressed student",
+        text: "<b>Part 3 · Listening comprehension.</b> Listen to Camila, a student, talking to the school counselor. You may play it more than once, then answer the questions."
+      },
+      {
+        type: "mc",
+        text: "1. What is Camila's problem?",
+        audioText: "Counselor: Hi, Camila. How are you? Camila: Not good. I have a lot of stress. I have three exams this week and a big project. I can't sleep, I have headaches and I'm always tired. Counselor: I understand. When you have a lot of stress, your body feels it. If you don't sleep, you feel tired and nervous. That happens to everybody. So here is my advice. If you sleep eight hours, you will have more energy for your exams. If you take a short break every hour, you will study better. Camila: What about my headaches? Counselor: Try deep breathing. If you breathe slowly for five minutes, you will feel calm. And don't forget exercise and a healthy diet. If you walk for twenty minutes after school, you will reduce your stress. Camila: Okay. If I follow your advice, I will feel better, right? Counselor: Yes! I'm sure you will.",
+        options: ["She has a lot of stress", "She lost her phone", "She has no friends"],
+        answer: "She has a lot of stress"
+      },
+      {
+        type: "truefalse",
+        text: "2. Camila has three exams this week.",
+        audioText: "I have three exams this week and a big project.",
+        answer: "True"
+      },
+      {
+        type: "mc",
+        text: "3. Which problems does Camila have?",
+        audioText: "I can't sleep, I have headaches and I'm always tired.",
+        options: ["She can't sleep, she has headaches and she is tired", "She eats too much candy", "She plays video games all night"],
+        answer: "She can't sleep, she has headaches and she is tired"
+      },
+      {
+        type: "mc",
+        text: "4. What will happen if Camila takes a short break every hour?",
+        audioText: "If you take a short break every hour, you will study better.",
+        options: ["She will sleep better", "She will study better", "She will have more headaches"],
+        answer: "She will study better"
+      },
+      {
+        type: "truefalse",
+        text: "5. The counselor says Camila should run for two hours after school.",
+        audioText: "If you walk for twenty minutes after school, you will reduce your stress.",
+        answer: "False"
+      },
+      {
+        type: "note",
+        text: "<b>Part 4 · Always or maybe?</b> ¿Siempre pasa (<b>zero conditional</b>: presente, presente) o puede pasar (<b>first conditional</b>: presente, will)?"
+      },
+      {
+        type: "mc",
+        text: "If you heat ice, it melts.",
+        options: ["Always (zero conditional)", "Maybe (first conditional)"],
+        answer: "Always (zero conditional)"
+      },
+      {
+        type: "mc",
+        text: "If you study tonight, you will pass the exam.",
+        options: ["Always (zero conditional)", "Maybe (first conditional)"],
+        answer: "Maybe (first conditional)"
+      },
+      {
+        type: "mc",
+        text: "If you drop a pen, it falls.",
+        options: ["Always (zero conditional)", "Maybe (first conditional)"],
+        answer: "Always (zero conditional)"
+      },
+      {
+        type: "mc",
+        text: "If you practice meditation, you will be calmer.",
+        options: ["Always (zero conditional)", "Maybe (first conditional)"],
+        answer: "Maybe (first conditional)"
+      },
+      {
+        type: "mc",
+        text: "If you mix yellow and blue, you get green.",
+        options: ["Always (zero conditional)", "Maybe (first conditional)"],
+        answer: "Always (zero conditional)"
+      },
+      {
+        type: "mc",
+        text: "If you take a break, you will feel better.",
+        options: ["Always (zero conditional)", "Maybe (first conditional)"],
+        answer: "Maybe (first conditional)"
+      },
+      {
+        type: "note",
+        text: "<b>Part 5 · Give advice.</b> Completa con <b>will</b> + el verbo entre paréntesis (first conditional)."
+      },
+      { type: "fill", text: "If you take a break, you ______ (feel) better.", answer: "will feel", acceptableAny: ["'ll feel"] },
+      { type: "fill", text: "If you sleep 8 hours, you ______ (have) more energy.", answer: "will have", acceptableAny: ["'ll have"] },
+      { type: "fill", text: "If you exercise every day, you ______ (reduce) your stress.", answer: "will reduce", acceptableAny: ["'ll reduce"] },
+      { type: "fill", text: "If you practice deep breathing, you ______ (be) less nervous.", answer: "will be", acceptableAny: ["'ll be"] },
+      { type: "fill", text: "If you have a healthy diet, your body ______ (feel) stronger.", answer: "will feel" },
+      {
+        type: "note",
+        text: "<b>Part 6 · Unscramble.</b> Put the words in order to form correct sentences."
+      },
+      { type: "unscramble", text: "Put the words in order:", words: ["break,", "If", "take", "you", "a", "will", "you", "relax"], answer: "If you take a break, you will relax" },
+      { type: "unscramble", text: "Put the words in order:", words: ["exercise,", "you", "If", "feel", "you", "will", "better"], answer: "If you exercise, you will feel better" },
+      { type: "unscramble", text: "Put the words in order:", words: ["don't", "If", "sleep,", "you", "feel", "you", "tired"], answer: "If you don't sleep, you feel tired" },
+      { type: "unscramble", text: "Put the words in order:", words: ["meditation", "reduces", "stress", "Daily"], answer: "Daily meditation reduces stress" },
+      {
+        type: "note",
+        text: "<b>Part 6b · Review (como la p. 44).</b> Choose the correct option: ¿siempre pasa (presente) o puede pasar en el futuro (will)?"
+      },
+      { type: "mc", text: "If you heat water to 100°C, it ______.", options: ["will boil", "boils"], answer: "boils" },
+      { type: "mc", text: "If Ana studies tonight, she ______ the English exam tomorrow.", options: ["passes", "will pass"], answer: "will pass" },
+      { type: "mc", text: "If you don't drink water, you ______ a headache.", options: ["get", "got"], answer: "get" },
+      { type: "mc", text: "If it rains tomorrow, we ______ at home.", options: ["will stay", "stayed"], answer: "will stay" },
+      { type: "mc", text: "If you eat too much sugar, you ______ low energy later.", options: ["have", "had"], answer: "have" },
+      {
+        type: "note",
+        text: "<b>Part 7 · Shadowing.</b> Habla EN VOZ ALTA al mismo tiempo que escuchas."
+      },
+      { type: "shadowing", sentence: "If you sleep eight hours, you will have more energy." },
+      { type: "shadowing", sentence: "If you take a break, you will feel better." },
+      { type: "shadowing", sentence: "If you don't sleep, you feel tired and nervous." },
+      { type: "shadowing", sentence: "Deep breathing and exercise reduce stress." },
+      {
+        type: "note",
+        text: "<b>Part 8 · Speaking.</b> Eres el doctor: escucha el problema y graba un consejo con <b>If you…, you will…</b>"
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Patient: \"I have three exams tomorrow and I'm very nervous.\" Give advice:",
+        keywords: ["if", "will"],
+        minWords: 6,
+        hint: "use If you..., you will..., like 'If you study today, you will feel ready'",
+        sampleAnswer: "If you practice deep breathing, you will feel calm."
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Patient: \"I can't sleep and I'm always tired.\" Give advice:",
+        keywords: ["if", "will"],
+        minWords: 6,
+        hint: "use If you..., you will..., like 'If you sleep early, you will have more energy'",
+        sampleAnswer: "If you don't use your phone at night, you will sleep better."
+      }
+    ]
   }
 ];
 
@@ -1533,10 +1831,13 @@ function renderUnitPicker(){
       const pct = progress.total ? Math.round((progress.score / progress.total) * 100) : 0;
       btn.textContent = `✓ ${u.title} (${pct}%)`;
       btn.title = `Ya contestada — mejor resultado: ${progress.score}/${progress.total}, ${progress.attempts} intento(s)`;
+    } else if (loadSavedProgress(u)) {
+      btn.textContent = `⏸ ${u.title} (en progreso)`;
+      btn.title = 'Tienes avance guardado en este teléfono';
     } else {
       btn.textContent = u.title;
     }
-    btn.onclick = () => { currentUnit = u; userAnswers = {}; practicedAnswers = {}; renderQuiz(); renderUnitPicker(); };
+    btn.onclick = () => openUnit(u);
     el.appendChild(btn);
   });
 }
@@ -1641,6 +1942,7 @@ function renderQuiz(){
         label.className = 'option';
         label.dataset.qIndex = i;
         label.innerHTML = `<input type="radio" name="q${i}" value="${opt}"> <span>${opt}</span>`;
+        if (userAnswers[i] === opt) label.querySelector('input').checked = true;
         label.querySelector('input').onchange = (e) => { userAnswers[i] = e.target.value; };
         opts.appendChild(label);
       });
@@ -1651,6 +1953,7 @@ function renderQuiz(){
       input.className = 'fill-input';
       input.dataset.qIndex = i;
       input.placeholder = 'type your answer';
+      if (typeof userAnswers[i] === 'string') input.value = userAnswers[i];
       input.oninput = (e) => { userAnswers[i] = e.target.value.trim(); };
       card.appendChild(input);
 
@@ -1662,13 +1965,14 @@ function renderQuiz(){
         label.className = 'option';
         label.dataset.qIndex = i;
         label.innerHTML = `<input type="radio" name="q${i}" value="${opt}"> <span>${opt}</span>`;
+        if (userAnswers[i] === opt) label.querySelector('input').checked = true;
         label.querySelector('input').onchange = (e) => { userAnswers[i] = e.target.value; };
         opts.appendChild(label);
       });
       card.appendChild(opts);
 
     } else if (q.type === 'unscramble') {
-      userAnswers[i] = [];
+      if (!Array.isArray(userAnswers[i])) userAnswers[i] = [];
       const bank = document.createElement('div');
       bank.className = 'unscramble-bank';
       const builder = document.createElement('div');
@@ -1705,6 +2009,7 @@ function renderQuiz(){
         chip.className = 'word-chip';
         chip.dataset.wordIndex = wordIdx;
         chip.textContent = word;
+        if (userAnswers[i].some(item => item.idx === wordIdx)) chip.classList.add('used');
         chip.onclick = () => {
           if (chip.classList.contains('used')) return;
           chip.classList.add('used');
@@ -1750,6 +2055,7 @@ function renderQuiz(){
         select.dataset.qIndex = i;
         select.innerHTML = `<option value="">— choose —</option>` +
           pair.options.map(o => `<option value="${o}">${o}</option>`).join('');
+        if (userAnswers[i][pIdx]) select.value = userAnswers[i][pIdx];
         select.onchange = (e) => { userAnswers[i][pIdx] = e.target.value; };
         row.appendChild(term);
         row.appendChild(select);
@@ -1919,7 +2225,8 @@ function renderQuiz(){
         status.className = 'record-status';
         const transcriptBox = document.createElement('div');
         transcriptBox.className = 'transcript-box';
-        transcriptBox.textContent = 'Your answer will appear here...';
+        transcriptBox.textContent = typeof userAnswers[i] === 'string' && userAnswers[i]
+          ? `"${userAnswers[i]}"` : 'Your answer will appear here...';
 
         let retriedCapture = false;
         recBtn.onclick = async () => {
@@ -2033,9 +2340,97 @@ function addQuestionImage(card, q, fallbackEl){
 }
 
 function resetQuiz(){
+  if (currentUnit && loadSavedProgress(currentUnit) &&
+      !confirm('¿Borrar tu avance guardado de esta unidad y empezar de nuevo?')) return;
+  if (currentUnit) clearSavedProgress(currentUnit);
   userAnswers = {};
+  practicedAnswers = {};
   renderQuiz();
+  renderUnitPicker();
 }
+
+/* ---------- Guardar avance (pedido de los alumnos, 20 oct 2026) ----------
+   Guarda las respuestas de la unidad en este teléfono (localStorage) para
+   salir a medias y continuar después. Se guarda solo al tocar
+   "Guardar avance", al cambiar una respuesta y al presionar "Check".
+   No sube nada a Firebase: los resultados siguen guardándose con "Check". */
+function progressKey(unitId){
+  return `avance:${selectedTeacherId}:${selectedSemester}:${studentNameKey}:${unitId}`;
+}
+function loadSavedProgress(unit){
+  if (!unit || !studentNameKey) return null;
+  try {
+    const raw = localStorage.getItem(progressKey(unit.id));
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function clearSavedProgress(unit){
+  try { localStorage.removeItem(progressKey(unit.id)); } catch (e) {}
+}
+function saveProgress(showMsg){
+  if (!currentUnit || !studentNameKey) return false;
+  const data = { userAnswers, practicedAnswers, lockedQuestions, wrongChecks, savedAt: Date.now() };
+  try {
+    localStorage.setItem(progressKey(currentUnit.id), JSON.stringify(data));
+  } catch (e) {
+    if (showMsg) showSaveToast('⚠ Este navegador no deja guardar (¿modo incógnito?). Termina la unidad antes de salir.');
+    return false;
+  }
+  if (showMsg) {
+    showSaveToast('✓ Avance guardado en este teléfono. Puedes salir y continuar después con el mismo nombre.');
+    renderUnitPicker();
+  }
+  return true;
+}
+let saveToastTimer = null;
+function showSaveToast(msg){
+  const t = document.getElementById('saveToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(saveToastTimer);
+  saveToastTimer = setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+function openUnit(u){
+  currentUnit = u;
+  const saved = loadSavedProgress(u);
+  userAnswers = (saved && saved.userAnswers) || {};
+  practicedAnswers = (saved && saved.practicedAnswers) || {};
+  renderQuiz();
+  if (saved) {
+    wrongChecks = saved.wrongChecks || {};
+    Object.keys(saved.lockedQuestions || {}).forEach(i => {
+      lockQuestion(i);
+      const fb = document.getElementById(`fb-${i}`);
+      if (fb) { fb.textContent = '✓ Correct!'; fb.className = 'feedback ok'; }
+    });
+    const note = document.createElement('div');
+    note.className = 'resume-note';
+    const when = new Date(saved.savedAt || Date.now()).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+    note.textContent = `📂 Continúas donde te quedaste (guardado: ${when}). Las ✓ ya están bien; sigue con las demás.`;
+    const area = document.getElementById('quizArea');
+    area.insertBefore(note, area.children[1] || null);
+  }
+  renderUnitPicker();
+}
+// Guardado automático: cada cambio de respuesta se guarda en silencio.
+let autoSaveTimer = null;
+function scheduleAutoSave(){
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => saveProgress(false), 400);
+}
+function attachAutoSave(){
+  const area = document.getElementById('quizArea');
+  if (!area) return;
+  area.addEventListener('change', scheduleAutoSave);
+  area.addEventListener('input', scheduleAutoSave);
+  area.addEventListener('click', scheduleAutoSave);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachAutoSave);
+else attachAutoSave();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveProgress(false);
+});
 
 function lockQuestion(i){
   lockedQuestions[i] = true;
@@ -2233,6 +2628,7 @@ function checkAnswers(){
   const practiceCompleted = practiceQuestions.filter(({ i }) => practicedAnswers[i]).length;
 
   showScore(correctCount, scorableTotal, practiceCompleted, practiceTotal);
+  saveProgress(false);
   saveResults(correctCount, scorableTotal, questionResults, practiceCompleted, practiceTotal);
 }
 
@@ -2433,16 +2829,12 @@ function startSession(){
   studentNameKey = normalizeName(name);
   studentGroup = group.toUpperCase();
   selectedSemester = Number(semester);
-  currentUnit = visibleUnits()[0] || null;
   completedUnits = {};
-  userAnswers = {};
-  practicedAnswers = {};
   document.getElementById('nameGate').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
   // El concurso de canción es solo de los grupos del Profr. Jorge Sandoval
   document.getElementById('songContest').style.display = SONG_CONTEST.teacherId === teacherId ? 'block' : 'none';
-  renderUnitPicker();
-  renderQuiz();
+  openUnit(visibleUnits()[0] || null);
   loadStudentProgress();
 }
 </script>
