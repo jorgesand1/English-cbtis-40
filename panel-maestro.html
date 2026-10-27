@@ -36,6 +36,11 @@
   th{color:var(--accent-yellow);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;}
   tr:last-child td{border-bottom:none;}
   .pct-good{color:var(--accent-green);font-weight:600;}
+  .legend{color:var(--chalk-dim, #b9b6a8);font-size:13px;margin:-6px 0 12px;}
+  .table-scroll{overflow-x:auto;}
+  .table-scroll td.cell{text-align:center;white-space:nowrap;}
+  .table-scroll th.unit-col{text-align:center;min-width:90px;}
+  .attempts-details summary{cursor:pointer;}
   .pct-bad{color:var(--accent-red);font-weight:600;}
   .practice-good{color:var(--accent-green);}
   .practice-bad{color:var(--chalk-dim);}
@@ -98,11 +103,18 @@
     <div class="section-title" id="progressTitle" style="display:none;">Progreso del alumno</div>
     <div id="studentProgress" style="display:none;"></div>
 
-    <div class="section-title">Intentos por alumno</div>
-    <div id="attemptsTable" class="loading">Cargando...</div>
+    <div class="section-title">Cumplimiento por unidad</div>
+    <div class="legend">✅ cumplió (mejor intento de 70% o más) · ⚠️ la hizo pero con menos de 70% · — no la hizo · 🔒 unidad cerrada (no cuentan los intentos desde su cierre)</div>
+    <div id="complianceTable" class="table-scroll loading">Cargando...</div>
+
+    <details class="attempts-details">
+      <summary class="section-title">Ver todos los intentos</summary>
+      <div id="attemptsTable" class="loading">Cargando...</div>
+    </details>
   </div>
 </div>
 
+<script src="cierres-unidades.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
@@ -152,6 +164,7 @@
   async function loadData(){
     document.getElementById('errorAnalysis').innerHTML = '<div class="loading">Cargando...</div>';
     document.getElementById('attemptsTable').innerHTML = '<div class="loading">Cargando...</div>';
+    document.getElementById('complianceTable').innerHTML = '<div class="loading">Cargando...</div>';
     try {
       let query = db.collection('results').orderBy('timestamp', 'desc');
       if (currentAccount.scope !== 'all') {
@@ -168,6 +181,7 @@
       document.getElementById('attemptsTable').innerHTML =
         '<div class="empty">No se pudieron cargar los datos. Revisa la conexión o las reglas de Firestore.</div>';
       document.getElementById('errorAnalysis').innerHTML = '';
+      document.getElementById('complianceTable').innerHTML = '';
     }
   }
 
@@ -244,7 +258,66 @@
   function renderAll(){
     renderErrorAnalysis();
     renderStudentProgress();
+    renderComplianceTable();
     renderAttemptsTable();
+  }
+
+  // ---------- Cumplimiento: una fila por alumno, una columna por unidad ----------
+  const CUMPLE_PCT = 70;
+
+  // Un intento cuenta si se hizo antes del cierre de la unidad (cierres-unidades.js).
+  function attemptCounts(r){
+    if (!window.unitClosingDate) return true;
+    const closing = window.unitClosingDate(r.teacherId, r.unitId);
+    if (!closing) return true;
+    const t = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate() : null;
+    return !t || t < closing;
+  }
+
+  function unitIsClosedFor(results, unitId){
+    if (!window.isUnitClosed) return false;
+    const teachers = [...new Set(results.filter(r => r.unitId === unitId).map(r => r.teacherId))];
+    return teachers.length > 0 && teachers.every(t => window.isUnitClosed(t, unitId));
+  }
+
+  function renderComplianceTable(){
+    const results = filteredResults();
+    const el = document.getElementById('complianceTable');
+    el.classList.remove('loading');
+    if (!results.length) { el.innerHTML = '<div class="empty">Todavía no hay resultados.</div>'; return; }
+
+    const units = [...new Map(results.map(r => [r.unitId, r.unitTitle || r.unitId])).entries()]
+      .sort((a, b) => byName(a[0], b[0]));
+    const students = new Map();
+    results.forEach(r => {
+      const key = r.studentNameKey || r.studentName;
+      if (!students.has(key)) students.set(key, { name: r.studentName || '—', group: r.studentGroup || '—', attempts: [] });
+      students.get(key).attempts.push(r);
+    });
+    const list = [...students.values()].sort((a, b) => byName(a.group, b.group) || byName(a.name, b.name));
+
+    const head = units.map(([uid, title]) =>
+      `<th class="unit-col">${unitIsClosedFor(results, uid) ? '🔒 ' : ''}${title}</th>`).join('');
+    const rows = list.map(st => {
+      let done = 0;
+      const cells = units.map(([uid]) => {
+        const all = st.attempts.filter(r => r.unitId === uid);
+        const valid = all.filter(attemptCounts);
+        if (!valid.length) {
+          const late = all.length ? ' title="Solo tiene intentos después del cierre"' : '';
+          return `<td class="cell"${late}>—${all.length ? ' 🔒' : ''}</td>`;
+        }
+        const best = Math.max(...valid.map(resultPct));
+        if (best >= CUMPLE_PCT) { done++; return `<td class="cell"><span class="pct-good">✅ ${best}%</span></td>`; }
+        return `<td class="cell"><span class="pct-bad">⚠️ ${best}%</span></td>`;
+      }).join('');
+      return `<tr><td>${st.name}</td><td>${st.group}</td>${cells}<td class="cell"><b>${done}/${units.length}</b></td></tr>`;
+    }).join('');
+
+    el.innerHTML = `<table>
+      <thead><tr><th>Alumno</th><th>Grupo</th>${head}<th class="unit-col">Cumplidas</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
   }
 
   function renderStudentProgress(){
@@ -425,7 +498,8 @@
       const rows = list.map((st, i) => {
         const row = [i + 1, st.name];
         units.forEach(([uid]) => {
-          const att = st.attempts.filter(r => r.unitId === uid).sort((a, b) => resultTime(a) - resultTime(b));
+          // Los intentos hechos después del cierre de la unidad no cuentan.
+          const att = st.attempts.filter(r => r.unitId === uid && attemptCounts(r)).sort((a, b) => resultTime(a) - resultTime(b));
           if (!att.length) { row.push('', '', 0); return; }
           row.push(resultPct(att[0]), Math.max(...att.map(resultPct)), att.length);
         });
