@@ -1868,15 +1868,68 @@ function loadSpeechSdk(){
 }
 // Graba una frase y regresa lo que dijo con sus puntajes (0-100).
 // referenceText vacío = respuesta libre (Azure evalúa sin texto esperado).
-// onListening se llama cuando el micrófono ya está grabando de verdad, para
-// no decirle al alumno "habla" antes de tiempo (con una sola palabra se pierde).
+// Micrófono propio para Azure. El micrófono del SDK abre el audio después de
+// pedir el permiso (ya fuera del toque del alumno) y a 16 kHz; en iPhone eso
+// entrega silencio. Aquí el audio se abre en el mismo toque, a la frecuencia
+// normal del teléfono, y se convierte a 16 kHz. Lo que se graba antes de
+// conectar con Azure se guarda y se manda después, así no se pierde nada.
+function startMicCapture(){
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  const ctx = new Ctx();
+  ctx.resume();
+  let stream = null, src = null, proc = null, push = null, pending = [];
+  const ready = navigator.mediaDevices.getUserMedia({ audio: true }).then(s => {
+    stream = s;
+    src = ctx.createMediaStreamSource(s);
+    proc = ctx.createScriptProcessor(4096, 1, 1);
+    proc.onaudioprocess = e => {
+      const pcm = toPcm16k(e.inputBuffer.getChannelData(0), ctx.sampleRate);
+      if (push) push.write(pcm); else pending.push(pcm);
+    };
+    src.connect(proc);
+    proc.connect(ctx.destination);
+    return ctx.resume();
+  });
+  return {
+    ready,
+    attach(p){ push = p; pending.forEach(b => p.write(b)); pending = []; },
+    stop(){
+      try { if (proc) proc.disconnect(); if (src) src.disconnect(); } catch (e) {}
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      if (push) { try { push.close(); } catch (e) {} push = null; }
+      if (ctx.state !== 'closed') ctx.close().catch(() => {});
+    }
+  };
+}
+function toPcm16k(input, rate){
+  const ratio = rate / 16000;
+  const out = new Int16Array(Math.floor(input.length / ratio));
+  for (let i = 0; i < out.length; i++){
+    const a = Math.floor(i * ratio), b = Math.min(input.length, Math.floor((i + 1) * ratio));
+    let sum = 0;
+    for (let j = a; j < b; j++) sum += input[j];
+    const v = Math.max(-1, Math.min(1, sum / Math.max(1, b - a)));
+    out[i] = v < 0 ? v * 0x8000 : v * 0x7fff;
+  }
+  return out.buffer;
+}
+// Se debe llamar directo desde el toque del botón (antes de cualquier await).
+// onListening se llama cuando el micrófono ya está grabando de verdad.
 async function azurePronunciation(referenceText, onListening){
-  const [sdk, auth] = await Promise.all([loadSpeechSdk(), getAzureToken()]);
+  const mic = startMicCapture();
+  let sdk, auth;
+  try {
+    await mic.ready;
+    if (onListening) onListening();
+    [sdk, auth] = await Promise.all([loadSpeechSdk(), getAzureToken()]);
+  } catch (e) { mic.stop(); throw e; }
   const cfg = sdk.SpeechConfig.fromAuthorizationToken(auth.token, auth.region);
   cfg.speechRecognitionLanguage = 'en-US';
   cfg.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, '8000');
-  const recognizer = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromDefaultMicrophoneInput());
-  if (onListening) recognizer.sessionStarted = () => onListening();
+  const pushStream = sdk.AudioInputStream.createPushStream(sdk.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1));
+  mic.attach(pushStream);
+  const recognizer = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromStreamInput(pushStream));
+  const guard = setTimeout(() => mic.stop(), 20000);  // nunca dejar el micrófono abierto
   const pa = new sdk.PronunciationAssessmentConfig(
     referenceText || '',
     sdk.PronunciationAssessmentGradingSystem.HundredMark,
@@ -1888,6 +1941,7 @@ async function azurePronunciation(referenceText, onListening){
   pa.applyTo(recognizer);
   return new Promise((resolve, reject) => {
     recognizer.recognizeOnceAsync(r => {
+      clearTimeout(guard); mic.stop();
       recognizer.close();
       if (r.reason === sdk.ResultReason.RecognizedSpeech){
         const pr = sdk.PronunciationAssessmentResult.fromResult(r);
@@ -1912,7 +1966,7 @@ async function azurePronunciation(referenceText, onListening){
         if (e.quota) logAzureUsage('quota', 0);
         reject(e);
       }
-    }, err => { recognizer.close(); reject(new Error(String(err))); });
+    }, err => { clearTimeout(guard); mic.stop(); recognizer.close(); reject(new Error(String(err))); });
   });
 }
 // Retroalimentación pensada para hispanohablantes: tono de ánimo, máximo
