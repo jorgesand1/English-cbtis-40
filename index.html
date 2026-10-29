@@ -1914,8 +1914,9 @@ function toPcm16k(input, rate){
   return out.buffer;
 }
 // Se debe llamar directo desde el toque del botón (antes de cualquier await).
-// onListening se llama cuando el micrófono ya está grabando de verdad.
-async function azurePronunciation(referenceText, onListening){
+// onListening se llama cuando el micrófono ya está grabando de verdad;
+// onScoring cuando el alumno terminó de hablar y Azure está calificando.
+async function azurePronunciation(referenceText, onListening, onScoring){
   const mic = startMicCapture();
   let sdk, auth;
   try {
@@ -1930,6 +1931,9 @@ async function azurePronunciation(referenceText, onListening){
   mic.attach(pushStream);
   const recognizer = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromStreamInput(pushStream));
   const guard = setTimeout(() => mic.stop(), 20000);  // nunca dejar el micrófono abierto
+  // Al terminar de hablar se suelta el micrófono de una vez (el iPhone no deja
+  // grabar en otra pregunta mientras siga abierto) y Azure califica antes.
+  recognizer.speechEndDetected = () => { mic.stop(); if (onScoring) onScoring(); };
   const pa = new sdk.PronunciationAssessmentConfig(
     referenceText || '',
     sdk.PronunciationAssessmentGradingSystem.HundredMark,
@@ -2478,7 +2482,9 @@ function renderQuiz(){
           evalBtn.classList.add('recording');
           evalStatus.textContent = 'Preparando micrófono... espera';
           try {
-            const res = await azurePronunciation(q.sentence, () => { evalStatus.textContent = '🎙️ Ahora sí, di la oración completa...'; });
+            const res = await azurePronunciation(q.sentence,
+              () => { evalStatus.textContent = '🎙️ Ahora sí, di la oración completa...'; },
+              () => { evalStatus.textContent = '⏳ Evaluando tu pronunciación... (no repitas)'; });
             evalBtn.classList.remove('recording');
             if (res) logAzureUsage('ok', res.seconds);
             if (!res || !res.text) { evalStatus.textContent = 'No te escuché. Toca otra vez y habla cuando aparezca 🎙️.'; return; }
@@ -2565,7 +2571,10 @@ function renderQuiz(){
           recBtn.classList.add('recording');
           status.textContent = '🎙️ Listening... speak now';
 
+          let heard = false;
+          const startedAt = Date.now();
           recognition.onresult = (e) => {
+            heard = true;
             retriedCapture = false;
             const said = e.results[0][0].transcript;
             userAnswers[i] = said;
@@ -2596,7 +2605,12 @@ function renderQuiz(){
           recognition.onend = () => {
             recBtn.classList.remove('recording');
             if (!status.textContent.includes('⚠') && !status.textContent.includes('No se detectó') && !status.textContent.includes('Reintentando')) {
-              status.textContent = 'Recording finished. Press "Check my answers" when ready, or record again.';
+              status.textContent = heard
+                ? 'Recording finished. Press "Check my answers" when ready, or record again.'
+                : Date.now() - startedAt < 1500
+                  // Se cerró solo, sin dejar hablar: el micrófono seguía ocupado.
+                  ? 'El micrófono seguía ocupado. Toca 🎤 Record otra vez.'
+                  : 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.';
             }
           };
           try {
@@ -2617,7 +2631,8 @@ function renderQuiz(){
           status.textContent = 'Preparando micrófono... espera';
           try {
             const res = await azurePronunciation(q.mode === 'open' ? '' : (q.targetText || ''),
-              () => { status.textContent = '🎙️ Listening... speak now'; });
+              () => { status.textContent = '🎙️ Listening... speak now (di la palabra una sola vez)'; },
+              () => { status.textContent = '⏳ Evaluando tu pronunciación... (no repitas)'; });
             recBtn.classList.remove('recording');
             if (!res || !res.text) {
               status.textContent = 'No te escuché. Toca Record otra vez y habla cuando aparezca 🎙️ Listening.';
