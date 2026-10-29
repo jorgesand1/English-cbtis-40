@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel de Maestro — CBTIS 40</title>
+<!-- Las fuentes se cargan sin detener la página (igual que en index.html). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Work+Sans:wght@400;500;600;700&display=swap');
   :root{
     --board:#233d2f; --board-dark:#1a2f24; --chalk:#f4f1e6; --chalk-dim:#c9d3c9;
     --accent-red:#e2574c; --accent-yellow:#e0b84a; --accent-green:#7fb069; --line: rgba(244,241,230,0.18);
@@ -29,6 +32,12 @@
     padding:9px 14px;border-radius:8px;font-size:14px;font-family:'Work Sans',sans-serif;cursor:pointer;
   }
 
+  .azure-usage{margin-top:18px;padding:10px 14px;border:1px solid rgba(255,255,255,.15);border-radius:10px;font-size:14px;}
+  .azure-usage .bar{height:8px;border-radius:4px;background:rgba(255,255,255,.12);margin-top:6px;overflow:hidden;}
+  .azure-usage .bar div{height:100%;background:var(--accent-green);}
+  .azure-usage.warn .bar div{background:var(--accent-yellow);}
+  .azure-usage.out{border-color:var(--accent-red);}
+  .azure-usage.out .bar div{background:var(--accent-red);}
   .section-title{font-family:'Patrick Hand',cursive;font-size:24px;color:var(--accent-yellow);margin:34px 0 14px;}
 
   table{width:100%;border-collapse:collapse;background:var(--board-dark);border-radius:10px;overflow:hidden;}
@@ -97,6 +106,8 @@
       <button class="ghost" id="excelBtn" onclick="downloadExcel()">⬇ Descargar Excel</button>
     </div>
 
+    <div id="azureUsage" class="azure-usage" style="display:none;"></div>
+
     <div class="section-title">Errores más recurrentes</div>
     <div id="errorAnalysis" class="loading">Cargando...</div>
 
@@ -115,8 +126,6 @@
 </div>
 
 <script src="cierres-unidades.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyC_JqZlzxvhvcduK695YPqIHM5PukeLI64",
@@ -126,8 +135,35 @@
     messagingSenderId: "99688303455",
     appId: "1:99688303455:web:7c13b7c60086047eddc4ea"
   };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  // Firebase se carga en segundo plano para que el panel aparezca aunque
+  // gstatic.com tarde (mismo arreglo que en index.html).
+  const FIREBASE_SCRIPTS = [
+    'https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js'
+  ];
+  function loadScript(src){
+    return new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = () => reject(new Error('No cargó ' + src));
+      document.head.appendChild(el);
+    });
+  }
+  let dbPromise = null;
+  function getDb(){
+    if (!dbPromise){
+      dbPromise = (async () => {
+        if (!window.firebase) await loadScript(FIREBASE_SCRIPTS[0]);
+        if (!firebase.firestore) await loadScript(FIREBASE_SCRIPTS[1]);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        return firebase.firestore();
+      })();
+      dbPromise.catch(() => { dbPromise = null; });
+    }
+    return dbPromise;
+  }
+  getDb().catch(() => {});
 
   const TEACHER_ACCOUNTS = {
     "cbtis40profe":     { name: "Profr. Jorge Sandoval", teacherId: "jorge",  scope: "own" },
@@ -166,6 +202,7 @@
     document.getElementById('attemptsTable').innerHTML = '<div class="loading">Cargando...</div>';
     document.getElementById('complianceTable').innerHTML = '<div class="loading">Cargando...</div>';
     try {
+      const db = await getDb();
       let query = db.collection('results').orderBy('timestamp', 'desc');
       if (currentAccount.scope !== 'all') {
         query = db.collection('results').where('teacherId', '==', currentAccount.teacherId).orderBy('timestamp', 'desc');
@@ -176,12 +213,41 @@
       populateUnitFilter();
       populateStudentFilter();
       renderAll();
+      loadAzureUsage(db);
     } catch (err) {
       console.error(err);
       document.getElementById('attemptsTable').innerHTML =
         '<div class="empty">No se pudieron cargar los datos. Revisa la conexión o las reglas de Firestore.</div>';
       document.getElementById('errorAnalysis').innerHTML = '';
       document.getElementById('complianceTable').innerHTML = '';
+    }
+  }
+
+  // Contador de Azure (evaluación de pronunciación): las 5 horas gratis
+  // del plan F0 son por mes y compartidas por toda la plataforma.
+  const AZURE_FREE_MINUTES = 300;
+  async function loadAzureUsage(db){
+    const box = document.getElementById('azureUsage');
+    try {
+      const now = new Date();
+      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const snap = await db.collection('azureUsage').where('month', '==', month).get();
+      if (snap.empty) { box.style.display = 'none'; return; }
+      let count = 0, seconds = 0, quota = false;
+      snap.forEach(d => {
+        const u = d.data();
+        if (u.kind === 'quota') quota = true;
+        else { count++; seconds += Number(u.seconds) || 0; }
+      });
+      const minutes = Math.round(seconds / 60);
+      const pct = Math.min(100, Math.round(minutes / AZURE_FREE_MINUTES * 100));
+      box.className = 'azure-usage' + (quota ? ' out' : pct >= 80 ? ' warn' : '');
+      box.innerHTML = quota
+        ? `⚠️ <b>Se acabaron las horas gratis de Azure de este mes.</b> La plataforma sigue funcionando con el reconocimiento normal; se reinicia el día 1.<div class="bar"><div style="width:100%"></div></div>`
+        : `🎯 Evaluaciones de pronunciación este mes: <b>${count}</b> (≈ ${minutes} min de ${AZURE_FREE_MINUTES} gratis)${pct >= 80 ? ' · ya casi se acaban' : ''}<div class="bar"><div style="width:${pct}%"></div></div>`;
+      box.style.display = '';
+    } catch (e) {
+      box.style.display = 'none';   // sin permiso en Firestore todavía, o sin conexión
     }
   }
 
