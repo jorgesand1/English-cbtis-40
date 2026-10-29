@@ -1825,17 +1825,29 @@ function speechHelpMessage(){
 
 /* ---------- Azure Pronunciation Assessment ----------
    Califica la pronunciación palabra por palabra y sonido por sonido.
-   Si AZURE_SPEECH.key está vacío, la plataforma funciona como antes
+   Si AZURE_SPEECH.tokenUrl está vacío, la plataforma funciona como antes
    (reconocimiento de voz del navegador). Plan Free F0: sin cobro posible;
    si se acaban las horas gratis del mes, se usa el reconocimiento normal. */
 // allQuestions: false = solo las preguntas de speaking marcadas con azure: true
 // (frases clave, para no pasar de las horas gratis del mes).
-const AZURE_SPEECH = { key: '', region: 'eastus', allQuestions: false };
+// tokenUrl: dirección del servicio en Cloudflare que guarda la llave de
+// Azure y entrega permisos de 10 minutos. Vacío = Azure apagado.
+const AZURE_SPEECH = { tokenUrl: 'https://cbtis40-voz.jorgesandoval2305.workers.dev', region: 'eastus', allQuestions: false };
 const AZURE_SDK_URL = 'https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.51.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js';
 const pronScores = {};
 const pronAttempts = {};  // intentos por pregunta, para no frustrar
 const AZURE_MAX_ATTEMPTS = 3;  // después, ya no se usa Azure en esa pregunta (ahorra horas)   // `${unitId}:${i}` -> { pron, accuracy, fluency, completeness }
-function azureEnabled(){ return !!AZURE_SPEECH.key; }
+function azureEnabled(){ return !!AZURE_SPEECH.tokenUrl; }
+// Permiso temporal de Azure (dura 10 min; se renueva a los 9).
+let azureToken = null;
+async function getAzureToken(){
+  if (azureToken && Date.now() - azureToken.at < 9 * 60 * 1000) return azureToken;
+  const r = await fetch(AZURE_SPEECH.tokenUrl, { cache: 'no-store' });
+  if (!r.ok) throw new Error('Sin permiso de Azure (' + r.status + ')');
+  const data = await r.json();
+  azureToken = { token: data.token, region: data.region || AZURE_SPEECH.region, at: Date.now() };
+  return azureToken;
+}
 let speechSdkPromise = null;
 function loadSpeechSdk(){
   if (window.SpeechSDK) return Promise.resolve(window.SpeechSDK);
@@ -1854,8 +1866,8 @@ function loadSpeechSdk(){
 // Graba una frase y regresa lo que dijo con sus puntajes (0-100).
 // referenceText vacío = respuesta libre (Azure evalúa sin texto esperado).
 async function azurePronunciation(referenceText){
-  const sdk = await loadSpeechSdk();
-  const cfg = sdk.SpeechConfig.fromSubscription(AZURE_SPEECH.key, AZURE_SPEECH.region);
+  const [sdk, auth] = await Promise.all([loadSpeechSdk(), getAzureToken()]);
+  const cfg = sdk.SpeechConfig.fromAuthorizationToken(auth.token, auth.region);
   cfg.speechRecognitionLanguage = 'en-US';
   const recognizer = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromDefaultMicrophoneInput());
   const pa = new sdk.PronunciationAssessmentConfig(
