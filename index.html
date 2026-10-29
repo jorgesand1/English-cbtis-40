@@ -1840,13 +1840,16 @@ const AZURE_MAX_ATTEMPTS = 3;  // después, ya no se usa Azure en esa pregunta (
 function azureEnabled(){ return !!AZURE_SPEECH.tokenUrl; }
 // Permiso temporal de Azure (dura 10 min; se renueva a los 9).
 let azureToken = null;
-async function getAzureToken(){
-  if (azureToken && Date.now() - azureToken.at < 9 * 60 * 1000) return azureToken;
-  const r = await fetch(AZURE_SPEECH.tokenUrl, { cache: 'no-store' });
-  if (!r.ok) throw new Error('Sin permiso de Azure (' + r.status + ')');
-  const data = await r.json();
-  azureToken = { token: data.token, region: data.region || AZURE_SPEECH.region, at: Date.now() };
-  return azureToken;
+let azureTokenPromise = null;  // varias preguntas lo piden a la vez: una sola petición
+function getAzureToken(){
+  if (azureToken && Date.now() - azureToken.at < 9 * 60 * 1000) return Promise.resolve(azureToken);
+  if (!azureTokenPromise) {
+    azureTokenPromise = fetch(AZURE_SPEECH.tokenUrl, { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('Sin permiso de Azure (' + r.status + ')'); return r.json(); })
+      .then(data => (azureToken = { token: data.token, region: data.region || AZURE_SPEECH.region, at: Date.now() }))
+      .finally(() => { azureTokenPromise = null; });
+  }
+  return azureTokenPromise;
 }
 let speechSdkPromise = null;
 function loadSpeechSdk(){
@@ -1865,11 +1868,15 @@ function loadSpeechSdk(){
 }
 // Graba una frase y regresa lo que dijo con sus puntajes (0-100).
 // referenceText vacío = respuesta libre (Azure evalúa sin texto esperado).
-async function azurePronunciation(referenceText){
+// onListening se llama cuando el micrófono ya está grabando de verdad, para
+// no decirle al alumno "habla" antes de tiempo (con una sola palabra se pierde).
+async function azurePronunciation(referenceText, onListening){
   const [sdk, auth] = await Promise.all([loadSpeechSdk(), getAzureToken()]);
   const cfg = sdk.SpeechConfig.fromAuthorizationToken(auth.token, auth.region);
   cfg.speechRecognitionLanguage = 'en-US';
+  cfg.setProperty(sdk.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, '8000');
   const recognizer = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromDefaultMicrophoneInput());
+  if (onListening) recognizer.sessionStarted = () => onListening();
   const pa = new sdk.PronunciationAssessmentConfig(
     referenceText || '',
     sdk.PronunciationAssessmentGradingSystem.HundredMark,
@@ -2396,6 +2403,7 @@ function renderQuiz(){
       if (azureEnabled() && (AZURE_SPEECH.allQuestions || q.azure) && q.sentence &&
           navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         loadSpeechSdk().catch(() => {});
+        getAzureToken().catch(() => {});
         const evalBtn = document.createElement('button');
         evalBtn.type = 'button';
         evalBtn.className = 'record-btn';
@@ -2414,18 +2422,18 @@ function renderQuiz(){
           }
           if (window.speechSynthesis) window.speechSynthesis.cancel();
           evalBtn.classList.add('recording');
-          evalStatus.textContent = window.SpeechSDK ? '🎙️ Di la oración completa...' : 'Preparando micrófono...';
+          evalStatus.textContent = 'Preparando micrófono... espera';
           try {
-            await loadSpeechSdk();
-            evalStatus.textContent = '🎙️ Di la oración completa...';
-            const res = await azurePronunciation(q.sentence);
+            const res = await azurePronunciation(q.sentence, () => { evalStatus.textContent = '🎙️ Ahora sí, di la oración completa...'; });
             evalBtn.classList.remove('recording');
             if (res) logAzureUsage('ok', res.seconds);
-            if (!res || !res.text) { evalStatus.textContent = 'No se detectó voz — intenta de nuevo.'; return; }
+            if (!res || !res.text) { evalStatus.textContent = 'No te escuché. Toca otra vez y habla cuando aparezca 🎙️.'; return; }
             const sk = `${currentUnit.id}:${i}`;
             pronAttempts[sk] = (pronAttempts[sk] || 0) + 1;
             renderPronunciation(evalBox, res, pronAttempts[sk]);
-            evalStatus.textContent = 'Revisa las palabras en amarillo, escucha el audio otra vez y vuelve a intentarlo.';
+            evalStatus.textContent = res.pron >= 80
+              ? '¡Muy bien! Puedes pasar a la siguiente oración.'
+              : 'Revisa las palabras en amarillo o rojo, escucha el audio otra vez y vuelve a intentarlo.';
             markPracticed();
           } catch (err) {
             evalBtn.classList.remove('recording');
@@ -2449,7 +2457,7 @@ function renderQuiz(){
       }
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const useAzure = azureEnabled() && (AZURE_SPEECH.allQuestions || !!q.azure) && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-      if (useAzure) loadSpeechSdk().catch(() => {});
+      if (useAzure) { loadSpeechSdk().catch(() => {}); getAzureToken().catch(() => {}); }
       if (!SR && !useAzure) {
         const warn = document.createElement('div');
         warn.className = 'no-support';
@@ -2552,14 +2560,13 @@ function renderQuiz(){
           practicedAnswers[i] = true;
           if (window.speechSynthesis) window.speechSynthesis.cancel();
           recBtn.classList.add('recording');
-          status.textContent = window.SpeechSDK ? '🎙️ Listening... speak now' : 'Preparando micrófono...';
+          status.textContent = 'Preparando micrófono... espera';
           try {
-            const sdkReady = loadSpeechSdk().then(() => { status.textContent = '🎙️ Listening... speak now'; });
-            await sdkReady;
-            const res = await azurePronunciation(q.mode === 'open' ? '' : (q.targetText || ''));
+            const res = await azurePronunciation(q.mode === 'open' ? '' : (q.targetText || ''),
+              () => { status.textContent = '🎙️ Listening... speak now'; });
             recBtn.classList.remove('recording');
             if (!res || !res.text) {
-              status.textContent = 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.';
+              status.textContent = 'No te escuché. Toca Record otra vez y habla cuando aparezca 🎙️ Listening.';
               return;
             }
             logAzureUsage('ok', res.seconds);
