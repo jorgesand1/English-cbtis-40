@@ -190,6 +190,7 @@
 
   .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:28px;}
   /* Guardar avance: botón fijo abajo para salir a medias y continuar después */
+  .unit-btn.closed{opacity:.55;}
   .save-fab{
     position:fixed;right:16px;bottom:16px;z-index:50;
     background:var(--accent-green);color:var(--board-dark);border:none;
@@ -295,6 +296,9 @@
     edítalo para poner tus propios temas y actividades exactas de clase. Ver comentarios en el HTML para la guía.
   </footer>
 </div>
+
+<!-- Unidades cerradas por maestro (las comparte con el panel) -->
+<script src="cierres-unidades.js"></script>
 
 <!-- Firebase (guarda resultados en tu base de datos de Firestore) -->
 <script>
@@ -1812,6 +1816,10 @@ function speechHelpMessage(){
 
 let completedUnits = {};
 
+function unitIsClosed(u){
+  return !!(u && window.isUnitClosed && window.isUnitClosed(selectedTeacherId, u.id));
+}
+
 function visibleUnits(){
   return UNITS.filter(u =>
     Number(u.semester || 1) === Number(selectedSemester) &&
@@ -1827,7 +1835,11 @@ function renderUnitPicker(){
     const btn = document.createElement('button');
     btn.className = 'unit-btn' + (currentUnit && u.id === currentUnit.id ? ' active' : '');
     const progress = completedUnits[u.id];
-    if (progress) {
+    if (unitIsClosed(u)) {
+      btn.classList.add('closed');
+      btn.textContent = `🔒 ${u.title} (cerrada)`;
+      btn.title = 'Esta unidad ya cerró: ya no cuenta para calificación';
+    } else if (progress) {
       const pct = progress.total ? Math.round((progress.score / progress.total) * 100) : 0;
       btn.textContent = `✓ ${u.title} (${pct}%)`;
       btn.title = `Ya contestada — mejor resultado: ${progress.score}/${progress.total}, ${progress.attempts} intento(s)`;
@@ -2368,7 +2380,7 @@ function clearSavedProgress(unit){
   try { localStorage.removeItem(progressKey(unit.id)); } catch (e) {}
 }
 function saveProgress(showMsg){
-  if (!currentUnit || !studentNameKey) return false;
+  if (!currentUnit || !studentNameKey || unitIsClosed(currentUnit)) return false;
   const data = { userAnswers, practicedAnswers, lockedQuestions, wrongChecks, savedAt: Date.now() };
   try {
     localStorage.setItem(progressKey(currentUnit.id), JSON.stringify(data));
@@ -2393,6 +2405,13 @@ function showSaveToast(msg){
 }
 function openUnit(u){
   currentUnit = u;
+  if (unitIsClosed(u)) {
+    userAnswers = {};
+    practicedAnswers = {};
+    renderClosedUnit(u);
+    renderUnitPicker();
+    return;
+  }
   const saved = loadSavedProgress(u);
   userAnswers = (saved && saved.userAnswers) || {};
   practicedAnswers = (saved && saved.practicedAnswers) || {};
@@ -2413,6 +2432,17 @@ function openUnit(u){
   }
   renderUnitPicker();
 }
+function renderClosedUnit(u){
+  const area = document.getElementById('quizArea');
+  const d = window.unitClosingDate(selectedTeacherId, u.id);
+  const when = d ? d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' }) : '';
+  area.innerHTML = `<div class="card closed-unit">
+      <div class="q-meta">🔒 Unidad cerrada</div>
+      <div class="q-text"><b>${u.title}</b> se cerró${when ? ' el ' + when : ''} porque el parcial ya terminó.
+      Ya no se puede contestar ni cuenta para calificación. Elige una unidad abierta.</div>
+    </div>`;
+}
+
 // Guardado automático: cada cambio de respuesta se guarda en silencio.
 let autoSaveTimer = null;
 function scheduleAutoSave(){
@@ -2462,6 +2492,7 @@ function scoreSpeaking(said, target){
 }
 
 function checkAnswers(){
+  if (unitIsClosed(currentUnit)) { renderClosedUnit(currentUnit); return; }
   let correctCount = 0;
   const questionResults = [];
   const pushResult = (q, isCorrect) => {
@@ -2834,7 +2865,7 @@ function startSession(){
   document.getElementById('appContent').style.display = 'block';
   // El concurso de canción es solo de los grupos del Profr. Jorge Sandoval
   document.getElementById('songContest').style.display = SONG_CONTEST.teacherId === teacherId ? 'block' : 'none';
-  openUnit(visibleUnits()[0] || null);
+  openUnit(visibleUnits().find(u => !unitIsClosed(u)) || visibleUnits()[0] || null);
   loadStudentProgress();
 }
 </script>
