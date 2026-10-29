@@ -1931,7 +1931,9 @@ async function azurePronunciation(referenceText, onListening, onScoring){
   mic.attach(pushStream);
   const recognizer = new sdk.SpeechRecognizer(cfg, sdk.AudioConfig.fromStreamInput(pushStream));
   const guard = setTimeout(() => mic.stop(), 20000);  // nunca dejar el micrófono abierto
-  if (onScoring) recognizer.speechEndDetected = () => onScoring();
+  // Al terminar de hablar se suelta el micrófono de una vez (el iPhone no deja
+  // grabar en otra pregunta mientras siga abierto) y Azure califica antes.
+  recognizer.speechEndDetected = () => { mic.stop(); if (onScoring) onScoring(); };
   const pa = new sdk.PronunciationAssessmentConfig(
     referenceText || '',
     sdk.PronunciationAssessmentGradingSystem.HundredMark,
@@ -2570,6 +2572,7 @@ function renderQuiz(){
           status.textContent = '🎙️ Listening... speak now';
 
           let heard = false;
+          const startedAt = Date.now();
           recognition.onresult = (e) => {
             heard = true;
             retriedCapture = false;
@@ -2604,7 +2607,10 @@ function renderQuiz(){
             if (!status.textContent.includes('⚠') && !status.textContent.includes('No se detectó') && !status.textContent.includes('Reintentando')) {
               status.textContent = heard
                 ? 'Recording finished. Press "Check my answers" when ready, or record again.'
-                : 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.';
+                : Date.now() - startedAt < 1500
+                  // Se cerró solo, sin dejar hablar: el micrófono seguía ocupado.
+                  ? 'El micrófono seguía ocupado. Toca 🎤 Record otra vez.'
+                  : 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.';
             }
           };
           try {
