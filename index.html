@@ -745,12 +745,12 @@ const UNITS = [
       { type: "note", text: "En español, la J suena como una exhalación fuerte desde la garganta (jamón, jugo). En inglés, la J <b>siempre</b> suena distinto: es un sonido que empieza como 'd' y termina como 'sh' suave — algo como \"dyu\". Escucha cada palabra, dale play las veces que quieras, y luego grábate repitiéndola." },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧃", audioText: "juice", targetText: "juice", azure: true },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧥", audioText: "jacket", targetText: "jacket", azure: true },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🫙", audioText: "jar", targetText: "jar" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🍊", audioText: "orange", targetText: "orange" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚙", audioText: "jeep", targetText: "jeep" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🫙", audioText: "jar", targetText: "jar", azure: true },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🍊", audioText: "orange", targetText: "orange", azure: true },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🚙", audioText: "jeep", targetText: "jeep", azure: true },
       { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🧌", audioText: "giant", targetText: "giant", azure: true },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🪼", audioText: "jellyfish", targetText: "jellyfish" },
-      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🐆", audioText: "jaguar", targetText: "jaguar" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🪼", audioText: "jellyfish", targetText: "jellyfish", azure: true },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🐆", audioText: "jaguar", targetText: "jaguar", azure: true },
       { type: "note", text: "Dato extra: la letra <b>G</b> antes de e/i/y a veces hace este MISMO sonido — como en <i>giant</i> o <i>orange</i>. No solo la letra J lo produce." }
     ]
   },
@@ -1840,7 +1840,12 @@ const AZURE_MAX_ATTEMPTS = 3;  // después, ya no se usa Azure en esa pregunta (
 function azureEnabled(){ return !!AZURE_SPEECH.tokenUrl; }
 // En algunos iPhone el reconocimiento de voz del navegador se cierra solo sin
 // dejar hablar. Si pasa, las preguntas de Speaking usan Azure como respaldo.
-let webSpeechFailed = false;
+// Se recuerda en el teléfono para no hacer que el alumno falle cada vez.
+let webSpeechFailed = (() => { try { return localStorage.getItem('webSpeechFailed') === '1'; } catch (e) { return false; } })();
+function markWebSpeechFailed(){
+  webSpeechFailed = true;
+  try { localStorage.setItem('webSpeechFailed', '1'); } catch (e) {}
+}
 // Permiso temporal de Azure (dura 10 min; se renueva a los 9).
 let azureToken = null;
 let azureTokenPromise = null;  // varias preguntas lo piden a la vez: una sola petición
@@ -1950,7 +1955,11 @@ async function azurePronunciation(referenceText, onListening, onScoring){
     recognizer.recognizeOnceAsync(r => {
       clearTimeout(guard); mic.stop();
       recognizer.close();
-      if (r.reason === sdk.ResultReason.RecognizedSpeech){
+      // Solo ruido (Azure devuelve "." o nada): igual que si no hubiera hablado.
+      if (r.reason === sdk.ResultReason.RecognizedSpeech && !/[a-z]/i.test(r.text || '')){
+        logAzureUsage('ok', (r.duration || 0) / 1e7);
+        resolve(null);
+      } else if (r.reason === sdk.ResultReason.RecognizedSpeech){
         const pr = sdk.PronunciationAssessmentResult.fromResult(r);
         resolve({
           seconds: (r.duration || 0) / 1e7,
@@ -2615,7 +2624,7 @@ function renderQuiz(){
                 : Date.now() - startedAt < 1500
                   // Se cerró solo, sin dejar hablar.
                   ? (azureEnabled() && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
-                      ? (webSpeechFailed = true, 'Este teléfono no dejó grabar. Toca 🎤 Record otra vez: ahora usará otro sistema.')
+                      ? (markWebSpeechFailed(), 'Este teléfono no dejó grabar. Toca 🎤 Record otra vez: ahora usará otro sistema.')
                       : 'El micrófono seguía ocupado. Toca 🎤 Record otra vez.')
                   : 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.';
             }
