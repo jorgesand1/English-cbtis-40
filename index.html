@@ -1838,6 +1838,9 @@ const pronScores = {};
 const pronAttempts = {};  // intentos por pregunta, para no frustrar
 const AZURE_MAX_ATTEMPTS = 3;  // después, ya no se usa Azure en esa pregunta (ahorra horas)   // `${unitId}:${i}` -> { pron, accuracy, fluency, completeness }
 function azureEnabled(){ return !!AZURE_SPEECH.tokenUrl; }
+// En algunos iPhone el reconocimiento de voz del navegador se cierra solo sin
+// dejar hablar. Si pasa, las preguntas de Speaking usan Azure como respaldo.
+let webSpeechFailed = false;
 // Permiso temporal de Azure (dura 10 min; se renueva a los 9).
 let azureToken = null;
 let azureTokenPromise = null;  // varias preguntas lo piden a la vez: una sola petición
@@ -2517,8 +2520,10 @@ function renderQuiz(){
       }
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const useAzure = azureEnabled() && (AZURE_SPEECH.allQuestions || !!q.azure) && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-      if (useAzure) { loadSpeechSdk().catch(() => {}); getAzureToken().catch(() => {}); }
-      if (!SR && !useAzure) {
+      // Navegador sin reconocimiento de voz: si hay Azure, se usa como respaldo.
+      if (!SR && azureEnabled() && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) webSpeechFailed = true;
+      if (useAzure || webSpeechFailed) { loadSpeechSdk().catch(() => {}); getAzureToken().catch(() => {}); }
+      if (!SR && !useAzure && !webSpeechFailed) {
         const warn = document.createElement('div');
         warn.className = 'no-support';
         warn.textContent = speechHelpMessage();
@@ -2608,8 +2613,10 @@ function renderQuiz(){
               status.textContent = heard
                 ? 'Recording finished. Press "Check my answers" when ready, or record again.'
                 : Date.now() - startedAt < 1500
-                  // Se cerró solo, sin dejar hablar: el micrófono seguía ocupado.
-                  ? 'El micrófono seguía ocupado. Toca 🎤 Record otra vez.'
+                  // Se cerró solo, sin dejar hablar.
+                  ? (azureEnabled() && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+                      ? (webSpeechFailed = true, 'Este teléfono no dejó grabar. Toca 🎤 Record otra vez: ahora usará otro sistema.')
+                      : 'El micrófono seguía ocupado. Toca 🎤 Record otra vez.')
                   : 'No se detectó voz — intenta de nuevo, habla justo después de presionar Record.';
             }
           };
@@ -2656,9 +2663,8 @@ function renderQuiz(){
             else status.textContent = '⚠ Error de conexión — intenta de nuevo en un momento.';
           }
         };
-        recBtn.onclick = useAzure
-          ? () => ((pronAttempts[pronKey] || 0) >= AZURE_MAX_ATTEMPTS ? webSpeechClick() : azureClick())
-          : webSpeechClick;
+        recBtn.onclick = () => ((useAzure || webSpeechFailed) && (pronAttempts[pronKey] || 0) < AZURE_MAX_ATTEMPTS
+          ? azureClick() : webSpeechClick());
 
         card.appendChild(recBtn);
         card.appendChild(status);
