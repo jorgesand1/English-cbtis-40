@@ -35,3 +35,13 @@ Las fotos `u4-*.jpg` (Unidad 4) son de [Unsplash](https://unsplash.com) (licenci
 | u4-diet.jpg | Anna Pelzer | [ver](https://unsplash.com/photos/bowl-of-vegetable-salads-IGfIGP5ONV0) |
 | u4-breathing.jpg | Richard Jaimes | [ver](https://unsplash.com/photos/womans-face-tt9BPCXvZc8) |
 | u4-sleep.jpg | Greg Pappas | [ver](https://unsplash.com/photos/woman-sleeping-on-bed-under-blankets-rUc9hVE-L-E) |
+
+Las fotos `u5-*.jpg` (Unidad 5) son de [Unsplash](https://unsplash.com) (licencia de Unsplash, uso libre).
+
+| Archivo | Fotógrafo | Foto original |
+|---|---|---|
+| u5-achievement.jpg | Pang Yuhao | [ver](https://unsplash.com/photos/people-throwing-hats-on-air-_kd5cxwZOK4) |
+| u5-career.jpg | Jefferson Santos | [ver](https://unsplash.com/photos/person-using-laptop-computers-9SoCnyQmkzI) |
+| u5-skill.jpg | Jefferson Santos | [ver](https://unsplash.com/photos/person-playing-guitar-fCEJGBzAkrU) |
+| u5-experience.jpg | Holly Mandarich | [ver](https://unsplash.com/photos/person-carrying-yellow-and-black-backpack-walking-between-green-plants-UVyOfX3v0Ls) |
+| u5-realize.jpg | Look Studio | [ver](https://unsplash.com/photos/a-woman-with-curly-hair-is-making-a-surprised-face-klKIQ9vu6mw) |
