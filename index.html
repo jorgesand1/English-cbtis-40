@@ -2544,6 +2544,11 @@ function renderQuiz(){
       practiceBtn.textContent = practicedAnswers[i] ? '✓ Practiced' : '✓ I practiced this sentence';
       if (practicedAnswers[i]) practiceBtn.classList.add('done');
       practiceBtn.onclick = markPracticed;
+      // Con Azure, la oración cuenta como practicada solo cuando Azure la
+      // escucha: el botón manual se esconde y vuelve si Azure falla.
+      const azureShadow = !!(azureEnabled() && (AZURE_SPEECH.allQuestions || q.azure) && q.sentence &&
+        navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      if (azureShadow && !practicedAnswers[i]) practiceBtn.style.display = 'none';
 
       const MR = window.MediaRecorder;
       if (!navigator.mediaDevices || !MR) {
@@ -2618,7 +2623,8 @@ function renderQuiz(){
               status.textContent = '✓ Listo — dale play para escucharte y comparar con el modelo.';
               // Si sí logró grabar audio real, ya sabemos que practicó —
               // no lo obligamos a dar clic aparte en el botón verde.
-              markPracticed();
+              // (Con Azure, solo cuenta la evaluación.)
+              if (!azureShadow) markPracticed();
             };
             mediaRecorder.start();
             recBtn.classList.add('recording');
@@ -2639,8 +2645,7 @@ function renderQuiz(){
 
       // Retroalimentación de Azure en shadowing: no cuenta para la
       // calificación, solo le dice al alumno qué palabras y sonidos revisar.
-      if (azureEnabled() && (AZURE_SPEECH.allQuestions || q.azure) && q.sentence &&
-          navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      if (azureShadow) {
         loadSpeechSdk().catch(() => {});
         getAzureToken().catch(() => {});
         const evalBtn = document.createElement('button');
@@ -2675,9 +2680,11 @@ function renderQuiz(){
               ? '¡Muy bien! Puedes pasar a la siguiente oración.'
               : 'Revisa las palabras en amarillo o rojo, escucha el audio otra vez y vuelve a intentarlo.';
             markPracticed();
+            practiceBtn.style.display = '';
           } catch (err) {
             evalBtn.classList.remove('recording');
             console.warn('Azure no disponible:', err);
+            practiceBtn.style.display = '';
             evalStatus.textContent = '⚠ La evaluación no está disponible ahorita. Puedes seguir practicando con "Record my attempt".';
           }
         };
