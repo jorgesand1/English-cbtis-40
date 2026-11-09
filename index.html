@@ -249,6 +249,32 @@
   .song-winner th,.song-winner td{padding:4px;border-bottom:1px solid var(--line);text-align:center;}
   .song-winner th:first-child,.song-winner td:first-child{text-align:left;}
 
+  /* Logros: racha, XP, misión del día, insignias y liga (logros.js) */
+  .logros-bar{background:var(--board-dark);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:18px;}
+  .logros-stats{display:flex;gap:18px;flex-wrap:wrap;font-size:16px;}
+  .logros-stats b{color:var(--accent-yellow);font-size:19px;}
+  .logros-mission{margin-top:10px;font-size:13px;color:var(--chalk-dim);}
+  .logros-mbar{height:8px;border-radius:4px;background:rgba(255,255,255,.12);margin-top:5px;overflow:hidden;}
+  .logros-mbar div{height:100%;width:0;background:var(--accent-yellow);transition:width .4s;}
+  .logros-bar.mission-done .logros-mbar div{background:var(--accent-green);}
+  .logros-bar.mission-done .logros-mission{color:var(--accent-green);}
+  .logros-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .logros-actions button{padding:7px 12px;font-size:13px;}
+  .logros-note{font-size:13px;color:var(--chalk-dim);margin:8px 0;}
+  .logros-league table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;}
+  .logros-league td,.logros-league th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;}
+  .logros-league tr.me td{color:var(--accent-yellow);font-weight:700;}
+  .logros-league-title{font-family:'Patrick Hand',cursive;font-size:20px;color:var(--accent-yellow);margin-top:10px;}
+  .logros-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:10px;}
+  .logros-badge{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;opacity:.5;font-size:14px;}
+  .logros-badge.has{opacity:1;border-color:var(--accent-yellow);}
+  .logros-badge small{color:var(--chalk-dim);}
+  .logros-badge-icon{font-size:26px;}
+  .logros-toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-80px);z-index:60;max-width:calc(100% - 32px);
+    background:var(--accent-yellow);color:var(--board-dark);font-weight:700;padding:9px 16px;border-radius:999px;
+    font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .25s;text-align:center;pointer-events:none;}
+  .logros-toast.show{transform:translate(-50%,0);}
+
   footer{margin-top:50px;border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--chalk-dim);}
   footer code{background:var(--board-dark);padding:2px 6px;border-radius:4px;}
 </style>
@@ -296,6 +322,20 @@
   <div id="appContent" style="display:none;">
     <button id="saveProgressBtn" class="save-fab" type="button" onclick="saveProgress(true)">💾 Guardar avance</button>
     <div id="saveToast" class="save-toast" role="status"></div>
+    <div id="logrosToast" class="logros-toast" role="status"></div>
+    <div id="logrosBar" class="logros-bar" style="display:none;">
+      <div class="logros-stats">
+        <span title="Racha">🔥 <b data-l="streak">0</b> <span data-l="streakWord">días</span></span>
+        <span title="Puntos de experiencia">⭐ <b data-l="xp">0</b> XP</span>
+        <span title="Insignias">🏅 <b data-l="badges">0</b></span>
+      </div>
+      <div class="logros-mission"><div data-l="mission"></div><div class="logros-mbar"><div data-l="fill"></div></div></div>
+      <div class="logros-actions">
+        <button type="button" class="ghost" onclick="Logros.showLeague()">🏆 Liga semanal</button>
+        <button type="button" class="ghost" onclick="Logros.showBadges()">🏅 Mis insignias</button>
+      </div>
+      <div id="logrosPanel"></div>
+    </div>
     <div class="unit-picker" id="unitPicker"></div>
     <div id="quizArea"></div>
   </div>
@@ -2189,6 +2229,12 @@ function logAzureUsage(kind, seconds){
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   })).catch(() => {});
 }
+// Logros: pronunciación de 80 o más da XP (una vez por pregunta); 90+ da insignia.
+function awardPron(key, pron){
+  if (!window.Logros || !currentUnit) return;
+  if (pron >= 80) Logros.award(`${key}:pron`, Logros.XP.pron, `pronunciación ${pron}`);
+  if (pron >= 90) Logros.badge('pron-90');
+}
 function scoreClass(n){ return n >= 70 ? 'good' : n >= 45 ? 'mid' : 'low'; }
 function wordTip(w){
   const pa = w.PronunciationAssessment || {};
@@ -2538,6 +2584,7 @@ function renderQuiz(){
       practiceBtn.className = 'practice-btn';
       const markPracticed = () => {
         practicedAnswers[i] = true;
+        Logros.award(`${currentUnit.id}:${i}:shadow`, Logros.XP.shadow, 'oración practicada');
         practiceBtn.textContent = '✓ Practiced';
         practiceBtn.classList.add('done');
       };
@@ -2676,6 +2723,7 @@ function renderQuiz(){
             if (!res || !res.text) { evalStatus.textContent = 'No te escuché. Toca otra vez y habla cuando aparezca 🎙️.'; return; }
             const sk = `${currentUnit.id}:${i}`;
             renderPronunciation(evalBox, res, addPronAttempt(sk));
+            awardPron(sk, res.pron);
             evalStatus.textContent = res.pron >= 80
               ? '¡Muy bien! Puedes pasar a la siguiente oración.'
               : 'Revisa las palabras en amarillo o rojo, escucha el audio otra vez y vuelve a intentarlo.';
@@ -2834,6 +2882,7 @@ function renderQuiz(){
             transcriptBox.textContent = `"${res.text}"`;
             pronScores[pronKey] = { pron: res.pron, accuracy: res.accuracy, fluency: res.fluency, completeness: res.completeness };
             renderPronunciation(pronBox, res, addPronAttempt(pronKey));
+            awardPron(pronKey, res.pron);
             status.textContent = 'Recording finished. Press "Check my answers" when ready, or record again.';
           } catch (err) {
             recBtn.classList.remove('recording');
@@ -3193,7 +3242,10 @@ function checkAnswers(){
       last.pronScore = ps.pron;
       fb.textContent += ` · Pronunciación: ${ps.pron}/100`;
     }
-    if (questionResults.length > resultsBefore && last.correct) lockQuestion(i);
+    if (questionResults.length > resultsBefore && last.correct) {
+      lockQuestion(i);
+      Logros.award(`${currentUnit.id}:${i}:ok`, Logros.XP.question, 'respuesta correcta');
+    }
     else wrongChecks[i] = (wrongChecks[i] || 0) + 1;
   });
 
@@ -3206,6 +3258,10 @@ function checkAnswers(){
   const practiceCompleted = practiceQuestions.filter(({ i }) => practicedAnswers[i]).length;
 
   showScore(correctCount, scorableTotal, practiceCompleted, practiceTotal);
+  if (scorableTotal > 0 && correctCount === scorableTotal) {
+    Logros.award(`${currentUnit.id}:unidad`, Logros.XP.unit, '¡unidad completa!');
+    Logros.badge('unidad');
+  }
   saveProgress(false);
   saveResults(correctCount, scorableTotal, questionResults, practiceCompleted, practiceTotal);
 }
@@ -3414,7 +3470,9 @@ function startSession(){
   document.getElementById('songContest').style.display = SONG_CONTEST.teacherId === teacherId ? 'block' : 'none';
   openUnit(visibleUnits().find(u => !unitIsClosed(u)) || visibleUnits()[0] || null);
   loadStudentProgress();
+  Logros.load();
 }
 </script>
+<script src="logros.js"></script>
 </body>
 </html>
