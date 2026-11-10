@@ -3244,7 +3244,10 @@ function checkAnswers(){
     }
     if (questionResults.length > resultsBefore && last.correct) {
       lockQuestion(i);
-      Logros.award(`${currentUnit.id}:${i}:ok`, Logros.XP.question, 'respuesta correcta');
+      // Si ya se le mostró la respuesta correcta, no da XP (si no, podrían
+      // fallar a propósito 2 veces y luego copiarla).
+      if ((wrongChecks[i] || 0) < REVEAL_AFTER_WRONG)
+        Logros.award(`${currentUnit.id}:${i}:ok`, Logros.XP.question, 'respuesta correcta');
     }
     else wrongChecks[i] = (wrongChecks[i] || 0) + 1;
   });
