@@ -62,7 +62,43 @@
     return missed <= freeze ? Number(s.streak) || 0 : 0;
   }
 
-  window.Logros = { XP, MISSION_XP, BADGES, dayKey, weekId, lastWeekId, weekLabel, streakOf };
+  /* Liga por PROMEDIO (pedido de Jorge, 10 nov 2026): los grupos tienen
+     distinto número de alumnos, así que gana el grupo con más XP por alumno.
+     XP de la semana del grupo ÷ alumnos inscritos en el grupo.
+     Pon aquí cuántos alumnos tiene cada grupo. Si un grupo no está, se usa
+     cuántos alumnos de ese grupo ya entraron a la plataforma este semestre. */
+  const GROUP_SIZES = {
+    jorge:  { /* '5AVG': 45, '5AVC': 40, ... */ },
+    esposa: { }
+  };
+  // XP de un alumno en una semana dada (su semana actual o la anterior).
+  function xpInWeek(d, id){
+    if (d.weekId === id) return Number(d.weekXp) || 0;
+    if (d.prevWeekId === id) return Number(d.prevWeekXp) || 0;
+    return 0;
+  }
+  // docs: documentos de un profesor y semestre. Devuelve los grupos
+  // ordenados por promedio: [{ g, xp, active, size, avg }].
+  function rankGroups(docs, id, teacherId, groups){
+    const sizes = GROUP_SIZES[teacherId] || {};
+    const t = {};
+    (groups || []).forEach(g => { t[g] = { g, xp: 0, active: 0, registered: 0 }; });
+    docs.forEach(d => {
+      const g = d.studentGroup;
+      if (!g) return;
+      t[g] = t[g] || { g, xp: 0, active: 0, registered: 0 };
+      t[g].registered++;
+      const x = xpInWeek(d, id);
+      if (x > 0) { t[g].xp += x; t[g].active++; }
+    });
+    return Object.values(t).map(r => {
+      const size = Number(sizes[r.g]) || r.registered || 1;
+      const sizeKnown = !!(Number(sizes[r.g]) || r.registered);
+      return { ...r, size, sizeKnown, avg: Math.round(r.xp / size) };
+    }).sort((a, b) => b.avg - a.avg || b.xp - a.xp);
+  }
+
+  window.Logros = { XP, MISSION_XP, BADGES, GROUP_SIZES, dayKey, weekId, lastWeekId, weekLabel, streakOf, xpInWeek, rankGroups };
 
   // Lo demás es solo para la página del alumno.
   if (typeof window.getDb !== 'function' || !document.getElementById('appContent')) return;
@@ -274,49 +310,36 @@
     if (saveTimer) save();
     try {
       const db = await getDb();
-      const base = db.collection('gamification')
+      const snap = await db.collection('gamification')
         .where('teacherId', '==', selectedTeacherId)
-        .where('semester', '==', Number(selectedSemester));
+        .where('semester', '==', Number(selectedSemester))
+        .get();
       const wk = weekId(), lw = lastWeekId();
-      const [now, prevA, prevB] = await Promise.all([
-        base.where('weekId', '==', wk).get(),
-        base.where('weekId', '==', lw).get(),
-        base.where('prevWeekId', '==', lw).get()
-      ]);
       const all = typeof GROUPS_BY_TEACHER_SEMESTER !== 'undefined' ? GROUPS_BY_TEACHER_SEMESTER : {};
       const groups = (all[selectedTeacherId] || {})[selectedSemester] || [];
-      const sum = (docs, field) => {
-        const t = {}; groups.forEach(g => { t[g] = { xp: 0, n: 0 }; });
-        docs.forEach(d => {
-          const g = d.studentGroup; const x = Number(d[field]) || 0;
-          if (!g || x <= 0) return;
-          t[g] = t[g] || { xp: 0, n: 0 }; t[g].xp += x; t[g].n += 1;
-        });
-        return Object.entries(t).sort((a, b) => b[1].xp - a[1].xp);
-      };
-      const nowDocs = now.docs.map(d => d.data());
+      const docs = snap.docs.map(d => d.data());
       // Si este alumno todavía no se sube, cuenta lo de este teléfono.
-      if (state && state.weekXp > 0 && !nowDocs.some(d => d.studentNameKey === studentNameKey)) nowDocs.push(state);
-      const ranking = sum(nowDocs, 'weekXp');
-      const prevDocs = [...prevA.docs.map(d => ({ ...d.data(), _x: d.data().weekXp })),
-                        ...prevB.docs.map(d => ({ ...d.data(), _x: d.data().prevWeekXp }))];
-      const prevRanking = sum(prevDocs, '_x');
-      const prevWinner = prevRanking[0] && prevRanking[0][1].xp > 0 ? prevRanking[0] : null;
+      const i = docs.findIndex(d => d.studentNameKey === studentNameKey);
+      if (state) { if (i >= 0) docs[i] = state; else docs.push(state); }
+      const ranking = rankGroups(docs, wk, selectedTeacherId, groups);
+      const prevRanking = rankGroups(docs, lw, selectedTeacherId, groups);
+      const prevWinner = prevRanking[0] && prevRanking[0].xp > 0 ? prevRanking[0] : null;
+      const nowDocs = docs.map(d => ({ ...d, weekXp: xpInWeek(d, wk) }));
       const mine = nowDocs.filter(d => d.studentGroup === studentGroup && Number(d.weekXp) > 0)
         .sort((a, b) => b.weekXp - a.weekXp).slice(0, 5);
       const medal = i => ['🥇','🥈','🥉'][i] || `${i + 1}.`;
       box.innerHTML = `
         <div class="logros-league">
           <div class="logros-league-title">🏆 Liga de la semana del ${weekLabel(wk)}</div>
-          ${prevWinner ? `<div class="logros-note">Ganador de la semana pasada: <b>${esc(prevWinner[0])}</b> (${prevWinner[1].xp} XP)</div>` : ''}
+          ${prevWinner ? `<div class="logros-note">Ganador de la semana pasada: <b>${esc(prevWinner.g)}</b> (${prevWinner.avg} XP por alumno)</div>` : ''}
           <table>
-            <tr><th></th><th>Grupo</th><th>XP</th><th>Alumnos</th></tr>
-            ${ranking.map(([g, t], i) => `<tr class="${g === studentGroup ? 'me' : ''}"><td>${medal(i)}</td><td>${esc(g)}</td><td>${t.xp}</td><td>${t.n}</td></tr>`).join('')}
+            <tr><th></th><th>Grupo</th><th>XP por alumno</th><th>Activos</th></tr>
+            ${ranking.map((r, i) => `<tr class="${r.g === studentGroup ? 'me' : ''}"><td>${medal(i)}</td><td>${esc(r.g)}</td><td>${r.avg}</td><td>${r.sizeKnown ? `${r.active} de ${r.size}` : '0'}</td></tr>`).join('')}
           </table>
           <div class="logros-league-title" style="margin-top:14px;">Top 5 de ${esc(studentGroup)} esta semana</div>
           ${mine.length ? `<table>${mine.map((d, i) => `<tr class="${d.studentNameKey === studentNameKey ? 'me' : ''}"><td>${medal(i)}</td><td>${esc(d.studentName)}</td><td>${d.weekXp} XP</td></tr>`).join('')}</table>`
             : '<div class="logros-note">Nadie de tu grupo ha ganado XP esta semana. ¡Sé el primero!</div>'}
-          <p class="logros-note">Gana el grupo que junte más XP de lunes a domingo. Cada respuesta correcta suma a tu grupo.</p>
+          <p class="logros-note">Gana el grupo con más XP por alumno de lunes a domingo (XP del grupo ÷ número de alumnos). Si no participas, tu grupo baja: ¡cada respuesta correcta cuenta!</p>
         </div>`;
     } catch (err) {
       console.warn('Logros: no se pudo cargar la liga', err);

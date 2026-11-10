@@ -109,7 +109,7 @@
     <div id="azureUsage" class="azure-usage" style="display:none;"></div>
 
     <div class="section-title">🏆 Liga semanal y rachas</div>
-    <div class="legend">XP que juntó cada grupo esta semana (lunes a domingo). Anuncia al ganador el lunes en clase.</div>
+    <div class="legend">Gana el grupo con más XP por alumno esta semana (lunes a domingo): XP del grupo ÷ alumnos del grupo. Anuncia al ganador el lunes en clase.</div>
     <div id="leagueBox" class="loading">Cargando...</div>
 
     <div class="section-title">Errores más recurrentes</div>
@@ -280,20 +280,24 @@
     const wk = Logros.weekId(), lw = Logros.lastWeekId();
     const docs = leagueDocs.filter(d => !semester || Number(d.semester) === Number(semester));
     if (!docs.length) { box.className = 'empty'; box.innerHTML = 'Todavía ningún alumno ha ganado XP.'; return; }
-    const weekXp = (d, id) => d.weekId === id ? Number(d.weekXp) || 0 : d.prevWeekId === id ? Number(d.prevWeekXp) || 0 : 0;
+    const weekXp = Logros.xpInWeek;
     const today = Logros.dayKey();
-    const byGroup = id => {
-      const t = {};
-      docs.forEach(d => {
-        const k = `${d.semester}|${d.studentGroup}`;
-        t[k] = t[k] || { sem: d.semester, g: d.studentGroup, xp: 0, n: 0, mission: 0 };
-        const x = weekXp(d, id);
-        if (x > 0) { t[k].xp += x; t[k].n++; }
-        if (id === wk && d.missionDay === today && Number(d.missionXp) >= Logros.MISSION_XP) t[k].mission++;
-      });
-      return Object.values(t).sort((a, b) => b.xp - a.xp);
-    };
-    const now = byGroup(wk), prev = byGroup(lw).filter(r => r.xp > 0);
+    // Un ranking por profesor y semestre (cada uno es su propia liga).
+    const leagues = {};
+    docs.forEach(d => { const k = `${d.teacherId}|${d.semester}`; (leagues[k] = leagues[k] || []).push(d); });
+    const byGroup = id => Object.entries(leagues).flatMap(([k, ds]) => {
+      const [teacherId, sem] = k.split('|');
+      return Logros.rankGroups(ds, id, teacherId).map(r => ({
+        ...r, sem,
+        mission: ds.filter(d => d.studentGroup === r.g && d.missionDay === today && Number(d.missionXp) >= Logros.MISSION_XP).length
+      }));
+    }).sort((a, b) => b.avg - a.avg || b.xp - a.xp);
+    const now = byGroup(wk);
+    // Ganador de la semana pasada de cada liga (profesor + semestre).
+    const prev = Object.entries(leagues).map(([k, ds]) => {
+      const [teacherId, sem] = k.split('|');
+      return { ...(Logros.rankGroups(ds, lw, teacherId)[0] || {}), sem };
+    }).filter(r => r.xp > 0);
     const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const medal = i => ['🥇','🥈','🥉'][i] || (i + 1);
     const students = docs.filter(d => !group || d.studentGroup === group)
@@ -302,9 +306,9 @@
       .slice(0, group ? 100 : 15);
     box.className = '';
     box.innerHTML = `
-      ${prev.length ? `<div class="legend">Ganador de la semana pasada (del ${Logros.weekLabel(lw)}): <b>${esc(prev[0].g)}</b> con ${prev[0].xp} XP.</div>` : ''}
-      <table><tr><th></th><th>Grupo</th><th>XP esta semana</th><th>Alumnos activos</th><th>Misión cumplida hoy</th></tr>
-      ${now.map((r, i) => `<tr><td>${medal(i)}</td><td>${esc(r.g)}${semester ? '' : ` <small>(${r.sem}.º)</small>`}</td><td>${r.xp}</td><td>${r.n}</td><td>${r.mission}</td></tr>`).join('')}</table>
+      ${prev.map(r => `<div class="legend">Ganador de la semana pasada (del ${Logros.weekLabel(lw)})${prev.length > 1 ? `, ${r.sem}.º semestre` : ''}: <b>${esc(r.g)}</b> con ${r.avg} XP por alumno.</div>`).join('')}
+      <table><tr><th></th><th>Grupo</th><th>XP por alumno</th><th>XP total</th><th>Activos esta semana</th><th>Misión cumplida hoy</th></tr>
+      ${now.map((r, i) => `<tr><td>${medal(i)}</td><td>${esc(r.g)}${semester ? '' : ` <small>(${r.sem}.º)</small>`}</td><td><b>${r.avg}</b></td><td>${r.xp}</td><td>${r.sizeKnown ? `${r.active} de ${r.size}` : '0'}</td><td>${r.mission}</td></tr>`).join('')}</table>
       <div class="legend" style="margin-top:14px;">${group ? `Alumnos de ${esc(group)}` : 'Top 15 alumnos'} (racha = días seguidos con la misión del día cumplida)</div>
       <div class="table-scroll"><table><tr><th>Alumno</th><th>Grupo</th><th>XP semana</th><th>XP total</th><th>Racha</th><th>Insignias</th></tr>
       ${students.map(d => `<tr><td>${esc(d.studentName)}</td><td>${esc(d.studentGroup)}</td><td>${d.wxp}</td><td>${Number(d.xp) || 0}</td><td>🔥 ${Logros.streakOf(d)}</td><td>${(d.badges || []).length}</td></tr>`).join('')}</table></div>`;
