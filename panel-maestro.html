@@ -108,6 +108,10 @@
 
     <div id="azureUsage" class="azure-usage" style="display:none;"></div>
 
+    <div class="section-title">🏆 Liga semanal y rachas</div>
+    <div class="legend">Gana el grupo con más XP por alumno esta semana (lunes a domingo): XP del grupo ÷ alumnos del grupo. Anuncia al ganador el lunes en clase.</div>
+    <div id="leagueBox" class="loading">Cargando...</div>
+
     <div class="section-title">Errores más recurrentes</div>
     <div id="errorAnalysis" class="loading">Cargando...</div>
 
@@ -126,6 +130,7 @@
 </div>
 
 <script src="cierres-unidades.js"></script>
+<script src="logros.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyC_JqZlzxvhvcduK695YPqIHM5PukeLI64",
@@ -214,6 +219,7 @@
       populateStudentFilter();
       renderAll();
       loadAzureUsage(db);
+      loadLeague(db);
     } catch (err) {
       console.error(err);
       document.getElementById('attemptsTable').innerHTML =
@@ -249,6 +255,63 @@
     } catch (e) {
       box.style.display = 'none';   // sin permiso en Firestore todavía, o sin conexión
     }
+  }
+
+  // Liga semanal (colección gamification, la llena logros.js en la página del alumno).
+  let leagueDocs = [];
+  async function loadLeague(db){
+    const box = document.getElementById('leagueBox');
+    try {
+      let q = db.collection('gamification');
+      if (currentAccount.scope !== 'all') q = q.where('teacherId', '==', currentAccount.teacherId);
+      const snap = await q.get();
+      leagueDocs = snap.docs.map(d => d.data());
+      renderLeague();
+    } catch (e) {
+      box.className = 'empty';
+      box.innerHTML = 'Todavía no se puede leer la liga: falta publicar la regla <b>gamification</b> en Firestore.';
+    }
+  }
+  function renderLeague(){
+    const box = document.getElementById('leagueBox');
+    if (!box || !window.Logros) return;
+    const semester = document.getElementById('semesterFilter').value;
+    const group = document.getElementById('groupFilter').value;
+    const wk = Logros.weekId(), lw = Logros.lastWeekId();
+    const docs = leagueDocs.filter(d => !semester || Number(d.semester) === Number(semester));
+    if (!docs.length) { box.className = 'empty'; box.innerHTML = 'Todavía ningún alumno ha ganado XP.'; return; }
+    const weekXp = Logros.xpInWeek;
+    const today = Logros.dayKey();
+    // Un ranking por profesor y semestre (cada uno es su propia liga).
+    const leagues = {};
+    docs.forEach(d => { const k = `${d.teacherId}|${d.semester}`; (leagues[k] = leagues[k] || []).push(d); });
+    const byGroup = id => Object.entries(leagues).flatMap(([k, ds]) => {
+      const [teacherId, sem] = k.split('|');
+      return Logros.rankGroups(ds, id, teacherId).map(r => ({
+        ...r, sem,
+        mission: ds.filter(d => d.studentGroup === r.g && d.missionDay === today && Number(d.missionXp) >= Logros.MISSION_XP).length
+      }));
+    }).sort((a, b) => b.avg - a.avg || b.xp - a.xp);
+    const now = byGroup(wk);
+    // Ganador de la semana pasada de cada liga (profesor + semestre).
+    const prev = Object.entries(leagues).map(([k, ds]) => {
+      const [teacherId, sem] = k.split('|');
+      return { ...(Logros.rankGroups(ds, lw, teacherId)[0] || {}), sem };
+    }).filter(r => r.xp > 0);
+    const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const medal = i => ['🥇','🥈','🥉'][i] || (i + 1);
+    const students = docs.filter(d => !group || d.studentGroup === group)
+      .map(d => ({ ...d, wxp: weekXp(d, wk) }))
+      .sort((a, b) => b.wxp - a.wxp || (Number(b.xp) || 0) - (Number(a.xp) || 0))
+      .slice(0, group ? 100 : 15);
+    box.className = '';
+    box.innerHTML = `
+      ${prev.map(r => `<div class="legend">Ganador de la semana pasada (del ${Logros.weekLabel(lw)})${prev.length > 1 ? `, ${r.sem}.º semestre` : ''}: <b>${esc(r.g)}</b> con ${r.avg} XP por alumno.</div>`).join('')}
+      <table><tr><th></th><th>Grupo</th><th>XP por alumno</th><th>XP total</th><th>Activos esta semana</th><th>Misión cumplida hoy</th></tr>
+      ${now.map((r, i) => `<tr><td>${medal(i)}</td><td>${esc(r.g)}${semester ? '' : ` <small>(${r.sem}.º)</small>`}</td><td><b>${r.avg}</b></td><td>${r.xp}</td><td>${r.sizeKnown ? `${r.active} de ${r.size}` : '0'}</td><td>${r.mission}</td></tr>`).join('')}</table>
+      <div class="legend" style="margin-top:14px;">${group ? `Alumnos de ${esc(group)}` : 'Top 15 alumnos'} (racha = días seguidos con la misión del día cumplida)</div>
+      <div class="table-scroll"><table><tr><th>Alumno</th><th>Grupo</th><th>XP semana</th><th>XP total</th><th>Racha</th><th>Insignias</th></tr>
+      ${students.map(d => `<tr><td>${esc(d.studentName)}</td><td>${esc(d.studentGroup)}</td><td>${d.wxp}</td><td>${Number(d.xp) || 0}</td><td>🔥 ${Logros.streakOf(d)}</td><td>${(d.badges || []).length}</td></tr>`).join('')}</table></div>`;
   }
 
   function populateGroupFilter(){
@@ -322,6 +385,7 @@
   }
 
   function renderAll(){
+    renderLeague();
     renderErrorAnalysis();
     renderStudentProgress();
     renderComplianceTable();
