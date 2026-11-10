@@ -1924,7 +1924,9 @@ let currentUnit = null;
 let userAnswers = {};
 let practicedAnswers = {};
 // Preguntas ya correctas (se bloquean) y cuántas veces ha fallado cada
-// una; la respuesta correcta solo se muestra después de 2 intentos.
+// una. Desde el 10 nov 2026 la respuesta correcta YA NO se muestra (Jorge
+// prefiere que la descubran solos); REVEAL_AFTER_WRONG solo se usa para
+// dar XP únicamente si la contestan bien en el 1.º o 2.º intento.
 let lockedQuestions = {};
 let wrongChecks = {};
 const REVEAL_AFTER_WRONG = 2;
@@ -3082,6 +3084,13 @@ function scoreSpeaking(said, target){
   return { pct, missing };
 }
 
+function isBlank(a){
+  if (a == null) return true;
+  if (Array.isArray(a)) return a.length === 0;
+  if (typeof a === 'object') return Object.keys(a).length === 0;
+  return String(a).trim() === '';
+}
+
 function checkAnswers(){
   if (unitIsClosed(currentUnit)) { renderClosedUnit(currentUnit); return; }
   let correctCount = 0;
@@ -3108,7 +3117,7 @@ function checkAnswers(){
       pushResult(q, true);
       return;
     }
-    const reveal = (wrongChecks[i] || 0) + 1 >= REVEAL_AFTER_WRONG;
+    const reveal = false;   // nunca mostrar la respuesta correcta (pedido de Jorge, 10 nov 2026)
     const resultsBefore = questionResults.length;
 
     if (q.type === 'mc') {
@@ -3244,9 +3253,12 @@ function checkAnswers(){
     }
     if (questionResults.length > resultsBefore && last.correct) {
       lockQuestion(i);
-      Logros.award(`${currentUnit.id}:${i}:ok`, Logros.XP.question, 'respuesta correcta');
+      // XP solo si la contestó bien en el 1.º o 2.º intento (para que no
+      // ganen XP probando todas las opciones).
+      if ((wrongChecks[i] || 0) < REVEAL_AFTER_WRONG)
+        Logros.award(`${currentUnit.id}:${i}:ok`, Logros.XP.question, 'respuesta correcta');
     }
-    else wrongChecks[i] = (wrongChecks[i] || 0) + 1;
+    else if (!isBlank(userAnswers[i])) wrongChecks[i] = (wrongChecks[i] || 0) + 1;   // sin contestar no cuenta como intento
   });
 
   const scorableTotal = currentUnit.questions.filter(q => q.type !== 'note' && q.type !== 'shadowing').length;
