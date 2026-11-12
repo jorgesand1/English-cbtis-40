@@ -211,6 +211,15 @@
     background:var(--board-dark);color:var(--chalk);border:1px solid var(--accent-green);
     padding:10px 14px;border-radius:10px;font-size:14px;text-align:center;display:none;
   }
+  .pending-notice{
+    border:2px solid var(--accent-yellow);border-radius:10px;padding:12px 14px;margin:0 0 16px;
+    font-size:14px;line-height:1.45;
+  }
+  .pending-notice b{color:var(--accent-yellow);}
+  .pending-notice .pending-row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:8px;}
+  .pending-notice button{padding:8px 14px;font-size:14px;}
+  .pending-notice.all-done{border-color:var(--accent-green);}
+  .pending-notice.all-done b{color:var(--accent-green);}
   .resume-note{
     border:1px dashed var(--accent-green);color:var(--accent-green);border-radius:10px;
     padding:10px 14px;font-size:14px;margin-bottom:16px;
@@ -336,6 +345,7 @@
       </div>
       <div id="logrosPanel"></div>
     </div>
+    <div id="pendingNotice" class="pending-notice" style="display:none;"></div>
     <div class="unit-picker" id="unitPicker"></div>
     <div id="quizArea"></div>
   </div>
@@ -2287,6 +2297,7 @@ function renderPronunciation(box, res, attempt){
 }
 
 let completedUnits = {};
+let progressLoaded = false;
 
 function unitIsClosed(u){
   return !!(u && window.isUnitClosed && window.isUnitClosed(selectedTeacherId, u.id));
@@ -2299,7 +2310,60 @@ function visibleUnits(){
   );
 }
 
+/* Aviso "Te falta…" (pedido de Jorge, 12 nov 2026): al entrar, cada alumno ve
+   las unidades abiertas que todavía no cumple (mejor intento < 70%), con su
+   fecha límite si el maestro la puso en cierres-unidades.js. */
+const PENDING_PCT = 70;
+function renderPendingNotice(){
+  const el = document.getElementById('pendingNotice');
+  if (!el) return;
+  if (!progressLoaded) { el.style.display = 'none'; return; }
+  const deadlines = ((window.UNIT_DEADLINES || {})[selectedTeacherId]) || {};
+  const pending = visibleUnits().filter(u => {
+    if (!/^unit/.test(u.id) || unitIsClosed(u)) return false;
+    const p = completedUnits[u.id];
+    return !p || !p.total || (p.score / p.total) * 100 < PENDING_PCT;
+  });
+  const open = visibleUnits().filter(u => /^unit/.test(u.id) && !unitIsClosed(u));
+  if (!open.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  if (!pending.length) {
+    el.className = 'pending-notice all-done';
+    el.innerHTML = '✅ <b>¡Vas al día!</b> Ya cumpliste todas las unidades abiertas. Puedes repasarlas cuando quieras.';
+    return;
+  }
+  el.className = 'pending-notice';
+  el.innerHTML = `📌 <b>Te ${pending.length === 1 ? 'falta' : 'faltan'}:</b>`;
+  pending.forEach(u => {
+    const row = document.createElement('div');
+    row.className = 'pending-row';
+    const p = completedUnits[u.id];
+    let info = u.title;
+    if (p && p.total) info += ` — llevas ${Math.round((p.score / p.total) * 100)}%, necesitas ${PENDING_PCT}%`;
+    const day = deadlines[u.id];
+    if (day) {
+      const d = new Date(day + 'T23:59:59');
+      const days = Math.ceil((d - new Date()) / 86400000);
+      const when = d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      info += days >= 0
+        ? ` · ⏰ fecha límite: ${when}${days === 0 ? ' (¡hoy!)' : days === 1 ? ' (mañana)' : ` (faltan ${days} días)`}`
+        : ` · ⏰ la fecha límite fue el ${when}`;
+    }
+    const span = document.createElement('span');
+    span.textContent = info;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'primary';
+    btn.textContent = 'Hacerla ahora';
+    btn.onclick = () => { openUnit(u); document.getElementById('quizArea').scrollIntoView({ behavior: 'smooth' }); };
+    row.appendChild(span);
+    row.appendChild(btn);
+    el.appendChild(row);
+  });
+}
+
 function renderUnitPicker(){
+  renderPendingNotice();
   const el = document.getElementById('unitPicker');
   el.innerHTML = '';
   const units = visibleUnits();
@@ -2348,6 +2412,7 @@ async function loadStudentProgress(){
       }
     });
     completedUnits = byUnit;
+    progressLoaded = true;
     renderUnitPicker();
   } catch (err) {
     console.error('No se pudo cargar el progreso previo:', err);
@@ -3476,6 +3541,7 @@ function startSession(){
   studentGroup = group.toUpperCase();
   selectedSemester = Number(semester);
   completedUnits = {};
+  progressLoaded = false;
   document.getElementById('nameGate').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
   // El concurso de canción es solo de los grupos del Profr. Jorge Sandoval
