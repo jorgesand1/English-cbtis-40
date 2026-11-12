@@ -10,8 +10,19 @@ window.UNIT_CLOSINGS = {
     'unit1-ingles5': '2026-10-27',
     'unit2-ingles5': '2026-10-27',
     'unit3-ingles5': '2026-10-27',
-    'unit4-ingles5': '2026-10-27'
+    'unit4-ingles5': '2026-10-27',
+    // Prácticas del 1.er parcial — cerradas el 12 nov 2026
+    'pron-j-5': '2026-11-12',
+    'shadowing-5': '2026-11-12',
+    'diag-5': '2026-11-12'
   },
+  esposa: {}
+};
+
+/* Fecha límite (opcional) de las unidades abiertas, por maestro. Sale en el
+   aviso "Te falta…" que ven los alumnos al entrar. Formato 'AAAA-MM-DD'. */
+window.UNIT_DEADLINES = {
+  jorge: {},
   esposa: {}
 };
 
