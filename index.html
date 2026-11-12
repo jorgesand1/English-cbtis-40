@@ -2537,7 +2537,8 @@ function renderPendingNotice(){
     const day = deadlines[u.id];
     if (day) {
       const d = new Date(day + 'T23:59:59');
-      const days = Math.ceil((d - new Date()) / 86400000);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const days = Math.round((new Date(day + 'T00:00:00') - today) / 86400000);   // días de calendario
       const when = d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
       info += days >= 0
         ? ` · ⏰ fecha límite: ${when}${days === 0 ? ' (¡hoy!)' : days === 1 ? ' (mañana)' : ` (faltan ${days} días)`}`
