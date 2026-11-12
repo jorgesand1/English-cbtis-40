@@ -104,6 +104,7 @@
       </select>
       <button class="ghost" onclick="loadData()">↻ Actualizar</button>
       <button class="ghost" id="excelBtn" onclick="downloadExcel()">⬇ Descargar Excel</button>
+      <button class="ghost" id="waBtn" onclick="whatsappReminder()">📲 Recordatorio WhatsApp</button>
     </div>
 
     <div id="azureUsage" class="azure-usage" style="display:none;"></div>
@@ -408,6 +409,63 @@
     if (!window.isUnitClosed) return false;
     const teachers = [...new Set(results.filter(r => r.unitId === unitId).map(r => r.teacherId))];
     return teachers.length > 0 && teachers.every(t => window.isUnitClosed(t, unitId));
+  }
+
+  // ---------- Recordatorio por WhatsApp (pedido de Jorge, 8 nov 2026) ----------
+  // Arma el mensaje para el grupo elegido y abre WhatsApp para que el maestro
+  // elija el chat y lo envíe. Si hay una unidad elegida, puede incluir la
+  // lista de quienes todavía no la cumplen (mejor intento < 70% o sin hacer).
+  const PLATFORM_URL = 'https://jorgesand1.github.io/English-cbtis-40/';
+
+  function pendingStudents(group, unitId){
+    const semester = document.getElementById('semesterFilter').value;
+    const pool = allResults.filter(r =>
+      r.studentGroup === group && (!semester || resultSemester(r) === Number(semester)));
+    const students = new Map();
+    pool.forEach(r => {
+      const key = r.studentNameKey || r.studentName;
+      if (!students.has(key)) students.set(key, { name: r.studentName || '—', best: -1 });
+      if (r.unitId === unitId && attemptCounts(r)) {
+        students.get(key).best = Math.max(students.get(key).best, resultPct(r));
+      }
+    });
+    return [...students.values()].filter(st => st.best < CUMPLE_PCT)
+      .sort((a, b) => byName(a.name, b.name));
+  }
+
+  function whatsappReminder(){
+    const group = document.getElementById('groupFilter').value;
+    if (!group) { alert('Primero elige un grupo en los filtros.'); return; }
+    const unitSel = document.getElementById('unitFilter');
+    const unitId = unitSel.value;
+    let unitTitle = unitId ? unitSel.options[unitSel.selectedIndex].text : '';
+    if (!unitTitle) {
+      unitTitle = prompt('¿Qué unidad deben hacer? (Si la eliges en el filtro de unidades, también puedo poner la lista de pendientes.)', 'Unit 5');
+      if (unitTitle === null) return;
+    }
+    const deadline = prompt('Fecha límite (opcional). Ejemplo: viernes 14 de noviembre', '');
+    if (deadline === null) return;
+
+    let lines = [
+      `📚 *Inglés — ${group}*`,
+      `Recuerden hacer *${unitTitle}* en la plataforma:`,
+      PLATFORM_URL
+    ];
+    if (deadline.trim()) lines.push(`⏰ Fecha límite: *${deadline.trim()}*`);
+    lines.push('Entren con su nombre completo y su grupo. 💪');
+
+    if (unitId) {
+      const pending = pendingStudents(group, unitId);
+      if (pending.length && confirm(`${pending.length} alumno(s) de ${group} todavía no la cumplen. ¿Incluir la lista en el mensaje?`)) {
+        lines.push('', 'Todavía les falta (o no llegan a 70%):');
+        pending.forEach((st, k) => lines.push(`${k + 1}. ${st.name}`));
+        lines.push('', '_Si no estás en la lista pero no la has hecho, también te toca._');
+      }
+    }
+
+    const text = lines.join('\n');
+    try { navigator.clipboard && navigator.clipboard.writeText(text).catch(() => {}); } catch (e) {}
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   }
 
   function renderComplianceTable(){
