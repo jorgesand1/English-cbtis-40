@@ -22,7 +22,7 @@ window.UNIT_CLOSINGS = {
 /* Fecha límite (opcional) de las unidades abiertas, por maestro. Sale en el
    aviso "Te falta…" que ven los alumnos al entrar. Formato 'AAAA-MM-DD'. */
 window.UNIT_DEADLINES = {
-  jorge: { 'unit6-ingles5': '2026-11-16' },
+  jorge: { 'unit5-ingles5': '2026-11-16', 'unit6-ingles5': '2026-11-16' },
   esposa: {}
 };
 
