@@ -45,3 +45,14 @@ Las fotos `u5-*.jpg` (Unidad 5) son de [Unsplash](https://unsplash.com) (licenci
 | u5-skill.jpg | Jefferson Santos | [ver](https://unsplash.com/photos/person-playing-guitar-fCEJGBzAkrU) |
 | u5-experience.jpg | Holly Mandarich | [ver](https://unsplash.com/photos/person-carrying-yellow-and-black-backpack-walking-between-green-plants-UVyOfX3v0Ls) |
 | u5-realize.jpg | Look Studio | [ver](https://unsplash.com/photos/a-woman-with-curly-hair-is-making-a-surprised-face-klKIQ9vu6mw) |
+
+Las fotos `u6-*.jpg` (Unidad 6) son de [Unsplash](https://unsplash.com) (licencia de Unsplash, uso libre).
+
+| Archivo | Fotógrafo | Foto original |
+|---|---|---|
+| u6-crossroad.jpg | Victor | [ver](https://unsplash.com/photos/aerial-view-photography-of-road-between-green-grass-0Ezh0PRhtPo) |
+| u6-friends.jpg | Vitaly Gariev | [ver](https://unsplash.com/photos/students-looking-at-phones-in-a-lecture-hall-qVmH0x-jfPY) |
+| u6-phone.jpg | Fajar Herlambang STUDIO | [ver](https://unsplash.com/photos/young-students-focused-on-their-smartphones-in-a-classroom-YyLyRdRb4JM) |
+| u6-water.jpg | Brendan Church | [ver](https://unsplash.com/photos/person-holding-bottle-pouring-water-on-drinking-glass-4bFKX8G419Q) |
+| u6-rain.jpg | Raychel Sanner | [ver](https://unsplash.com/photos/paved-road-under-dark-storm-clouds-MnnXMvs4cQo) |
+| u6-uniform.jpg | Assad Tanoli | [ver](https://unsplash.com/photos/a-group-of-young-men-sitting-at-desks-in-a-classroom-DreH1YbP1js) |

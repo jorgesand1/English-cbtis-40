@@ -194,6 +194,14 @@
   .audio-hint{font-size:12px;color:var(--chalk-dim);}
 
   .feedback{margin-top:12px;font-size:14px;min-height:20px;}
+  /* Conversación con huecos (tipo "dialogue") */
+  .dlg-script{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
+  .dlg-line{line-height:2.1;font-size:15px;}
+  .dlg-who{font-weight:700;color:var(--accent-yellow);margin-right:4px;}
+  .dlg-blank{font:inherit;font-size:15px;padding:2px 4px;border-radius:6px;border:2px solid var(--accent-yellow);background:transparent;color:inherit;min-width:84px;}
+  .dlg-blank option{color:#111;}
+  .dlg-blank.correct{border-color:var(--accent-green);color:var(--accent-green);}
+  .dlg-blank.incorrect{border-color:var(--accent-red);color:var(--accent-red);}
   .feedback.ok{color:var(--accent-green);}
   .feedback.no{color:var(--accent-red);}
 
@@ -1928,6 +1936,164 @@ const UNITS = [
       }
     ]
   }
+  ,
+  {
+    id: "unit6-ingles5",
+    semester: 5,
+    title: "Unit 6 — Decisions: Modals (pp. 56–60)",
+    questions: [
+      {
+        type: "note",
+        text: "<b>Modales de esta unidad</b> (tabla C, pp. 56–57):<br><b>must · should · can · can't · might · may · could</b><br><br>💪 <b>must</b> = obligación → <i>You must wear the uniform.</i><br>☝️ <b>should</b> = consejo → <i>You should drink water.</i><br>👍 <b>can</b> = poder / permiso → <i>You can go to the bathroom.</i><br>✋ <b>can't</b> = no se permite / no se puede → <i>You can't use your phone in class.</i><br>🤷 <b>might / may</b> = tal vez → <i>It might rain today.</i> · <b>may</b> también es permiso formal → <i>May I come in?</i><br>🙌 <b>could</b> = se podría / posibilidad → <i>We could play a game.</i><br><br>Después del modal, el verbo va <b>sin to</b> y sin -s: <i>She must <u>study</u></i> (no <s>must to study</s>, no <s>must studies</s>)."
+      },
+      {
+        type: "note",
+        text: "<b>Part 1 · What does it mean?</b> Une cada modal con su uso."
+      },
+      {
+        type: "match",
+        text: "Match each modal with its use:",
+        pairs: [
+          { term: "must", options: ["Obligation (es obligatorio)", "Advice (consejo)", "Possibility (tal vez)"], answer: "Obligation (es obligatorio)" },
+          { term: "should", options: ["Prohibition (no se permite)", "Advice (consejo)", "Ability (habilidad)"], answer: "Advice (consejo)" },
+          { term: "can", options: ["Ability or permission (poder)", "Obligation (es obligatorio)", "Advice (consejo)"], answer: "Ability or permission (poder)" },
+          { term: "can't", options: ["Possibility (tal vez)", "Prohibition (no se permite)", "Advice (consejo)"], answer: "Prohibition (no se permite)" },
+          { term: "might", options: ["Possibility (tal vez)", "Obligation (es obligatorio)", "Prohibition (no se permite)"], answer: "Possibility (tal vez)" },
+          { term: "may", options: ["Ability (habilidad)", "Permission or possibility (formal)", "Prohibition (no se permite)"], answer: "Permission or possibility (formal)" },
+          { term: "could", options: ["Possibility or polite request (se podría)", "Obligation (es obligatorio)", "Prohibition (no se permite)"], answer: "Possibility or polite request (se podría)" }
+        ]
+      },
+      {
+        type: "note",
+        text: "<b>Part 1b · Pronunciation.</b> Las reglas que practicamos en clase. Escucha y grábate.<br>Ojo: en <b>should</b> y <b>could</b> la <b>l</b> no suena (/shud/, /kud/). En <b>can't</b> se oye la <b>t</b> al final: <i>I can</i> ≠ <i>I can't</i>."
+      },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "👕", audioText: "You must wear the uniform.", targetText: "You must wear the uniform", image: "img/u6-uniform.jpg", imageAlt: "Students in uniform sitting in a classroom" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "📵", audioText: "You can't use your phone in class.", targetText: "You can't use your phone in class", image: "img/u6-phone.jpg", imageAlt: "Students looking at their phones in a classroom" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "💧", audioText: "You should drink water.", targetText: "You should drink water", image: "img/u6-water.jpg", imageAlt: "Water being poured into a glass" },
+      { type: "speaking", text: "Listen and repeat:", showWord: true, emoji: "🌧️", audioText: "It might rain today.", targetText: "It might rain today", image: "img/u6-rain.jpg", imageAlt: "Dark rain clouds over a road" },
+      {
+        type: "note",
+        image: "img/u6-crossroad.jpg", imageAlt: "Two roads that split in a green field",
+        text: "<b>Part 2 · The crossroad.</b> Como en la encrucijada de clase: dos caminos y una decisión. Elige la oración que corresponde."
+      },
+      { type: "mc", text: "Exam tomorrow or party tonight? Which sentence gives <b>advice</b>?", options: ["I should study for the exam.", "I might go to the party.", "I can dance very well."], answer: "I should study for the exam." },
+      { type: "mc", text: "You found 500 pesos on the floor. Which sentence is an <b>obligation</b>?", options: ["I could buy tacos.", "I must look for the owner.", "I might keep it."], answer: "I must look for the owner." },
+      { type: "mc", text: "Saturday: work and earn money, or sleep all day? Which sentence is a <b>possibility</b>?", options: ["I must work.", "I might sleep all day.", "I can't sleep."], answer: "I might sleep all day." },
+      { type: "mc", text: "Your best friend copies your homework. Which sentence is a <b>prohibition</b>?", options: ["You can't copy my homework!", "You could tell the teacher.", "You should help him."], answer: "You can't copy my homework!" },
+      {
+        type: "note",
+        text: "<b>Part 3 · Choose the modal.</b> Lee la oración y elige el modal que va."
+      },
+      { type: "mc", text: "You ______ wear your uniform at CBTIS. It's a rule.", options: ["must", "might", "could"], answer: "must" },
+      { type: "mc", text: "You look tired. You ______ go to bed early.", options: ["can't", "should", "may"], answer: "should" },
+      { type: "mc", text: "I ______ swim very well. I practice every weekend.", options: ["can", "must", "might"], answer: "can" },
+      { type: "mc", text: "You ______ use your phone during the exam.", options: ["should", "can't", "could"], answer: "can't" },
+      { type: "mc", text: "Take an umbrella. It ______ rain this afternoon.", options: ["might", "must", "can't"], answer: "might" },
+      { type: "mc", text: "______ I go to the bathroom, please?", options: ["Must", "Should", "May"], answer: "May" },
+      { type: "mc", text: "We ______ watch a movie or play a game. What do you prefer?", options: ["could", "must", "can't"], answer: "could" },
+      {
+        type: "note",
+        image: "img/u6-friends.jpg", imageAlt: "Students talking in a classroom",
+        text: "<b>Part 4 · Listening: Fernanda and Diego.</b> Fernanda invita a Diego a una fiesta, pero Diego tiene examen. Escucha la conversación (puedes oírla varias veces) y elige el modal que oyes en cada espacio."
+      },
+      {
+        type: "dialogue",
+        text: "Listen and complete the conversation with the modals you hear:",
+        choices: ["must", "should", "can", "can't", "might", "may", "could"],
+        lines: [
+          { who: "Fernanda", text: "Diego, Ana is having a party on Friday. You {should} come with us!" },
+          { who: "Diego", text: "I don't know, Fer. I have a big exam on Saturday. I {must} pass it." },
+          { who: "Fernanda", text: "You {can} study on Thursday and go to the party on Friday." },
+          { who: "Diego", text: "Maybe, but I {might} be very tired on Thursday. I work in the afternoon." },
+          { who: "Fernanda", text: "You {could} ask your boss for a free afternoon." },
+          { who: "Diego", text: "No, I {can't} do that. We have a lot of work this week." },
+          { who: "Fernanda", text: "Okay. Then you {could} study on Friday morning and come to the party at night." },
+          { who: "Diego", text: "Hmm, the party {may} finish very late." },
+          { who: "Fernanda", text: "That's not a problem. My mom says I {may} stay only until eleven." },
+          { who: "Diego", text: "That's true. And I {should} sleep well before the exam." },
+          { who: "Fernanda", text: "So, are you coming?" },
+          { who: "Diego", text: "Yes! I {might} stay for two hours, but I {must} be home by eleven." },
+          { who: "Fernanda", text: "Perfect! And you {can't} talk about the exam at the party!" },
+          { who: "Diego", text: "Deal!" }
+        ]
+      },
+      {
+        type: "truefalse",
+        text: "1. Diego has an exam on Friday.",
+        audioText: "I have a big exam on Saturday. I must pass it.",
+        answer: "False"
+      },
+      {
+        type: "truefalse",
+        text: "2. Diego works in the afternoon.",
+        audioText: "Maybe, but I might be very tired on Thursday. I work in the afternoon.",
+        answer: "True"
+      },
+      {
+        type: "mc",
+        text: "3. What time must Diego be home?",
+        audioText: "Yes! I might stay for two hours, but I must be home by eleven.",
+        options: ["By ten", "By eleven", "By twelve"],
+        answer: "By eleven"
+      },
+      {
+        type: "note",
+        text: "<b>Part 5 · Reading: A Sunday of Choices.</b> Lee el texto y contesta True o False.<br><br><i>It's Sunday morning, and Mateo is thinking about his day. He could play soccer with his cousins, or he might stay home and watch a movie. It's very hot, so he should drink a lot of water if he plays.<br>His friend Sofía sends him a message: \"We can go to the swimming pool at the park. My brother may come too.\" Mateo thinks about it. He must finish his English homework, but it's for Tuesday.<br>\"Okay,\" he writes. \"I can go after lunch.\"<br>At the pool, Sofía says, \"We could eat tacos later.\" Mateo smiles. Sunday is a day full of choices.</i>"
+      },
+      { type: "truefalse", text: "1. Mateo might stay home and watch a movie.", answer: "True" },
+      { type: "truefalse", text: "2. Sofía invites Mateo to the cinema.", answer: "False" },
+      { type: "truefalse", text: "3. Sofía's brother may go to the pool, but it's not certain.", answer: "True" },
+      { type: "truefalse", text: "4. Mateo must finish his math homework.", answer: "False" },
+      { type: "truefalse", text: "5. Mateo can go to the pool after lunch.", answer: "True" },
+      {
+        type: "note",
+        text: "<b>Part 6 · Complete.</b> Escribe el modal correcto: <b>must · should · can · can't · might · may · could</b>."
+      },
+      { type: "fill", text: "You ______ wear a helmet on a motorcycle. It's the law.", answer: "must" },
+      { type: "fill", text: "You have a fever. You ______ see a doctor.", answer: "should" },
+      { type: "fill", text: "Students ______ smoke at school. It's prohibited.", answer: "can't", acceptableAny: ["cannot", "mustn't", "must not", "cant"] },
+      { type: "fill", text: "When I was ten, I ______ ride a bike very well. (pasado de can)", answer: "could" },
+      { type: "fill", text: "Take a jacket. It ______ be cold tonight. (tal vez)", answer: "might", acceptableAny: ["may", "could"] },
+      {
+        type: "note",
+        text: "<b>Part 7 · Unscramble.</b> Put the words in order."
+      },
+      { type: "unscramble", text: "Put the words in order:", words: ["study", "should", "the", "I", "for", "exam"], answer: "I should study for the exam" },
+      { type: "unscramble", text: "Put the words in order:", words: ["phone", "can't", "your", "You", "class", "in", "use"], answer: "You can't use your phone in class" },
+      { type: "unscramble", text: "Put the words in order:", words: ["go", "We", "the", "could", "party", "to"], answer: "We could go to the party" },
+      { type: "unscramble", text: "Put the words in order:", words: ["be", "must", "home", "I", "eleven", "by"], answer: "I must be home by eleven" },
+      {
+        type: "note",
+        text: "<b>Part 8 · Shadowing.</b> Habla EN VOZ ALTA al mismo tiempo que escuchas. Son frases de la conversación de Fernanda y Diego."
+      },
+      { type: "shadowing", sentence: "You should come with us!" },
+      { type: "shadowing", sentence: "I have a big exam on Saturday. I must pass it." },
+      { type: "shadowing", sentence: "I might be very tired on Thursday." },
+      { type: "shadowing", sentence: "You could study on Friday morning and come to the party at night." },
+      {
+        type: "note",
+        text: "<b>Part 9 · Speaking.</b> Contesta en voz alta con oraciones completas."
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "You are at a crossroad: exam tomorrow or party tonight. What will you do and why? (use should, must, might or could)",
+        keywords: ["should", "must", "might", "could", "can", "may", "can't"],
+        minWords: 6,
+        hint: "use a modal, like 'I could go to the party, but I should study'",
+        sampleAnswer: "I could go to the party, but I should study because I must pass the exam."
+      },
+      {
+        type: "speaking",
+        mode: "open",
+        text: "Say two rules of CBTIS. (use must or can't)",
+        keywords: ["must", "can't", "cannot", "cant"],
+        minWords: 6,
+        hint: "like 'You must wear the uniform. You can't use your phone in class.'",
+        sampleAnswer: "You must wear the uniform. You can't run in the classroom."
+      }
+    ]
+  }
 ];
 
 let currentUnit = null;
@@ -2007,6 +2173,34 @@ function speak(text, rate = 0.95, times = 1){
     utter.rate = rate;
     window.speechSynthesis.speak(utter);
   }
+}
+
+/* Lee una conversación línea por línea. Si el teléfono tiene dos voces en
+   inglés, cada personaje usa una; si no, se cambia el tono de la voz. */
+function dialogueAnswers(q){
+  const out = [];
+  q.lines.forEach(l => (l.text.match(/\{[^}]+\}/g) || []).forEach(m => out.push(m.slice(1, -1))));
+  return out;
+}
+function speakDialogue(lines, rate = 0.95){
+  if (!('speechSynthesis' in window)) {
+    alert('Este navegador no soporta audio integrado. Prueba en Chrome.');
+    return;
+  }
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const voices = (synth.getVoices() || []).filter(v => /^en[-_]/i.test(v.lang));
+  const speakers = [];
+  lines.forEach(l => { if (!speakers.includes(l.who)) speakers.push(l.who); });
+  lines.forEach(l => {
+    const n = speakers.indexOf(l.who);
+    const utter = new SpeechSynthesisUtterance(l.text.replace(/[{}]/g, ''));
+    utter.lang = 'en-US';
+    utter.rate = rate;
+    if (voices.length >= 2) utter.voice = voices[n % voices.length];
+    else utter.pitch = n % 2 ? 0.8 : 1.25;
+    synth.speak(utter);
+  });
 }
 
 /* En muchos celulares el micrófono no arranca mientras el audio de
@@ -2453,7 +2647,7 @@ function renderQuiz(){
     displayQuestionNumber++;
     const meta = document.createElement('div');
     meta.className = 'q-meta';
-    const typeLabels = { mc: 'Multiple choice', fill: 'Fill in the blank', match: 'Matching', truefalse: 'True / False', unscramble: 'Unscramble', speaking: 'Speaking', shadowing: 'Shadowing (practice)' };
+    const typeLabels = { mc: 'Multiple choice', fill: 'Fill in the blank', match: 'Matching', truefalse: 'True / False', unscramble: 'Unscramble', speaking: 'Speaking', shadowing: 'Shadowing (practice)', dialogue: 'Listening conversation' };
     meta.textContent = `Question ${displayQuestionNumber} — ${typeLabels[q.type] || ''}`;
     card.appendChild(meta);
 
@@ -2483,7 +2677,42 @@ function renderQuiz(){
       card.appendChild(audioRow);
     }
 
-    if (q.type === 'mc') {
+    if (q.type === 'dialogue') {
+      if (!userAnswers[i] || typeof userAnswers[i] !== 'object') userAnswers[i] = {};
+      const audioRow = document.createElement('div');
+      audioRow.className = 'audio-row';
+      audioRow.innerHTML = `<button class="audio-btn" type="button" data-rate="0.95">🔊 Play conversation</button>
+                            <button class="audio-btn" type="button" data-rate="0.75">🐢 Slow</button>
+                            <span class="audio-hint">You can play it more than once</span>`;
+      audioRow.querySelectorAll('.audio-btn').forEach(b => { b.onclick = () => speakDialogue(q.lines, Number(b.dataset.rate)); });
+      card.appendChild(audioRow);
+      const script = document.createElement('div');
+      script.className = 'dlg-script';
+      let k = 0;
+      q.lines.forEach(line => {
+        const row = document.createElement('div');
+        row.className = 'dlg-line';
+        const who = document.createElement('span');
+        who.className = 'dlg-who';
+        who.textContent = line.who + ':';
+        row.appendChild(who);
+        line.text.split(/(\{[^}]+\})/).forEach(part => {
+          if (!/^\{[^}]+\}$/.test(part)) { if (part) row.appendChild(document.createTextNode(part)); return; }
+          const b = k++;
+          const sel = document.createElement('select');
+          sel.className = 'dlg-blank';
+          sel.dataset.qIndex = i;
+          sel.dataset.blank = b;
+          sel.innerHTML = '<option value="">— ? —</option>' + q.choices.map(c => `<option value="${c}">${c}</option>`).join('');
+          if (userAnswers[i][b]) sel.value = userAnswers[i][b];
+          sel.onchange = e => { userAnswers[i][b] = e.target.value; };
+          row.appendChild(sel);
+        });
+        script.appendChild(row);
+      });
+      card.appendChild(script);
+
+    } else if (q.type === 'mc') {
       const opts = document.createElement('div');
       opts.className = 'options';
       q.options.forEach(opt => {
@@ -3178,12 +3407,48 @@ function checkAnswers(){
 
     // Ya estaba bien en un intento anterior: se cuenta y no se toca.
     if (lockedQuestions[i]) {
+      if (q.type === 'dialogue') {
+        dialogueAnswers(q).forEach((a, b) => { correctCount++; questionResults.push({ question: `Conversation · blank ${b + 1} (${a})`, type: q.type, correct: true }); });
+        return;
+      }
       correctCount++;
       pushResult(q, true);
       return;
     }
     const reveal = false;   // nunca mostrar la respuesta correcta (pedido de Jorge, 10 nov 2026)
     const resultsBefore = questionResults.length;
+
+    if (q.type === 'dialogue') {
+      // Cada hueco cuenta como un punto. Los correctos se bloquean; la
+      // tarjeta completa se bloquea cuando todos están bien.
+      const answers = dialogueAnswers(q);
+      const chosen = userAnswers[i] || {};
+      let ok = 0;
+      answers.forEach((a, b) => {
+        const sel = document.querySelector(`.dlg-blank[data-q-index="${i}"][data-blank="${b}"]`);
+        const good = chosen[b] === a;
+        if (sel) {
+          sel.classList.remove('correct', 'incorrect');
+          if (good) { sel.classList.add('correct'); sel.disabled = true; }
+          else if (chosen[b]) sel.classList.add('incorrect');
+        }
+        if (good) ok++;
+        questionResults.push({ question: `Conversation · blank ${b + 1} (${a})`, type: q.type, correct: good });
+      });
+      correctCount += ok;
+      if (ok === answers.length) {
+        fb.textContent = '✓ Correct! All the modals are in the right place.';
+        fb.className = 'feedback ok';
+        lockQuestion(i);
+        if ((wrongChecks[i] || 0) < REVEAL_AFTER_WRONG)
+          Logros.award(`${currentUnit.id}:${i}:ok`, Logros.XP.question, 'respuesta correcta');
+      } else {
+        fb.textContent = `${ok}/${answers.length} correct — escucha otra vez y corrige los que tienen rojo o están vacíos`;
+        fb.className = 'feedback no';
+        if (!isBlank(chosen)) wrongChecks[i] = (wrongChecks[i] || 0) + 1;
+      }
+      return;
+    }
 
     if (q.type === 'mc') {
       const labels = document.querySelectorAll(`.option[data-q-index="${i}"]`);
@@ -3326,7 +3591,9 @@ function checkAnswers(){
     else if (!isBlank(userAnswers[i])) wrongChecks[i] = (wrongChecks[i] || 0) + 1;   // sin contestar no cuenta como intento
   });
 
-  const scorableTotal = currentUnit.questions.filter(q => q.type !== 'note' && q.type !== 'shadowing').length;
+  const scorableTotal = currentUnit.questions
+    .filter(q => q.type !== 'note' && q.type !== 'shadowing')
+    .reduce((n, q) => n + (q.type === 'dialogue' ? dialogueAnswers(q).length : 1), 0);
 
   const practiceQuestions = currentUnit.questions
     .map((q, i) => ({ q, i }))
