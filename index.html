@@ -2166,13 +2166,36 @@ function speak(text, rate = 0.95, times = 1){
     alert('Este navegador no soporta audio integrado. Prueba en Chrome.');
     return;
   }
-  window.speechSynthesis.cancel();
-  for (let n = 0; n < times; n++) {
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'en-US';
-    utter.rate = rate;
-    window.speechSynthesis.speak(utter);
-  }
+  iosSoundTip();
+  whenSynthFree(() => {
+    for (let n = 0; n < times; n++) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en-US';
+      utter.rate = rate;
+      window.speechSynthesis.speak(utter);
+    }
+  });
+}
+
+/* En iPhone, si se llama speak() justo después de cancel(), a veces el
+   audio no sale. Solo se cancela si algo está sonando, y se espera un
+   momento antes de volver a hablar. */
+function whenSynthFree(fn){
+  const synth = window.speechSynthesis;
+  if (synth.speaking || synth.pending) { synth.cancel(); setTimeout(fn, 150); }
+  else fn();
+}
+
+/* En iPhone la voz de la página NO suena con el modo silencio activado,
+   aunque el volumen esté al máximo (reporte de una alumna, 13 nov 2026).
+   La primera vez que tocan "Play" se les recuerda cómo quitarlo. */
+let iosSoundTipShown = false;
+function iosSoundTip(){
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!isIOS || iosSoundTipShown) return;
+  iosSoundTipShown = true;
+  showSaveToast('🔇 ¿No se oye? En iPhone quita el modo silencio (el botón del lado del teléfono) y sube el volumen.', 9000);
 }
 
 /* Lee una conversación línea por línea. Si el teléfono tiene dos voces en
@@ -2188,7 +2211,11 @@ function speakDialogue(lines, rate = 0.95){
     return;
   }
   const synth = window.speechSynthesis;
-  synth.cancel();
+  iosSoundTip();
+  whenSynthFree(() => speakDialogueNow(lines, rate));
+}
+function speakDialogueNow(lines, rate){
+  const synth = window.speechSynthesis;
   const voices = (synth.getVoices() || []).filter(v => /^en[-_]/i.test(v.lang));
   const speakers = [];
   lines.forEach(l => { if (!speakers.includes(l.who)) speakers.push(l.who); });
@@ -2345,7 +2372,13 @@ async function azurePronunciation(referenceText, onListening, onScoring){
   try {
     await mic.ready;
     if (onListening) onListening();
-    [sdk, auth] = await Promise.all([loadSpeechSdk(), getAzureToken()]);
+    // Con mala señal la carga de Azure se podía quedar colgada y el alumno
+    // veía "Listening..." para siempre. Si tarda más de 12 s se usa el
+    // reconocimiento normal del teléfono.
+    [sdk, auth] = await Promise.race([
+      Promise.all([loadSpeechSdk(), getAzureToken()]),
+      wait(12000).then(() => { throw new Error('Azure tardó demasiado (señal lenta)'); })
+    ]);
   } catch (e) { mic.stop(); throw e; }
   const cfg = sdk.SpeechConfig.fromAuthorizationToken(auth.token, auth.region);
   cfg.speechRecognitionLanguage = 'en-US';
@@ -3283,13 +3316,13 @@ function saveProgress(showMsg){
   return true;
 }
 let saveToastTimer = null;
-function showSaveToast(msg){
+function showSaveToast(msg, ms = 3500){
   const t = document.getElementById('saveToast');
   if (!t) return;
   t.textContent = msg;
   t.style.display = 'block';
   clearTimeout(saveToastTimer);
-  saveToastTimer = setTimeout(() => { t.style.display = 'none'; }, 3500);
+  saveToastTimer = setTimeout(() => { t.style.display = 'none'; }, ms);
 }
 function openUnit(u){
   currentUnit = u;
