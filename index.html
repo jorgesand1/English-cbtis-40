@@ -3941,7 +3941,10 @@ function startSession(){
    llave segura del worker de Cloudflare; la voz cuesta casi nada (todos los
    textos juntos son ~10 000 letras y Azure regala 500 000 al mes). */
 (function(){
-  if (location.hash !== '#generar-audios') return;
+  // Acepta también "#generar-audios." u otras variantes (un punto pegado al
+  // copiar el enlace), y si cambian el # sin recargar la página.
+  const wanted = () => /^#generar-?audios/i.test(location.hash);
+  if (!wanted()) { window.addEventListener('hashchange', () => { if (wanted()) location.reload(); }); return; }
   const box = document.createElement('div');
   box.className = 'card';
   box.style.cssText = 'max-width:560px;margin:0 auto 20px;';
