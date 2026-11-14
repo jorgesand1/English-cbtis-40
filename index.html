@@ -2161,7 +2161,7 @@ function runAudioDiagnostic(){
   }, 2500);
 }
 
-function speak(text, rate = 0.95, times = 1){
+function speakSynth(text, rate = 0.95, times = 1){
   if (!('speechSynthesis' in window)) {
     alert('Este navegador no soporta audio integrado. Prueba en Chrome.');
     return;
@@ -2175,6 +2175,82 @@ function speak(text, rate = 0.95, times = 1){
       window.speechSynthesis.speak(utter);
     }
   });
+}
+
+/* ---------- Audios grabados (voces de Azure en archivos MP3) ----------
+   Antes, "Play" usaba la voz del teléfono (speechSynthesis). En muchos
+   teléfonos no suena: Android sin voz en inglés instalada, iPhone en modo
+   silencio, navegadores dentro de WhatsApp... (reportes de alumnos, nov 2026).
+   Ahora cada texto tiene su MP3 en audio-tts/, generado una sola vez con
+   Azure (index.html#generar-audios). Un <audio> suena en casi cualquier
+   teléfono, incluso con el iPhone en silencio. Si falta el archivo de algún
+   texto (por ejemplo, una unidad nueva), se usa la voz del teléfono como antes. */
+const TTS_DIR = 'audio-tts/';
+const TTS_VOICES = ['en-US-AvaNeural', 'en-US-AndrewNeural'];
+function ttsFile(text, voice, slow){
+  const key = `${voice}|${slow ? 'slow' : 'normal'}|${String(text).replace(/[{}]/g, '').trim()}`;
+  let h = 0x811c9dc5;
+  for (let k = 0; k < key.length; k++) { h ^= key.charCodeAt(k); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8, '0') + '.mp3';
+}
+const ttsPlayer = new Audio();
+ttsPlayer.preload = 'auto';
+let ttsRun = 0;
+function ttsBusy(){ return !ttsPlayer.paused && !ttsPlayer.ended; }
+function stopTts(){ ttsRun++; try { ttsPlayer.pause(); } catch (e) {} }
+// items: [{ file, rate }]. Se llama dentro del toque, para que iPhone deje sonar.
+function playTtsQueue(items, fallback){
+  if (window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+  stopTts();
+  const run = ttsRun;
+  let n = 0;
+  const next = () => {
+    if (run !== ttsRun) return;
+    if (n >= items.length) return;
+    const it = items[n++];
+    ttsPlayer.onended = () => setTimeout(next, it.gap || 250);
+    ttsPlayer.onerror = () => { if (run !== ttsRun) return; stopTts(); fallback(); };
+    ttsPlayer.src = TTS_DIR + it.file;
+    ttsPlayer.playbackRate = it.rate || 1;
+    try { ttsPlayer.preservesPitch = true; } catch (e) {}
+    const p = ttsPlayer.play();
+    if (p && p.catch) p.catch(err => {
+      if (run !== ttsRun) return;
+      if (err && err.name === 'AbortError') return;   // otro Play lo interrumpió
+      stopTts(); fallback();
+    });
+  };
+  next();
+}
+function speak(text, rate = 0.95, times = 1){
+  const slow = rate <= 0.6;
+  const items = [];
+  for (let k = 0; k < times; k++) items.push({ file: ttsFile(text, TTS_VOICES[0], slow), rate: 1, gap: 600 });
+  playTtsQueue(items, () => speakSynth(text, rate, times));
+}
+function speakDialogue(lines, rate = 0.95){
+  const speakers = [];
+  lines.forEach(l => { if (!speakers.includes(l.who)) speakers.push(l.who); });
+  const items = lines.map(l => ({
+    file: ttsFile(l.text, TTS_VOICES[speakers.indexOf(l.who) % TTS_VOICES.length], false),
+    rate: rate < 0.9 ? 0.8 : 1
+  }));
+  playTtsQueue(items, () => speakDialogueSynth(lines, rate));
+}
+// Todos los textos que la plataforma lee en voz alta (para el generador).
+function ttsAllItems(){
+  const out = new Map();
+  const add = (text, voice, slow) => out.set(ttsFile(text, voice, slow), { text: String(text).replace(/[{}]/g, '').trim(), voice, slow });
+  UNITS.forEach(u => (u.questions || []).forEach(q => {
+    if (q.audioText) add(q.audioText, TTS_VOICES[0], false);
+    if (q.type === 'shadowing' && q.sentence) { add(q.sentence, TTS_VOICES[0], false); add(q.sentence, TTS_VOICES[0], true); }
+    if (q.type === 'dialogue' && q.lines) {
+      const speakers = [];
+      q.lines.forEach(l => { if (!speakers.includes(l.who)) speakers.push(l.who); });
+      q.lines.forEach(l => add(l.text, TTS_VOICES[speakers.indexOf(l.who) % TTS_VOICES.length], false));
+    }
+  }));
+  return out;
 }
 
 /* En iPhone, si se llama speak() justo después de cancel(), a veces el
@@ -2205,7 +2281,7 @@ function dialogueAnswers(q){
   q.lines.forEach(l => (l.text.match(/\{[^}]+\}/g) || []).forEach(m => out.push(m.slice(1, -1))));
   return out;
 }
-function speakDialogue(lines, rate = 0.95){
+function speakDialogueSynth(lines, rate = 0.95){
   if (!('speechSynthesis' in window)) {
     alert('Este navegador no soporta audio integrado. Prueba en Chrome.');
     return;
@@ -2236,8 +2312,9 @@ function speakDialogueNow(lines, rate){
    el ejemplo y se espera un momento para que el teléfono suelte el audio. */
 function releaseAudioForMic(){
   const synth = window.speechSynthesis;
-  const wasBusy = !!synth && (synth.speaking || synth.pending);
+  const wasBusy = (!!synth && (synth.speaking || synth.pending)) || ttsBusy();
   if (synth) synth.cancel();
+  stopTts();
   return new Promise(r => setTimeout(r, wasBusy ? 600 : 250));
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -3042,6 +3119,7 @@ function renderQuiz(){
             return;
           }
           if (window.speechSynthesis) window.speechSynthesis.cancel();
+          stopTts();
           evalBtn.classList.add('recording');
           evalStatus.textContent = 'Preparando micrófono... espera';
           try {
@@ -3116,9 +3194,10 @@ function renderQuiz(){
           // porque Safari y algunos Android bloquean el servicio de voz
           // cuando arranca después de una pausa.
           const synth = window.speechSynthesis;
-          if (synth && (synth.speaking || synth.pending)) {
+          if ((synth && (synth.speaking || synth.pending)) || ttsBusy()) {
             status.textContent = 'Preparando micrófono...';
-            synth.cancel();
+            if (synth) synth.cancel();
+            stopTts();
             await wait(600);
           } else if (synth) {
             synth.cancel();
@@ -3196,6 +3275,7 @@ function renderQuiz(){
           if (recBtn.classList.contains('recording')) return;
           practicedAnswers[i] = true;
           if (window.speechSynthesis) window.speechSynthesis.cancel();
+          stopTts();
           recBtn.classList.add('recording');
           status.textContent = 'Preparando micrófono... espera';
           try {
@@ -3853,5 +3933,78 @@ function startSession(){
 }
 </script>
 <script src="logros.js"></script>
+<script>
+/* Generador de audios (solo para el maestro): abre
+   https://jorgesand1.github.io/English-cbtis-40/#generar-audios
+   en la computadora. Crea con Azure los MP3 que falten y los descarga en un
+   ZIP; ese ZIP se sube al repositorio (carpeta audio-tts/). Usa la misma
+   llave segura del worker de Cloudflare; la voz cuesta casi nada (todos los
+   textos juntos son ~10 000 letras y Azure regala 500 000 al mes). */
+(function(){
+  if (location.hash !== '#generar-audios') return;
+  const box = document.createElement('div');
+  box.className = 'card';
+  box.style.cssText = 'max-width:560px;margin:0 auto 20px;';
+  box.innerHTML = `<div class="q-meta">🔊 Generador de audios (maestro)</div>
+    <div class="q-text" id="genInfo">Revisando qué audios faltan...</div>
+    <div class="actions" style="margin-top:12px;"><button class="primary" id="genBtn" disabled>Generar audios que faltan</button></div>
+    <div class="record-status" id="genStatus" style="white-space:pre-wrap;"></div>`;
+  const wrap = document.querySelector('.wrap');
+  wrap.insertBefore(box, wrap.firstChild.nextSibling);
+  const info = box.querySelector('#genInfo'), btn = box.querySelector('#genBtn'), st = box.querySelector('#genStatus');
+  const items = ttsAllItems();
+  const missing = [];
+  (async () => {
+    for (const [file, it] of items) {
+      try { const r = await fetch(TTS_DIR + file, { method: 'HEAD', cache: 'no-store' }); if (!r.ok) missing.push([file, it]); }
+      catch (e) { missing.push([file, it]); }
+    }
+    info.textContent = `La plataforma lee ${items.size} textos. Faltan ${missing.length} audios.`;
+    btn.disabled = !missing.length;
+  })();
+  const loadJsZip = () => window.JSZip ? Promise.resolve() : new Promise((ok, bad) => {
+    const el = document.createElement('script');
+    el.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    el.onload = ok; el.onerror = () => bad(new Error('No cargó JSZip'));
+    document.head.appendChild(el);
+  });
+  const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  btn.onclick = async () => {
+    btn.disabled = true;
+    try {
+      const [SDK, tok] = await Promise.all([loadSpeechSdk(), getAzureToken(), loadJsZip()]).then(r => [r[0], r[1]]);
+      const zip = new JSZip();
+      let done = 0, failed = 0;
+      for (const [file, it] of missing) {
+        const t = await getAzureToken();
+        const cfg = SDK.SpeechConfig.fromAuthorizationToken(t.token, t.region);
+        cfg.speechSynthesisOutputFormat = SDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
+        const synth = new SDK.SpeechSynthesizer(cfg, null);
+        const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US"><voice name="${it.voice}">` +
+          (it.slow ? `<prosody rate="-40%">${esc(it.text)}</prosody>` : esc(it.text)) + `</voice></speak>`;
+        try {
+          const data = await new Promise((ok, bad) => synth.speakSsmlAsync(ssml,
+            r => r.audioData && r.audioData.byteLength ? ok(r.audioData) : bad(new Error(r.errorDetails || 'sin audio')), bad));
+          zip.file('audio-tts/' + file, data);
+          done++;
+        } catch (e) { failed++; console.warn(file, e); }
+        synth.close();
+        st.textContent = `Generando... ${done + failed} de ${missing.length}${failed ? ` (${failed} con error)` : ''}`;
+      }
+      if (done) {
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'audios-plataforma.zip';
+        a.click();
+      }
+      st.textContent = `✓ Listo: ${done} audios en audios-plataforma.zip${failed ? ` · ${failed} con error` : ''}. Mándale el ZIP a Claude en el hilo de soporte técnico.`;
+    } catch (e) {
+      st.textContent = '⚠ No se pudo: ' + (e && e.message || e);
+      btn.disabled = false;
+    }
+  };
+})();
+</script>
 </body>
 </html>

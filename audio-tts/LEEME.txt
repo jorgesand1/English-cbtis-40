@@ -1,0 +1,1 @@
+Audios MP3 generados con Azure (voces en-US-AvaNeural y en-US-AndrewNeural) desde index.html#generar-audios. El nombre de cada archivo sale del texto (ttsFile en index.html).
