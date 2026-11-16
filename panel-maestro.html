@@ -240,17 +240,23 @@
       const snap = await db.collection('azureUsage').where('month', '==', month).get();
       if (snap.empty) { box.style.display = 'none'; return; }
       let count = 0, seconds = 0, quota = false;
+      const noVoice = { mudo: 0, voz: 0 }, mudoDev = {};
       snap.forEach(d => {
         const u = d.data();
-        if (u.kind === 'quota') quota = true;
-        else { count++; seconds += Number(u.seconds) || 0; }
+        if (u.kind === 'quota') { quota = true; return; }
+        count++; seconds += Number(u.seconds) || 0;
+        const m = /^nomatch-(mudo|voz):?(.*)$/.exec(u.kind || '');
+        if (m) { noVoice[m[1]]++; if (m[1] === 'mudo') mudoDev[m[2] || '?'] = (mudoDev[m[2] || '?'] || 0) + 1; }
       });
+      const devs = Object.entries(mudoDev).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', ');
+      const diag = (noVoice.mudo || noVoice.voz)
+        ? `<div style="font-size:12px;opacity:.8;margin-top:6px;">Intentos sin voz este mes: ${noVoice.voz} con sonido pero sin palabras · ${noVoice.mudo} con micrófono mudo${devs ? ` (${devs})` : ''}</div>` : '';
       const minutes = Math.round(seconds / 60);
       const pct = Math.min(100, Math.round(minutes / AZURE_FREE_MINUTES * 100));
       box.className = 'azure-usage' + (quota ? ' out' : pct >= 80 ? ' warn' : '');
       box.innerHTML = quota
         ? `⚠️ <b>Se acabaron las horas gratis de Azure de este mes.</b> La plataforma sigue funcionando con el reconocimiento normal; se reinicia el día 1.<div class="bar"><div style="width:100%"></div></div>`
-        : `🎯 Evaluaciones de pronunciación este mes: <b>${count}</b> (≈ ${minutes} min de ${AZURE_FREE_MINUTES} gratis)${pct >= 80 ? ' · ya casi se acaban' : ''}<div class="bar"><div style="width:${pct}%"></div></div>`;
+        : `🎯 Evaluaciones de pronunciación este mes: <b>${count}</b> (≈ ${minutes} min de ${AZURE_FREE_MINUTES} gratis)${pct >= 80 ? ' · ya casi se acaban' : ''}<div class="bar"><div style="width:${pct}%"></div></div>${diag}`;
       box.style.display = '';
     } catch (e) {
       box.style.display = 'none';   // sin permiso en Firestore todavía, o sin conexión
