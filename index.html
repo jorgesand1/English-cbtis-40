@@ -2400,17 +2400,27 @@ function loadSpeechSdk(){
 // entrega silencio. Aquí el audio se abre en el mismo toque, a la frecuencia
 // normal del teléfono, y se convierte a 16 kHz. Lo que se graba antes de
 // conectar con Azure se guarda y se manda después, así no se pierde nada.
+// Volumen más alto que llegó del micrófono en la última grabación (0 a 1).
+// Si queda en ~0, el teléfono no está mandando sonido (micrófono "mudo").
+let lastMicPeak = -1;
+const MIC_SILENT = 0.01;
 function startMicCapture(){
+  // Suelta el reproductor de los audios de ejemplo: en iPhone, si sigue
+  // "cargado", la grabación puede llegar en silencio.
+  try { stopTts(); ttsPlayer.removeAttribute('src'); ttsPlayer.load(); } catch (e) {}
   const Ctx = window.AudioContext || window.webkitAudioContext;
   const ctx = new Ctx();
   ctx.resume();
   let stream = null, src = null, proc = null, push = null, pending = [];
+  lastMicPeak = 0;
   const ready = navigator.mediaDevices.getUserMedia({ audio: true }).then(s => {
     stream = s;
     src = ctx.createMediaStreamSource(s);
     proc = ctx.createScriptProcessor(4096, 1, 1);
     proc.onaudioprocess = e => {
-      const pcm = toPcm16k(e.inputBuffer.getChannelData(0), ctx.sampleRate);
+      const data = e.inputBuffer.getChannelData(0);
+      for (let k = 0; k < data.length; k += 8) { const v = Math.abs(data[k]); if (v > lastMicPeak) lastMicPeak = v; }
+      const pcm = toPcm16k(data, ctx.sampleRate);
       if (push) push.write(pcm); else pending.push(pcm);
     };
     src.connect(proc);
@@ -2482,7 +2492,7 @@ async function azurePronunciation(referenceText, onListening, onScoring){
       recognizer.close();
       // Solo ruido (Azure devuelve "." o nada): igual que si no hubiera hablado.
       if (r.reason === sdk.ResultReason.RecognizedSpeech && !/[a-z]/i.test(r.text || '')){
-        logAzureUsage('ok', (r.duration || 0) / 1e7);
+        logAzureUsage(noVoiceKind(), (r.duration || 0) / 1e7);
         resolve(null);
       } else if (r.reason === sdk.ResultReason.RecognizedSpeech){
         const pr = sdk.PronunciationAssessmentResult.fromResult(r);
@@ -2497,7 +2507,7 @@ async function azurePronunciation(referenceText, onListening, onScoring){
           words: (pr.detailResult && pr.detailResult.Words) || []
         });
       } else if (r.reason === sdk.ResultReason.NoMatch){
-        logAzureUsage('ok', (r.duration || 0) / 1e7);
+        logAzureUsage(noVoiceKind(), (r.duration || 0) / 1e7);
         resolve(null);
       } else {
         const c = sdk.CancellationDetails.fromResult(r);
@@ -2536,6 +2546,21 @@ const SOUND_TIPS = {
 };
 // Registro de uso para el contador del panel del maestro (colección
 // azureUsage en Firestore). Si falla, no afecta al alumno.
+// Para el panel: intentos donde Azure no oyó voz, separando si el micrófono
+// no mandó nada (mudo) o sí llegó sonido. Incluye el tipo de teléfono.
+function noVoiceKind(){
+  const ua = navigator.userAgent || '';
+  const dev = /iPhone|iPad|iPod/.test(ua) ? (/CriOS/.test(ua) ? 'iphone-chrome' : /FxiOS/.test(ua) ? 'iphone-firefox' : 'iphone-safari')
+    : /Android/.test(ua) ? 'android' : 'otro';
+  return `${lastMicPeak >= 0 && lastMicPeak < MIC_SILENT ? 'nomatch-mudo' : 'nomatch-voz'}:${dev}`;
+}
+// Mensaje cuando Azure no escuchó nada.
+function noVoiceMessage(again){
+  if (lastMicPeak >= 0 && lastMicPeak < MIC_SILENT)
+    return '⚠ Tu micrófono no mandó sonido. Cierra otras apps que usen el micrófono (llamadas, WhatsApp, grabadora), recarga la página y vuelve a intentar.' +
+      (/iPhone|iPad|iPod/.test(navigator.userAgent || '') ? ' En iPhone funciona mejor en Safari.' : '');
+  return `No te escuché. ${again} y habla fuerte y cerca del teléfono cuando aparezca 🎙️.`;
+}
 function logAzureUsage(kind, seconds){
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -3128,7 +3153,7 @@ function renderQuiz(){
               () => { evalStatus.textContent = '⏳ Evaluando tu pronunciación... (no repitas)'; });
             evalBtn.classList.remove('recording');
             if (res) logAzureUsage('ok', res.seconds);
-            if (!res || !res.text) { evalStatus.textContent = 'No te escuché. Toca otra vez y habla cuando aparezca 🎙️.'; return; }
+            if (!res || !res.text) { evalStatus.textContent = noVoiceMessage('Toca otra vez'); return; }
             const sk = `${currentUnit.id}:${i}`;
             renderPronunciation(evalBox, res, addPronAttempt(sk));
             awardPron(sk, res.pron);
@@ -3284,7 +3309,7 @@ function renderQuiz(){
               () => { status.textContent = '⏳ Evaluando tu pronunciación... (no repitas)'; });
             recBtn.classList.remove('recording');
             if (!res || !res.text) {
-              status.textContent = 'No te escuché. Toca Record otra vez y habla cuando aparezca 🎙️ Listening.';
+              status.textContent = noVoiceMessage('Toca Record otra vez');
               return;
             }
             logAzureUsage('ok', res.seconds);
