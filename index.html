@@ -2676,10 +2676,12 @@ function renderPendingNotice(){
     if (p && p.total) info += ` — llevas ${Math.round((p.score / p.total) * 100)}%, necesitas ${PENDING_PCT}%`;
     const day = deadlines[u.id];
     if (day) {
-      const d = new Date(day + 'T23:59:59');
+      const d = window.parseUnitDate(day);
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      const days = Math.round((new Date(day + 'T00:00:00') - today) / 86400000);   // días de calendario
-      const when = d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      const dayStart = new Date(d); dayStart.setHours(0, 0, 0, 0);
+      const days = Math.round((dayStart - today) / 86400000);   // días de calendario
+      let when = d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+      if (window.unitDateHasTime(day)) when += ' a las ' + d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true });
       info += days >= 0
         ? ` · ⏰ fecha límite: ${when}${days === 0 ? ' (¡hoy!)' : days === 1 ? ' (mañana)' : ` (faltan ${days} días)`}`
         : ` · ⏰ la fecha límite fue el ${when}`;
