@@ -232,6 +232,10 @@
   // Contador de Azure (evaluación de pronunciación): las 5 horas gratis
   // del plan F0 son por mes y compartidas por toda la plataforma.
   const AZURE_FREE_MINUTES = 300;
+  // 24 nov 2026: Jorge pasó Azure a S0 (de pago) con alerta de presupuesto de 10 USD.
+  const AZURE_PLAN = 'S0';
+  const AZURE_USD_PER_HOUR = 1;
+  const AZURE_BUDGET_USD = 10;
   async function loadAzureUsage(db){
     const box = document.getElementById('azureUsage');
     try {
@@ -239,11 +243,13 @@
       const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const snap = await db.collection('azureUsage').where('month', '==', month).get();
       if (snap.empty) { box.style.display = 'none'; return; }
-      let count = 0, seconds = 0, quota = false;
+      let count = 0, seconds = 0, lastQuota = 0, lastOk = 0;
+      const ms = u => (u.timestamp && u.timestamp.toMillis) ? u.timestamp.toMillis() : 0;
       const noVoice = { mudo: 0, voz: 0 }, mudoDev = {};
       snap.forEach(d => {
         const u = d.data();
-        if (u.kind === 'quota') { quota = true; return; }
+        if (u.kind === 'quota') { lastQuota = Math.max(lastQuota, ms(u)); return; }
+        lastOk = Math.max(lastOk, ms(u));
         count++; seconds += Number(u.seconds) || 0;
         const m = /^nomatch-(mudo|voz):?(.*)$/.exec(u.kind || '');
         if (m) { noVoice[m[1]]++; if (m[1] === 'mudo') mudoDev[m[2] || '?'] = (mudoDev[m[2] || '?'] || 0) + 1; }
@@ -252,11 +258,24 @@
       const diag = (noVoice.mudo || noVoice.voz)
         ? `<div style="font-size:12px;opacity:.8;margin-top:6px;">Intentos sin voz este mes: ${noVoice.voz} con sonido pero sin palabras · ${noVoice.mudo} con micrófono mudo${devs ? ` (${devs})` : ''}</div>` : '';
       const minutes = Math.round(seconds / 60);
-      const pct = Math.min(100, Math.round(minutes / AZURE_FREE_MINUTES * 100));
-      box.className = 'azure-usage' + (quota ? ' out' : pct >= 80 ? ' warn' : '');
-      box.innerHTML = quota
-        ? `⚠️ <b>Se acabaron las horas gratis de Azure de este mes.</b> La plataforma sigue funcionando con el reconocimiento normal; se reinicia el día 1.<div class="bar"><div style="width:100%"></div></div>`
-        : `🎯 Evaluaciones de pronunciación este mes: <b>${count}</b> (≈ ${minutes} min de ${AZURE_FREE_MINUTES} gratis)${pct >= 80 ? ' · ya casi se acaban' : ''}<div class="bar"><div style="width:${pct}%"></div></div>${diag}`;
+      // Solo se marca "sin horas" si lo último que pasó fue un error de cuota.
+      const quota = lastQuota > lastOk;
+      if (AZURE_PLAN === 'S0') {
+        // Plan de pago: ~1 USD por hora de audio; alerta de presupuesto de 10 USD en Azure.
+        const usd = (minutes / 60 * AZURE_USD_PER_HOUR).toFixed(2);
+        const pct = Math.min(100, Math.round(minutes / 60 * AZURE_USD_PER_HOUR / AZURE_BUDGET_USD * 100));
+        box.className = 'azure-usage' + (quota ? ' out' : pct >= 80 ? ' warn' : '');
+        box.innerHTML = (quota ? `⚠️ <b>Azure está rechazando evaluaciones.</b> Revisa el recurso en el portal de Azure.<br>` : '') +
+          `🎯 Evaluaciones de pronunciación este mes: <b>${count}</b> (≈ ${minutes} min · ≈ ${usd} USD de ${AZURE_BUDGET_USD} del presupuesto)` +
+          `<div class="bar"><div style="width:${pct}%"></div></div>` +
+          `<div style="font-size:12px;opacity:.8;margin-top:6px;">Estimado de todo el mes; Azure solo cobra desde que pasaste a S0.</div>${diag}`;
+      } else {
+        const pct = Math.min(100, Math.round(minutes / AZURE_FREE_MINUTES * 100));
+        box.className = 'azure-usage' + (quota ? ' out' : pct >= 80 ? ' warn' : '');
+        box.innerHTML = quota
+          ? `⚠️ <b>Se acabaron las horas gratis de Azure de este mes.</b> La plataforma sigue funcionando con el reconocimiento normal; se reinicia el día 1.<div class="bar"><div style="width:100%"></div></div>`
+          : `🎯 Evaluaciones de pronunciación este mes: <b>${count}</b> (≈ ${minutes} min de ${AZURE_FREE_MINUTES} gratis)${pct >= 80 ? ' · ya casi se acaban' : ''}<div class="bar"><div style="width:${pct}%"></div></div>${diag}`;
+      }
       box.style.display = '';
     } catch (e) {
       box.style.display = 'none';   // sin permiso en Firestore todavía, o sin conexión
