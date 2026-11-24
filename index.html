@@ -3391,6 +3391,7 @@ function resetQuiz(){
   userAnswers = {};
   practicedAnswers = {};
   renderQuiz();
+  lastProgressSig = progressSig();
   renderUnitPicker();
 }
 
@@ -3398,7 +3399,9 @@ function resetQuiz(){
    Guarda las respuestas de la unidad en este teléfono (localStorage) para
    salir a medias y continuar después. Se guarda solo al tocar
    "Guardar avance", al cambiar una respuesta y al presionar "Check".
-   No sube nada a Firebase: los resultados siguen guardándose con "Check". */
+   Desde el 24 nov 2026 también se copia a Firebase (colección "progress",
+   un documento por alumno y unidad) para continuar en otro teléfono con el
+   mismo nombre. Gana la copia más reciente (savedAt). */
 function progressKey(unitId){
   return `avance:${selectedTeacherId}:${selectedSemester}:${studentNameKey}:${unitId}`;
 }
@@ -3411,18 +3414,101 @@ function loadSavedProgress(unit){
 }
 function clearSavedProgress(unit){
   try { localStorage.removeItem(progressKey(unit.id)); } catch (e) {}
+  cloudSaveProgress(unit.id, null);   // en la nube queda "borrado" con su fecha
 }
-function saveProgress(showMsg){
+
+/* ---- Avance en la nube ---- */
+function progressDocId(unitId){
+  return `${selectedTeacherId}_${selectedSemester}_${studentNameKey}_${unitId}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+function cloudSaveProgress(unitId, data){
+  if (!studentNameKey || !unitId) return;
+  const payload = {
+    teacherId: selectedTeacherId,
+    semester: Number(selectedSemester),
+    studentNameKey,
+    unitId,
+    data: data ? JSON.stringify(data) : '',
+    savedAt: data ? data.savedAt : Date.now()
+  };
+  getDb().then(db => db.collection('progress').doc(progressDocId(unitId)).set(payload)).catch(() => {});
+}
+// Las respuestas se guardan en el teléfono a cada rato; a la nube solo cada
+// pocos segundos (o al instante con "Guardar avance", "Check" o al salir).
+let cloudPending = null, cloudTimer = null;
+function queueCloudSave(unitId, data, now){
+  cloudPending = { unitId, data };
+  clearTimeout(cloudTimer);
+  if (now) flushCloudSave();
+  else cloudTimer = setTimeout(flushCloudSave, 4000);
+}
+function flushCloudSave(){
+  clearTimeout(cloudTimer);
+  if (!cloudPending) return;
+  const p = cloudPending; cloudPending = null;
+  cloudSaveProgress(p.unitId, p.data);
+}
+// true si el alumno cambió algo que todavía no se guarda en el teléfono.
+let unsavedChanges = false;
+// Huella de lo último guardado/abierto: si nada cambió, no se vuelve a
+// guardar (así no se pisa con datos viejos lo que llegó de otro teléfono).
+let lastProgressSig = '';
+function progressSig(){
+  return JSON.stringify([userAnswers, practicedAnswers, lockedQuestions, wrongChecks]);
+}
+// Al entrar: baja el avance guardado desde otros teléfonos (y sube el de
+// este teléfono si es más nuevo que el de la nube).
+async function syncCloudProgress(){
+  if (!studentNameKey) return;
+  const who = studentNameKey, teacher = selectedTeacherId, sem = Number(selectedSemester);
+  let snap;
+  try {
+    snap = await (await getDb()).collection('progress')
+      .where('teacherId', '==', teacher)
+      .where('semester', '==', sem)
+      .where('studentNameKey', '==', who)
+      .get();
+  } catch (e) { return; }
+  if (who !== studentNameKey || teacher !== selectedTeacherId || sem !== Number(selectedSemester)) return;
+  const remote = {};
+  snap.forEach(doc => { const d = doc.data(); if (d && d.unitId) remote[d.unitId] = d; });
+  let currentChanged = false;
+  visibleUnits().forEach(u => {
+    if (unitIsClosed(u)) return;
+    const r = remote[u.id];
+    const local = loadSavedProgress(u);
+    const localAt = (local && local.savedAt) || 0;
+    const remoteAt = (r && Number(r.savedAt)) || 0;
+    if (remoteAt > localAt) {
+      try {
+        if (r.data) localStorage.setItem(progressKey(u.id), r.data);
+        else if (local) localStorage.removeItem(progressKey(u.id));
+        else return;
+      } catch (e) { return; }
+      if (currentUnit && currentUnit.id === u.id) currentChanged = true;
+    } else if (local && localAt > remoteAt) {
+      cloudSaveProgress(u.id, local);
+    }
+  });
+  if (currentChanged && !unsavedChanges) openUnit(currentUnit);
+  else renderUnitPicker();
+}
+function saveProgress(showMsg, cloudNow){
   if (!currentUnit || !studentNameKey || unitIsClosed(currentUnit)) return false;
+  const sig = progressSig();
+  unsavedChanges = false;
+  if (!showMsg && sig === lastProgressSig) return true;
+  lastProgressSig = sig;
   const data = { userAnswers, practicedAnswers, lockedQuestions, wrongChecks, savedAt: Date.now() };
+  queueCloudSave(currentUnit.id, data, showMsg || cloudNow);
   try {
     localStorage.setItem(progressKey(currentUnit.id), JSON.stringify(data));
   } catch (e) {
-    if (showMsg) showSaveToast('⚠ Este navegador no deja guardar (¿modo incógnito?). Termina la unidad antes de salir.');
+    if (showMsg) showSaveToast('⚠ Este navegador no deja guardar en el teléfono (¿modo incógnito?). Se intentó guardar en línea; mejor termina la unidad antes de salir.');
     return false;
   }
   if (showMsg) {
-    showSaveToast('✓ Avance guardado en este teléfono. Puedes salir y continuar después con el mismo nombre.');
+    showSaveToast('✓ Avance guardado. Puedes continuar después en este u otro teléfono con el mismo nombre.');
     renderUnitPicker();
   }
   return true;
@@ -3437,6 +3523,8 @@ function showSaveToast(msg, ms = 3500){
   saveToastTimer = setTimeout(() => { t.style.display = 'none'; }, ms);
 }
 function openUnit(u){
+  flushCloudSave();
+  unsavedChanges = false;
   currentUnit = u;
   if (unitIsClosed(u)) {
     userAnswers = {};
@@ -3463,6 +3551,7 @@ function openUnit(u){
     const area = document.getElementById('quizArea');
     area.insertBefore(note, area.children[1] || null);
   }
+  lastProgressSig = progressSig();
   renderUnitPicker();
 }
 function renderClosedUnit(u){
@@ -3480,6 +3569,7 @@ function renderClosedUnit(u){
 let autoSaveTimer = null;
 function scheduleAutoSave(){
   clearTimeout(autoSaveTimer);
+  unsavedChanges = true;
   autoSaveTimer = setTimeout(() => saveProgress(false), 400);
 }
 function attachAutoSave(){
@@ -3492,7 +3582,10 @@ function attachAutoSave(){
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachAutoSave);
 else attachAutoSave();
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') saveProgress(false);
+  // Al salir solo se guarda si hubo cambios: así un teléfono que se quedó
+  // abierto con respuestas viejas no borra lo que se avanzó en otro.
+  if (document.visibilityState === 'hidden') { if (unsavedChanges) saveProgress(false, true); flushCloudSave(); }
+  else if (studentNameKey) syncCloudProgress();
 });
 
 function lockQuestion(i){
@@ -3752,7 +3845,7 @@ function checkAnswers(){
     Logros.award(`${currentUnit.id}:unidad`, Logros.XP.unit, '¡unidad completa!');
     Logros.badge('unidad');
   }
-  saveProgress(false);
+  saveProgress(false, true);
   saveResults(correctCount, scorableTotal, questionResults, practiceCompleted, practiceTotal);
 }
 
@@ -3961,6 +4054,7 @@ function startSession(){
   document.getElementById('songContest').style.display = SONG_CONTEST.teacherId === teacherId ? 'block' : 'none';
   openUnit(visibleUnits().find(u => !unitIsClosed(u)) || visibleUnits()[0] || null);
   loadStudentProgress();
+  syncCloudProgress();
   Logros.load();
 }
 </script>
