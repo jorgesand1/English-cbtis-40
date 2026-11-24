@@ -2356,7 +2356,12 @@ function addPronAttempt(key){
 }
 function pronAttemptsUsed(key){ return pronAttempts[`${studentNameKey}|${key}`] || 0; }
 const AZURE_MAX_ATTEMPTS = 3;  // después, ya no se usa Azure en esa pregunta (ahorra horas)   // `${unitId}:${i}` -> { pron, accuracy, fluency, completeness }
-function azureEnabled(){ return !!AZURE_SPEECH.tokenUrl; }
+// Si Azure dice que se acabaron las horas, no se vuelve a intentar en 30 min
+// en este teléfono: así el alumno no pierde un toque esperando el error y
+// graba directo con el reconocimiento normal del teléfono.
+function azureQuotaPaused(){ try { return Date.now() < Number(localStorage.getItem('azureQuotaUntil') || 0); } catch (e) { return false; } }
+function pauseAzureForQuota(){ try { localStorage.setItem('azureQuotaUntil', String(Date.now() + 30 * 60 * 1000)); } catch (e) {} }
+function azureEnabled(){ return !!AZURE_SPEECH.tokenUrl && !azureQuotaPaused(); }
 // En algunos iPhone el reconocimiento de voz del navegador se cierra solo sin
 // dejar hablar. Si pasa, las preguntas de Speaking usan Azure como respaldo.
 // Se recuerda en el teléfono para no hacer que el alumno falle cada vez.
@@ -2514,7 +2519,7 @@ async function azurePronunciation(referenceText, onListening, onScoring){
         const e = new Error(c.errorDetails || 'cancelado');
         // Horas gratis agotadas (o demasiadas peticiones a la vez).
         e.quota = /quota|429|too ?many/i.test(String(c.errorDetails) + ' ' + String(c.errorCode));
-        if (e.quota) logAzureUsage('quota', 0);
+        if (e.quota) { logAzureUsage('quota', 0); pauseAzureForQuota(); }
         reject(e);
       }
     }, err => { clearTimeout(guard); mic.stop(); recognizer.close(); reject(new Error(String(err))); });
@@ -3331,7 +3336,7 @@ function renderQuiz(){
           }
         };
         recBtn.onclick = () => {
-          if (!(useAzure || webSpeechFailed)) return webSpeechClick();
+          if (!azureEnabled() || !(useAzure || webSpeechFailed)) return webSpeechClick();
           if (pronAttemptsUsed(pronKey) < AZURE_MAX_ATTEMPTS) return azureClick();
           // Con Azure, cada pregunta tiene 3 intentos y ya.
           status.textContent = 'Ya usaste tus 3 intentos en esta pregunta. Se queda tu último intento.';
