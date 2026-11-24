@@ -2355,6 +2355,41 @@ function addPronAttempt(key){
   return pronAttempts[k];
 }
 function pronAttemptsUsed(key){ return pronAttempts[`${studentNameKey}|${key}`] || 0; }
+// Última evaluación de Azure de cada grabación (`${unitId}:${i}`), en versión
+// corta para guardarla con el avance y volver a mostrarla al reabrir la unidad.
+const pronResults = {};
+function slimPron(res){
+  const pa = p => p ? { AccuracyScore: p.AccuracyScore, ErrorType: p.ErrorType } : {};
+  return {
+    text: res.text, pron: res.pron, accuracy: res.accuracy, fluency: res.fluency,
+    completeness: res.completeness, prosody: res.prosody,
+    words: (res.words || []).map(w => ({
+      Word: w.Word, PronunciationAssessment: pa(w.PronunciationAssessment),
+      Phonemes: (w.Phonemes || []).map(ph => ({ Phoneme: ph.Phoneme, PronunciationAssessment: { AccuracyScore: (ph.PronunciationAssessment || {}).AccuracyScore } }))
+    }))
+  };
+}
+// Lo de pronunciación de una unidad que se guarda con el avance.
+function unitPronData(unitId){
+  const out = {};
+  Object.keys(pronResults).forEach(k => {
+    if (k.startsWith(unitId + ':')) out[k.slice(unitId.length + 1)] = { res: pronResults[k], attempts: pronAttemptsUsed(k) };
+  });
+  return out;
+}
+function restoreUnitPron(unitId, data){
+  Object.entries(data || {}).forEach(([i, d]) => {
+    const key = `${unitId}:${i}`;
+    if (!d || !d.res) return;
+    pronResults[key] = d.res;
+    pronScores[key] = { pron: d.res.pron, accuracy: d.res.accuracy, fluency: d.res.fluency, completeness: d.res.completeness };
+    const k = `${studentNameKey}|${key}`;
+    if ((d.attempts || 0) > (pronAttempts[k] || 0)) {
+      pronAttempts[k] = d.attempts;
+      try { localStorage.setItem('pronAttempts', JSON.stringify(pronAttempts)); } catch (e) {}
+    }
+  });
+}
 const AZURE_MAX_ATTEMPTS = 3;  // después, ya no se usa Azure en esa pregunta (ahorra horas)   // `${unitId}:${i}` -> { pron, accuracy, fluency, completeness }
 // Si Azure dice que se acabaron las horas, no se vuelve a intentar en 30 min
 // en este teléfono: así el alumno no pierde un toque esperando el error y
@@ -3323,7 +3358,9 @@ function renderQuiz(){
             userAnswers[i] = res.text;
             transcriptBox.textContent = `"${res.text}"`;
             pronScores[pronKey] = { pron: res.pron, accuracy: res.accuracy, fluency: res.fluency, completeness: res.completeness };
+            pronResults[pronKey] = slimPron(res);
             renderPronunciation(pronBox, res, addPronAttempt(pronKey));
+            scheduleAutoSave();
             awardPron(pronKey, res.pron);
             status.textContent = 'Recording finished. Press "Check my answers" when ready, or record again.';
           } catch (err) {
@@ -3344,6 +3381,11 @@ function renderQuiz(){
           status.textContent = 'Ya usaste tus 3 intentos en esta pregunta. Se queda tu último intento.';
         };
 
+        // Al volver a abrir la unidad: que se vea que ya la grabó.
+        if (typeof userAnswers[i] === 'string' && userAnswers[i]) {
+          status.textContent = '✓ Ya la grabaste. Si quieres, grábala otra vez; al final presiona "Check my answers".';
+          if (pronResults[pronKey]) renderPronunciation(pronBox, pronResults[pronKey], pronAttemptsUsed(pronKey));
+        }
         card.appendChild(recBtn);
         card.appendChild(status);
         card.appendChild(transcriptBox);
@@ -3387,7 +3429,10 @@ function addQuestionImage(card, q, fallbackEl){
 function resetQuiz(){
   if (currentUnit && loadSavedProgress(currentUnit) &&
       !confirm('¿Borrar tu avance guardado de esta unidad y empezar de nuevo?')) return;
-  if (currentUnit) clearSavedProgress(currentUnit);
+  if (currentUnit) {
+    clearSavedProgress(currentUnit);
+    Object.keys(pronResults).forEach(k => { if (k.startsWith(currentUnit.id + ':')) { delete pronResults[k]; delete pronScores[k]; } });
+  }
   userAnswers = {};
   practicedAnswers = {};
   renderQuiz();
@@ -3454,7 +3499,7 @@ let unsavedChanges = false;
 // guardar (así no se pisa con datos viejos lo que llegó de otro teléfono).
 let lastProgressSig = '';
 function progressSig(){
-  return JSON.stringify([userAnswers, practicedAnswers, lockedQuestions, wrongChecks]);
+  return JSON.stringify([userAnswers, practicedAnswers, lockedQuestions, wrongChecks, currentUnit ? unitPronData(currentUnit.id) : {}]);
 }
 // Al entrar: baja el avance guardado desde otros teléfonos (y sube el de
 // este teléfono si es más nuevo que el de la nube).
@@ -3499,7 +3544,7 @@ function saveProgress(showMsg, cloudNow){
   unsavedChanges = false;
   if (!showMsg && sig === lastProgressSig) return true;
   lastProgressSig = sig;
-  const data = { userAnswers, practicedAnswers, lockedQuestions, wrongChecks, savedAt: Date.now() };
+  const data = { userAnswers, practicedAnswers, lockedQuestions, wrongChecks, pron: unitPronData(currentUnit.id), savedAt: Date.now() };
   queueCloudSave(currentUnit.id, data, showMsg || cloudNow);
   try {
     localStorage.setItem(progressKey(currentUnit.id), JSON.stringify(data));
@@ -3534,6 +3579,7 @@ function openUnit(u){
     return;
   }
   const saved = loadSavedProgress(u);
+  if (saved && saved.pron) restoreUnitPron(u.id, saved.pron);
   userAnswers = (saved && saved.userAnswers) || {};
   practicedAnswers = (saved && saved.practicedAnswers) || {};
   renderQuiz();
