@@ -2584,7 +2584,32 @@ const SOUND_TIPS = {
   'ɹ':  { tip: 'R inglesa: no vibra, la lengua no toca arriba', hard: true },
   'h':  { tip: 'H suave, como echar vaho (no "j" fuerte)' },
   'w':  { tip: 'W: labios redondos como "u"' },
-  'ŋ':  { tip: 'NG: sin pronunciar la "g" al final', hard: true }
+  'ŋ':  { tip: 'NG: sin pronunciar la "g" al final', hard: true },
+  // Agregados 24 nov 2026 para que casi todo sonido tenga explicación.
+  'i':  { tip: 'I larga: iii (como en "see")' },
+  'u':  { tip: 'U larga: uuu (como en "food")' },
+  'uː': { tip: 'U larga: uuu (como en "food")' },
+  'ʊ':  { tip: 'U corta y relajada, como en "book"', hard: true },
+  'ɑ':  { tip: 'esa O suena como "a" abierta: "soccer" = "sácer", "hot" = "jat"', hard: true },
+  'ɔ':  { tip: 'O abierta con la boca grande, como en "dog"', hard: true },
+  'ɛ':  { tip: 'E corta, como la "e" de "mesa"' },
+  'eɪ': { tip: 'se dice "ei", como en "say" o "name"' },
+  'oʊ': { tip: 'se dice "ou", como en "go" o "phone"' },
+  'aɪ': { tip: 'se dice "ai", como en "my" o "like"' },
+  'aʊ': { tip: 'se dice "au", como en "now" o "house"' },
+  'ɔɪ': { tip: 'se dice "oi", como en "boy"' },
+  'k':  { tip: 'K con un soplito de aire' },
+  'p':  { tip: 'P con un soplito de aire' },
+  't':  { tip: 'T con soplito; si va al final, que sí se oiga' },
+  'd':  { tip: 'D al final: que sí se oiga ("played" = "pleid")' },
+  's':  { tip: 'S: si la palabra empieza con S, no le pongas "e" antes ("school", no "eschool")' },
+  'l':  { tip: 'L: punta de la lengua detrás de los dientes de arriba' },
+  'j':  { tip: 'Y de "yes", suave' },
+  'b':  { tip: 'B con los labios bien cerrados' },
+  'g':  { tip: 'G fuerte, como en "gato"' },
+  'f':  { tip: 'F: dientes de arriba sobre el labio de abajo' },
+  'm':  { tip: 'M con los labios cerrados' },
+  'n':  { tip: 'N: punta de la lengua arriba' }
 };
 // Registro de uso para el contador del panel del maestro (colección
 // azureUsage en Firestore). Si falla, no afecta al alumno.
@@ -3653,6 +3678,27 @@ const IRREGULAR_PARTICIPLES = new Set(('arisen awoken been borne beaten become b
 const NOT_PARTICIPLES = new Set(('born teached buyed catched thinked eated goed writed speaked drinked swimmed runned singed bringed seed doed gived taked maked breaked choosed drived falled feeled finded flyed forgetted getted growed heared keeped knowed leaved losed meeted payed sayed selled sended sitted sleeped standed stealed telled throwed understanded weared winned').split(' '));
 const PERFECT_AUX = new Set(['have', 'has', 'had', "i've", "you've", "we've", "they've", "he's", "she's", "i'd", "you'd", "we'd", "they'd", "haven't", "hasn't", "hadn't"]);
 const PERFECT_SKIP = new Set(['never', 'ever', 'already', 'just', 'not', 'always', 'recently', 'finally', 'also', 'really', 'still', 'often', 'only', 'even']);
+// Formas equivocadas comunes → participio correcto, para explicar el error.
+const PARTICIPLE_FIX = (() => {
+  const m = {};
+  ('go,went,gone eat,ate,eaten see,saw,seen do,did,done write,wrote,written break,broke,broken speak,spoke,spoken take,took,taken give,gave,given drive,drove,driven run,ran,run come,came,come become,became,become begin,began,begun drink,drank,drunk swim,swam,swum sing,sang,sung fly,flew,flown grow,grew,grown know,knew,known throw,threw,thrown wear,wore,worn choose,chose,chosen forget,forgot,forgotten fall,fell,fallen ride,rode,ridden steal,stole,stolen wake,woke,woken hide,hid,hidden bite,bit,bitten freeze,froze,frozen shake,shook,shaken tear,tore,torn be,was,been are,were,been is,was,been win,won,won buy,bought,bought teach,taught,taught think,thought,thought catch,caught,caught bring,brought,brought make,made,made find,found,found feel,felt,felt keep,kept,kept leave,left,left lose,lost,lost meet,met,met pay,paid,paid say,said,said sell,sold,sold send,sent,sent sit,sat,sat sleep,slept,slept stand,stood,stood tell,told,told hear,heard,heard read,read,read understand,understood,understood get,got,gotten have,had,had build,built,built learn,learned,learned play,played,played visit,visited,visited travel,traveled,traveled live,lived,lived study,studied,studied finish,finished,finished use,used,used work,worked,worked practice,practiced,practiced try,tried,tried').split(' ').forEach(t => {
+    const [base, past, pp] = t.split(',');
+    if (base !== pp) m[base] = { pp, why: 'base' };
+    if (past !== pp) m[past] = { pp, why: 'past' };
+  });
+  Object.entries({ teached: 'taught', buyed: 'bought', catched: 'caught', thinked: 'thought', eated: 'eaten', goed: 'gone', writed: 'written', speaked: 'spoken', drinked: 'drunk', swimmed: 'swum', runned: 'run', bringed: 'brought', doed: 'done', gived: 'given', taked: 'taken', maked: 'made', breaked: 'broken', choosed: 'chosen', drived: 'driven', falled: 'fallen', feeled: 'felt', finded: 'found', forgetted: 'forgotten', getted: 'gotten', growed: 'grown', heared: 'heard', keeped: 'kept', knowed: 'known', leaved: 'left', losed: 'lost', meeted: 'met', sayed: 'said', selled: 'sold', sended: 'sent', sitted: 'sat', sleeped: 'slept', standed: 'stood', stealed: 'stolen', telled: 'told', throwed: 'thrown', understanded: 'understood', weared: 'worn', winned: 'won', seed: 'seen', singed: 'sung' })
+      .forEach(([w, pp]) => { m[w] = { pp, why: 'ed' }; });
+  return m;
+})();
+// Explicación en español de por qué esa palabra no va después de have/had.
+function participleExplanation(w){
+  if (w === 'born') return '"born" solo se usa en "I was born…". Después de have/had va otro verbo en participio, por ejemplo: won, done, been, played.';
+  const f = PARTICIPLE_FIX[w];
+  if (f && f.why === 'past') return `"${w}" es pasado simple. Después de have/had va el participio: "${f.pp}".`;
+  if (f && f.why === 'base') return `"${w}" es la forma base. Después de have/had va el participio: "${f.pp}".`;
+  if (f && f.why === 'ed') return `"${w}" no existe: ese verbo es irregular, el participio es "${f.pp}".`;
+  return `después de have/had falta un verbo en participio (por ejemplo: won, eaten, been, played).`;
+}
 function isParticiple(w){
   if (NOT_PARTICIPLES.has(w)) return false;
   return IRREGULAR_PARTICIPLES.has(w) || (/ed$/.test(w) && w.length > 3);
@@ -3860,7 +3906,7 @@ function checkAnswers(){
         notes.push(hasMinWords ? `✓ Full sentence (${wordCount} words)` : `Try a longer, full sentence (${wordCount} words so far)`);
         if (q.keywords && q.keywords.length) {
           notes.push(usedStructure ? `✓ Good, you used the expected structure`
-            : wrongParticiple ? `"${wrongParticiple}" no es el participio que va después de have/had. Tip: ${q.hint || ''}`
+            : wrongParticiple ? `✗ ${participleExplanation(wrongParticiple)} Tip: ${q.hint || ''}`
             : `Tip: ${q.hint || 'try to include "' + missingKeywords.join(', ') + '" in your answer'}`);
         }
         fb.textContent = `"${said}" — ` + notes.join(' · ');
