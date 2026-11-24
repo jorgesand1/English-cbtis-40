@@ -3907,7 +3907,7 @@ function checkAnswers(){
         if (q.keywords && q.keywords.length) {
           notes.push(usedStructure ? `✓ Good, you used the expected structure`
             : wrongParticiple ? `✗ ${participleExplanation(wrongParticiple)} Tip: ${q.hint || ''}`
-            : `Tip: ${q.hint || 'try to include "' + missingKeywords.join(', ') + '" in your answer'}`);
+            : `✗ Te faltó usar ${q.keywords.length > 1 ? 'una de estas palabras' : 'la palabra'}: ${q.keywords.filter(k => !/^(cant|cannot)$/.test(k)).join(', ')}. Tip: ${q.hint || ''}`);
         }
         fb.textContent = `"${said}" — ` + notes.join(' · ');
         fb.className = 'feedback ' + (isCorrect ? 'ok' : 'no');
